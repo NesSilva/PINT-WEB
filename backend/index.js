@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const sequelize = require('./models/basededados');
 const filmeRoute = require('./routes/filmesRoute');
+const authRoutes = require("./routes/auth");
 
 // Configurações básicas
 app.set('port', process.env.PORT || 3000);
@@ -21,18 +22,18 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Rotas
+
+app.use('/',authRoutes);
+
 app.use('/filmes', filmeRoute);
 
-// Rota inicial
 app.get('/', (req, res) => {
     res.send('Bem-vindo à API de Filmes');
 });
 
-// Sincronização única com o banco de dados
 sequelize.sync({
-    force: false, // Mude para false após primeira execução
-    alter: true,  // Usar alterações incrementais
+    force: false, 
+    alter: true,  
     logging: console.log
   });
 
