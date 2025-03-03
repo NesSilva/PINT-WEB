@@ -1,6 +1,5 @@
-const Utilizador = require("../models/Utilizador"); // Importar o modelo de Utilizador
-const bcrypt = require("bcrypt"); // Para comparar a senha
-
+const Utilizador = require("../models/Utilizador");
+const bcrypt = require("bcrypt"); 
 const login = async (req, res) => {
     try {
         const { Email, Palavra_passe } = req.body;
