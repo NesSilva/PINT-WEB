@@ -1,45 +1,41 @@
-const { Sequelize, DataTypes } = require("sequelize");
+
+const {DataTypes } = require("sequelize");
 const sequelize = require("./basededados");
-const Tipo_Utilizador = require("./Tipo_Utilizador"); // Importação do modelo relacionado
 
 const Utilizador = sequelize.define("Utilizador", {
-    ID_utilizador: {
+    id_utilizador: { 
         type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
+        primaryKey: true, 
+        autoIncrement: true 
     },
-    Nome: {
-        type: DataTypes.STRING,
+    nome: { 
+        type: DataTypes.STRING(100), 
+        allowNull: false 
+    },
+    email: { 
+        type: DataTypes.STRING(100), 
+        allowNull: false, 
+        unique: true },
+    senha: { 
+        type: DataTypes.STRING(255), 
         allowNull: false
     },
-    Idade: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        validate: {
-            min: 0 // Idade não pode ser negativa
-        }
+    morada:{
+        type: DataTypes.STRING(255),
     },
-    Email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+    telefone:{
+        type: DataTypes.STRING(20),
     },
-    Palavra_passe: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    ID_tipo_Utilizador: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: Tipo_Utilizador,
-            key: 'ID_tipo_Utilizador'
-        }
+    criado_em: { 
+        type: DataTypes.DATE, 
+        //defaultValue: Sequelize.NOW 
     }
-}, {
-    tableName: "utilizadores",
-    timestamps: false
-});
+},
+ { 
+    tableName: "Utilizador",
+     timestamps: false 
+    });
+
 
 
 module.exports = Utilizador;

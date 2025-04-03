@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const sequelize = require('./models/basededados');
-const filmeRoute = require('./routes/filmesRoute');
+
 const authRoutes = require("./routes/auth");
 
 // Configurações básicas
@@ -25,7 +25,6 @@ app.use(express.json());
 
 app.use('/',authRoutes);
 
-app.use('/filmes', filmeRoute);
 
 app.get('/', (req, res) => {
     res.send('Bem-vindo à API de Filmes');

@@ -1,4 +1,25 @@
 const Utilizador = require("../models/Utilizador");
+const Utilizador2 = require("../models/Perfil");
+const Utilizador3 = require("../models/PerfilUtilizador");
+const Utilizador4 = require("../models/Categoria");
+const Utilizador5 = require("../models/AreaFormacao");
+const Utilizador6 = require("../models/Curso");
+const Utilizador7 = require("../models/Inscricoes");
+const Utilizador8 = require("../models/ConteudoCurso");
+
+const Utilizador9 = require("../models/Avaliacoes");
+const Utilizador10 = require("../models/ProcessoCurso");
+const Utilizador11 = require("../models/Certificado");
+const Utilizador12 = require("../models/Notificacoes");
+
+
+
+
+
+
+
+
+
 const bcrypt = require("bcrypt"); 
 const login = async (req, res) => {
     try {
