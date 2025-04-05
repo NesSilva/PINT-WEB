@@ -31,11 +31,15 @@ const Utilizador = sequelize.define("Utilizador", {
         defaultValue: Sequelize.NOW 
     },
     resetCode: {
-        type: DataTypes.STRING,  // Código de reset (código gerado)
+        type: DataTypes.STRING,  
         allowNull: true,
     },
     resetCodeExpiry: {
-        type: DataTypes.DATE,  // Data de expiração do código
+        type: DataTypes.DATE, 
+        allowNull: true,
+    },
+    primeiroLogin: {
+        type: DataTypes.INTEGER, 
         allowNull: true,
     },
 },

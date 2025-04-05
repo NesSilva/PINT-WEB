@@ -11,7 +11,11 @@ const login = async (req, res) => {
             return res.status(400).json({ success: false, message: "Email e palavra-passe são obrigatórios." });
         }
 
-        const utilizador = await Utilizador.findOne({ where: { email } });
+        // Buscar todos os dados (incluindo senha) primeiro
+        const utilizador = await Utilizador.findOne({
+            where: { email }
+        });
+
         console.log("Resultado da query:", utilizador);
 
         if (!utilizador) {
@@ -22,7 +26,7 @@ const login = async (req, res) => {
         console.log("Senha inserida:", senha);
         console.log("Hash na BD:", utilizador.senha);
 
-        const hashNaBD = utilizador.senha.replace("$2y$", "$2b$");
+        const hashNaBD = utilizador.senha.replace("$2y$", "$2b$"); // compatibilidade
         const senhaCorreta = await bcrypt.compare(senha, hashNaBD);
 
         console.log("Resultado da comparação da senha:", senhaCorreta);
@@ -37,10 +41,11 @@ const login = async (req, res) => {
         res.status(200).json({
             success: true,
             message: "Login efetuado com sucesso.",
-            utilizador: {
+            user: {
                 id: utilizador.id_utilizador,
                 nome: utilizador.nome,
                 email: utilizador.email,
+                primeiroLogin: utilizador.primeiroLogin // <- agora o frontend recebe isto!
             },
         });
     } catch (error) {

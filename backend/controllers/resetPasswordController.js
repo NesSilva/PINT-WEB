@@ -88,4 +88,27 @@ const resetPassword = async (req, res) => {
     }
 };
 
-module.exports = { requestPasswordReset, resetPassword };
+const updateFirstLoginPassword = async (req, res) => {
+    const { email, newPassword } = req.body;
+
+    try {
+        const utilizador = await Utilizador.findOne({ where: { email } });
+
+        if (!utilizador) {
+            return res.status(404).json({ success: false, message: "Utilizador não encontrado." });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 12);
+        utilizador.senha = hashedPassword;
+        utilizador.primeiroLogin = 1;
+
+        await utilizador.save();
+
+        return res.status(200).json({ success: true, message: "Senha atualizada com sucesso." });
+    } catch (err) {
+        console.error("Erro ao atualizar senha:", err);
+        res.status(500).json({ success: false, message: "Erro no servidor." });
+    }
+};
+
+module.exports = { requestPasswordReset, resetPassword, updateFirstLoginPassword };
