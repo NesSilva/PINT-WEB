@@ -1,5 +1,5 @@
 
-const {DataTypes } = require("sequelize");
+const {Sequelize,DataTypes } = require("sequelize");
 const sequelize = require("./basededados");
 
 const Utilizador = sequelize.define("Utilizador", {
@@ -28,8 +28,16 @@ const Utilizador = sequelize.define("Utilizador", {
     },
     criado_em: { 
         type: DataTypes.DATE, 
-        //defaultValue: Sequelize.NOW 
-    }
+        defaultValue: Sequelize.NOW 
+    },
+    resetCode: {
+        type: DataTypes.STRING,  // Código de reset (código gerado)
+        allowNull: true,
+    },
+    resetCodeExpiry: {
+        type: DataTypes.DATE,  // Data de expiração do código
+        allowNull: true,
+    },
 },
  { 
     tableName: "Utilizador",

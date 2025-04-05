@@ -1,54 +1,46 @@
 const Utilizador = require("../models/Utilizador");
-const Utilizador2 = require("../models/Perfil");
-const Utilizador3 = require("../models/PerfilUtilizador");
-const Utilizador4 = require("../models/Categoria");
-const Utilizador5 = require("../models/AreaFormacao");
-const Utilizador6 = require("../models/Curso");
-const Utilizador7 = require("../models/Inscricoes");
-const Utilizador8 = require("../models/ConteudoCurso");
-
-const Utilizador9 = require("../models/Avaliacoes");
-const Utilizador10 = require("../models/ProcessoCurso");
-const Utilizador11 = require("../models/Certificado");
-const Utilizador12 = require("../models/Notificacoes");
-
-
-
-
-
-
-
-
-
 const bcrypt = require("bcrypt"); 
+
 const login = async (req, res) => {
     try {
-        const { Email, Palavra_passe } = req.body;
+        const { email, senha } = req.body;
+        console.log("Dados recebidos:", { email, senha });
 
-        if (!Email || !Palavra_passe) {
+        if (!email || !senha) {
+            console.log("Email ou senha em falta.");
             return res.status(400).json({ success: false, message: "Email e palavra-passe são obrigatórios." });
         }
 
-        const utilizador = await Utilizador.findOne({ where: { Email } });
+        const utilizador = await Utilizador.findOne({ where: { email } });
+        console.log("Resultado da query:", utilizador);
 
         if (!utilizador) {
+            console.log("Utilizador não encontrado no sistema.");
             return res.status(404).json({ success: false, message: "Utilizador não encontrado." });
         }
 
-        const senhaCorreta = await bcrypt.compare(Palavra_passe, utilizador.Palavra_passe);
+        console.log("Senha inserida:", senha);
+        console.log("Hash na BD:", utilizador.senha);
+
+        const hashNaBD = utilizador.senha.replace("$2y$", "$2b$");
+        const senhaCorreta = await bcrypt.compare(senha, hashNaBD);
+
+        console.log("Resultado da comparação da senha:", senhaCorreta);
 
         if (!senhaCorreta) {
+            console.log("Palavra-passe incorreta.");
             return res.status(401).json({ success: false, message: "Palavra-passe incorreta." });
         }
+
+        console.log("Login efetuado com sucesso para:", utilizador.email);
 
         res.status(200).json({
             success: true,
             message: "Login efetuado com sucesso.",
             utilizador: {
-                id: utilizador.ID_utilizador,
-                nome: utilizador.Nome,
-                email: utilizador.Email,
-                idade: utilizador.Idade,
+                id: utilizador.id_utilizador,
+                nome: utilizador.nome,
+                email: utilizador.email,
             },
         });
     } catch (error) {
