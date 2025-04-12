@@ -41,6 +41,10 @@ app.use("/", authRoutes);
 // Usando as rotas de reset de senha
 app.use("/api/password", passwordRoutes); // Definindo prefixo /api/password para as rotas de reset
 
+
+const dashboardRoutes = require("./routes/dashboard");
+app.use("/api/dashboard", dashboardRoutes);
+
 app.get("/", (req, res) => {
     res.send("Bem-vindo à API de Filmes");
 });
