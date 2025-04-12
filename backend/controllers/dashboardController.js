@@ -52,7 +52,7 @@ const getCursosPorMes = async (req, res) => {
           [sequelize.fn('date_trunc', 'month', sequelize.col('data_inicio')), 'mes'],
           [sequelize.fn('count', sequelize.col('id_curso')), 'numero_cursos']
         ],
-        group: ['mes'], // Agrupa apenas pelo mês truncado
+        group: ['mes'],
         order: [['mes', 'ASC']],
         raw: true
       });
