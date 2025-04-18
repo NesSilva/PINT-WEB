@@ -45,6 +45,9 @@ app.use("/api/password", passwordRoutes); // Definindo prefixo /api/password par
 const dashboardRoutes = require("./routes/dashboard");
 app.use("/api/dashboard", dashboardRoutes);
 
+const utilizadorRoutes = require("./routes/utilizadoresRoutes");
+app.use("/api/utilizadores", utilizadorRoutes);
+
 app.get("/", (req, res) => {
     res.send("Bem-vindo à API de Filmes");
 });

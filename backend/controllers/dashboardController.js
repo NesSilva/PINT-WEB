@@ -1,4 +1,3 @@
-// controllers/dashboardController.js
 const Curso = require("../models/Curso");
 const Utilizador = require("../models/Utilizador"); 
 const Perfil = require("../models/Perfil"); 
