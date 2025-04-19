@@ -48,6 +48,12 @@ app.use("/api/dashboard", dashboardRoutes);
 const utilizadorRoutes = require("./routes/utilizadoresRoutes");
 app.use("/api/utilizadores", utilizadorRoutes);
 
+
+
+const perfisRoutes = require("./routes/perfisRoutes");
+app.use("/api/perfis", perfisRoutes);
+
+
 app.get("/", (req, res) => {
     res.send("Bem-vindo à API de Filmes");
 });

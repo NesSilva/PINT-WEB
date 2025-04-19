@@ -2,6 +2,7 @@ const Utilizador = require("../models/Utilizador");
 const UtilizadorPerfil = require("../models/PerfilUtilizador"); // Importa o modelo UtilizadorPerfil
 const Perfil = require("../models/Perfil"); // Importa o modelo Perfil
 
+// Função para listar todos os utilizadores
 const listarUtilizadores = async (req, res) => {
   try {
     // Buscar todos os utilizadores
@@ -43,26 +44,98 @@ const listarUtilizadores = async (req, res) => {
   }
 };
 
-
+// Função para eliminar um utilizador
 const eliminarUtilizador = async (req, res) => {
-    const { id_utilizador } = req.params; // O id do utilizador a ser eliminado
-  
+  const { id_utilizador } = req.params; // O id do utilizador a ser eliminado
+
+  try {
+    // Remover as associações de perfil do utilizador
+    await UtilizadorPerfil.destroy({
+      where: { id_utilizador }
+    });
+
+    // Remover o utilizador
+    await Utilizador.destroy({
+      where: { id_utilizador }
+    });
+
+    res.status(200).json({ message: "Utilizador e perfis associados removidos com sucesso." });
+  } catch (error) {
+    console.error("Erro ao eliminar utilizador:", error);
+    res.status(500).json({ erro: "Erro ao eliminar utilizador." });
+  }
+};
+
+// Função para editar um utilizador
+const editarUtilizador = async (req, res) => {
+  const { id_utilizador } = req.params;
+  const { nome, email, morada, perfis } = req.body;
+
+  try {
+    const utilizadorAtualizado = await Utilizador.update(
+      { nome, email, morada },
+      { where: { id_utilizador } }
+    );
+
+    if (utilizadorAtualizado[0] === 0) {
+      return res.status(404).json({ message: "Utilizador não encontrado." });
+    }
+
+    await UtilizadorPerfil.destroy({ where: { id_utilizador } });
+
+    for (const nomePerfil of perfis) {
+      const perfil = await Perfil.findOne({ where: { nome: nomePerfil } });
+      if (perfil) {
+        await UtilizadorPerfil.create({
+          id_utilizador,
+          id_perfil: perfil.id_perfil
+        });
+      }
+    }
+
+    res.status(200).json({ message: "Utilizador e perfis atualizados com sucesso." });
+  } catch (error) {
+    console.error("Erro ao atualizar utilizador:", error);
+    res.status(500).json({ erro: "Erro ao atualizar utilizador." });
+  }
+};
+
+const criarUtilizador = async (req, res) => {
     try {
-      // Remover as associações de perfil do utilizador
-      await UtilizadorPerfil.destroy({
-        where: { id_utilizador }
+      const { nome, email, morada, senha, perfis } = req.body;
+  
+      if (!nome || !email || !morada || !senha) {
+        return res.status(400).json({ message: "Todos os campos são obrigatórios, incluindo a senha." });
+      }
+  
+      const bcrypt = require("bcrypt");
+      const saltRounds = 10;
+      const senhaEncriptada = await bcrypt.hash(senha, saltRounds);
+  
+      const novoUtilizador = await Utilizador.create({
+        nome,
+        email,
+        morada,
+        senha: senhaEncriptada
       });
   
-      // Remover o utilizador
-      await Utilizador.destroy({
-        where: { id_utilizador }
-      });
+      if (Array.isArray(perfis)) {
+        for (const nomePerfil of perfis) {
+          const perfil = await Perfil.findOne({ where: { nome: nomePerfil } });
+          if (perfil) {
+            await UtilizadorPerfil.create({
+              id_utilizador: novoUtilizador.id_utilizador,
+              id_perfil: perfil.id_perfil
+            });
+          }
+        }
+      }
   
-      res.status(200).json({ message: "Utilizador e perfis associados removidos com sucesso." });
+      return res.status(200).json({ message: "Utilizador criado com sucesso!" });
     } catch (error) {
-      console.error("Erro ao eliminar utilizador:", error);
-      res.status(500).json({ erro: "Erro ao eliminar utilizador." });
+      console.error("Erro ao criar utilizador:", error);
+      return res.status(500).json({ message: "Erro ao criar utilizador." });
     }
   };
-
-  module.exports = { listarUtilizadores , eliminarUtilizador };
+  
+module.exports = { listarUtilizadores, eliminarUtilizador, editarUtilizador , criarUtilizador};
