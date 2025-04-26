@@ -35,11 +35,9 @@ console.log(process.env.EMAIL_PASS);  // Deverá mostrar a sua senha de aplicati
 console.log('teste-------------------------');  // Deverá mostrar o seu email
 
 
-// Usando as rotas de autenticação
 app.use("/", authRoutes);
 
-// Usando as rotas de reset de senha
-app.use("/api/password", passwordRoutes); // Definindo prefixo /api/password para as rotas de reset
+app.use("/api/password", passwordRoutes); 
 
 
 const dashboardRoutes = require("./routes/dashboard");
@@ -52,6 +50,10 @@ app.use("/api/utilizadores", utilizadorRoutes);
 
 const perfisRoutes = require("./routes/perfisRoutes");
 app.use("/api/perfis", perfisRoutes);
+
+const cursoRoutes = require("./routes/cursoRoutes");
+
+app.use("/api/cursos", cursoRoutes);
 
 
 app.get("/", (req, res) => {
