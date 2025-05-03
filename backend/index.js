@@ -4,6 +4,7 @@ const sequelize = require("./models/basededados");
 const authRoutes = require("./routes/auth");
 const passwordRoutes = require("./routes/passwordRoutes"); // Importando as rotas de reset de senha
 
+
 // Configurações básicas
 app.set("port", process.env.PORT || 3000);
 
@@ -34,6 +35,10 @@ console.log(process.env.EMAIL_USER);  // Deverá mostrar o seu email
 console.log(process.env.EMAIL_PASS);  // Deverá mostrar a sua senha de aplicativo
 console.log('teste-------------------------');  // Deverá mostrar o seu email
 
+// index.js (ou seu arquivo principal)
+app.use(express.json()); // Isso deve estar ANTES das rotas
+app.use(express.urlencoded({ extended: true }));
+
 
 app.use("/", authRoutes);
 
@@ -54,6 +59,10 @@ app.use("/api/perfis", perfisRoutes);
 const cursoRoutes = require("./routes/cursoRoutes");
 
 app.use("/api/cursos", cursoRoutes);
+
+
+const conteudoRoutes = require("./routes/conteudoCursoRoutes");
+app.use("/api/conteudo", conteudoRoutes);
 
 
 app.get("/", (req, res) => {

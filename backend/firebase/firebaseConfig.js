@@ -1,9 +1,9 @@
 const admin = require("firebase-admin");
-const serviceAccount = require("./serviceAccountKey.json");
+const serviceAccount = require("./softinsapdm2-firebase-adminsdk-fjwws-c031a9b71d.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: "softinsa.appspot.com", // Nome do teu bucket de storage
+  storageBucket: "softinsapdm2.appspot.com", // Nome do teu bucket de storage
 });
 
 const bucket = admin.storage().bucket();

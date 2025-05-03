@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const cursoController = require('../controllers/cursoController');
+const upload = require('../firebase/upload'); // Adicione esta linha
 
 // Criar curso
 router.post("/criar", cursoController.criarCurso);
-
 // Listar cursos
 router.get('/', cursoController.listarCursos);
 
