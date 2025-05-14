@@ -1,0 +1,470 @@
+import React, { useEffect, useState } from "react";
+import Sidebar from "../components/Sidebar";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
+const ListarUtilizadores = () => {
+  const [utilizadores, setUtilizadores] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [utilizadorAtual, setUtilizadorAtual] = useState(null);
+  const [novoPerfil, setNovoPerfil] = useState("");
+  const [perfis, setPerfis] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [perfisDisponiveis, setPerfisDisponiveis] = useState([]);
+  const [novoUtilizador, setNovoUtilizador] = useState({
+    nome: "",
+    email: "",
+    morada: "",
+    perfis: []
+  });
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [filtroNome, setFiltroNome] = useState("");
+  const [filtroPerfil, setFiltroPerfil] = useState("");
+
+  useEffect(() => {
+    const fetchUtilizadores = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/utilizadores/utilizadores");
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setUtilizadores(data);
+        } else {
+          console.error("A resposta da API não é um array:", data);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar utilizadores:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchPerfis = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/perfis");
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setPerfisDisponiveis(data);
+        } else {
+          console.error("A resposta da API de perfis não é um array:", data);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar perfis:", error);
+      }
+    };
+
+    fetchUtilizadores();
+    fetchPerfis();
+  }, []);
+
+  const handleDeleteClick = async (id_utilizador) => {
+    const confirmDelete = window.confirm("Tem certeza que deseja eliminar este utilizador?");
+    if (confirmDelete) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/utilizadores/utilizadores/${id_utilizador}`, {
+          method: "DELETE",
+        });
+
+        if (response.ok) {
+          setUtilizadores(utilizadores.filter(utilizador => utilizador.id_utilizador !== id_utilizador));
+          alert("Utilizador eliminado com sucesso!");
+        } else {
+          alert("Erro ao eliminar utilizador!");
+        }
+      } catch (error) {
+        console.error("Erro ao fazer a requisição de delete:", error);
+        alert("Erro ao eliminar utilizador!");
+      }
+    }
+  };
+
+  const handleEditClick = (utilizador) => {
+    setUtilizadorAtual(utilizador);
+    setPerfis(Array.isArray(utilizador.perfis) ? utilizador.perfis : utilizador.perfis.split(/,\s*/));
+    setShowModal(true);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/utilizadores/utilizadores/${utilizadorAtual.id_utilizador}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nome: utilizadorAtual.nome,
+          email: utilizadorAtual.email,
+          morada: utilizadorAtual.morada,
+          perfis,
+        }),
+      });
+
+      if (response.ok) {
+        setUtilizadores((prevUtilizadores) =>
+          prevUtilizadores.map((utilizador) =>
+            utilizador.id_utilizador === utilizadorAtual.id_utilizador
+              ? { ...utilizadorAtual, perfis: perfis.join(", ") }
+              : utilizador
+          )
+        );
+        alert("Utilizador atualizado com sucesso!");
+        setShowModal(false);
+      } else {
+        alert("Erro ao atualizar utilizador!");
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar utilizador:", error);
+      alert("Erro ao atualizar utilizador!");
+    }
+  };
+
+  const handleCreateSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("http://localhost:3000/api/utilizadores/utilizadores", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            nome: novoUtilizador.nome,
+            email: novoUtilizador.email,
+            morada: novoUtilizador.morada,
+            senha: novoUtilizador.senha, 
+            perfis: novoUtilizador.perfis,
+          }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUtilizadores([...utilizadores, data]);
+        alert("Novo utilizador criado com sucesso!");
+        setShowCreateModal(false);
+      } else {
+        alert("Erro ao criar utilizador!");
+      }
+    } catch (error) {
+      console.error("Erro ao criar utilizador:", error);
+      alert("Erro ao criar utilizador!");
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setUtilizadorAtual(null);
+    setPerfis([]);
+  };
+
+  const handleCloseCreateModal = () => {
+    setShowCreateModal(false);
+    setNovoUtilizador({ nome: "", email: "", morada: "", perfis: [] });
+  };
+
+  const limparFiltros = () => {
+    setFiltroNome("");
+    setFiltroPerfil("");
+  };
+
+  if (loading) {
+    return <p>A carregar utilizadores...</p>;
+  }
+
+  return (
+    <div className="d-flex" style={{ minHeight: '100vh' }}>
+      <Sidebar />
+
+      <div className="container-fluid mt-4" style={{ marginLeft: '220px' }}>
+        <h2>Lista de Utilizadores</h2>
+        <button
+          className="btn btn-primary mb-3"
+          onClick={() => setShowCreateModal(true)}
+        >
+          Criar Utilizador
+        </button>
+
+        <div className="row mb-3">
+          <div className="col-md-6">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Filtrar por nome..."
+              value={filtroNome}
+              onChange={(e) => setFiltroNome(e.target.value)}
+            />
+          </div>
+          <div className="col-md-6">
+            <select
+              className="form-control"
+              value={filtroPerfil}
+              onChange={(e) => setFiltroPerfil(e.target.value)}
+            >
+              <option value="">Todos os perfis</option>
+              {perfisDisponiveis.map((perfil) => (
+                <option key={perfil.id} value={perfil.nome}>
+                  {perfil.nome}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <button
+          className="btn btn-secondary mb-3"
+          onClick={limparFiltros}
+        >
+          Limpar Filtros
+        </button>
+
+        <table className="table">
+          <thead>
+            <tr>
+              <th scope="col">Nome</th>
+              <th scope="col">Email</th>
+              <th scope="col">Morada</th>
+              <th scope="col">Perfis</th>
+              <th scope="col">Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {utilizadores && utilizadores.length > 0 ? (
+              utilizadores
+                .filter((utilizador) => {
+                  const nomeMatch = utilizador.nome.toLowerCase().includes(filtroNome.toLowerCase());
+                  const perfilMatch = filtroPerfil === "" || (utilizador.perfis && utilizador.perfis.includes(filtroPerfil));
+                  return nomeMatch && perfilMatch;
+                })
+                .map((utilizador) => (
+                  <tr key={utilizador.id_utilizador}>
+                    <td>{utilizador.nome}</td>
+                    <td>{utilizador.email}</td>
+                    <td>{utilizador.morada}</td>
+                    <td>{utilizador.perfis}</td>
+                    <td>
+                      <button
+                        onClick={() => handleEditClick(utilizador)}
+                        className="btn btn-warning"
+                      >
+                        <i className="bi bi-pencil"></i> Editar
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(utilizador.id_utilizador)}
+                        className="btn btn-danger"
+                      >
+                        <i className="bi bi-trash"></i> Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                ))
+            ) : (
+              <tr>
+                <td colSpan="5">Nenhum utilizador encontrado</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        {showCreateModal && (
+          <div className="modal fade show" style={{ display: 'block' }} role="dialog">
+            <div className="modal-dialog" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Criar Novo Utilizador</h5>
+                  <button type="button" className="close" onClick={handleCloseCreateModal}>
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div className="modal-body">
+                  <form onSubmit={handleCreateSubmit}>
+                    <div className="form-group">
+                      <label>Nome</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={novoUtilizador.nome}
+                        onChange={(e) => setNovoUtilizador({ ...novoUtilizador, nome: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Email</label>
+                      <input
+                        type="email"
+                        className="form-control"
+                        value={novoUtilizador.email}
+                        onChange={(e) => setNovoUtilizador({ ...novoUtilizador, email: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Morada</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={novoUtilizador.morada}
+                        onChange={(e) => setNovoUtilizador({ ...novoUtilizador, morada: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Senha</label>
+                      <input
+                        type="password"
+                        className="form-control"
+                        value={novoUtilizador.senha || ""}
+                        onChange={(e) => setNovoUtilizador({ ...novoUtilizador, senha: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Perfis</label>
+                      <select
+                        className="form-control"
+                        value={novoPerfil}
+                        onChange={(e) => setNovoPerfil(e.target.value)}
+                      >
+                        <option value="">Selecione um perfil</option>
+                        {perfisDisponiveis.map((perfil) => (
+                          <option key={`${perfil.id}-${perfil.nome}`} value={perfil.nome}>
+                            {perfil.nome}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        className="btn btn-info mt-2"
+                        onClick={() => {
+                          if (novoPerfil && !novoUtilizador.perfis.includes(novoPerfil)) {
+                            setNovoUtilizador({ ...novoUtilizador, perfis: [...novoUtilizador.perfis, novoPerfil] });
+                            setNovoPerfil("");
+                          }
+                        }}
+                      >
+                        Adicionar Perfil
+                      </button>
+                      <ul>
+                        {novoUtilizador.perfis.map((perfil) => (
+                          <li key={perfil}>
+                            {perfil}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setNovoUtilizador({
+                                  ...novoUtilizador,
+                                  perfis: novoUtilizador.perfis.filter((item) => item !== perfil),
+                                });
+                              }}
+                              className="btn btn-danger btn-sm"
+                            >
+                              Remover
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <button type="submit" className="btn btn-success mt-2">
+                      Criar Utilizador
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Edição de Utilizador */}
+        {showModal && utilizadorAtual && (
+          <div className="modal fade show" style={{ display: 'block' }} role="dialog">
+            <div className="modal-dialog" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Editar Utilizador</h5>
+                  <button type="button" className="close" onClick={handleCloseCreateModal}>
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div className="modal-body">
+                  <form onSubmit={handleEditSubmit}>
+                    <div className="form-group">
+                      <label>Nome</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={utilizadorAtual.nome}
+                        onChange={(e) => setUtilizadorAtual({ ...utilizadorAtual, nome: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Email</label>
+                      <input
+                        type="email"
+                        className="form-control"
+                        value={utilizadorAtual.email}
+                        onChange={(e) => setUtilizadorAtual({ ...utilizadorAtual, email: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Morada</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={utilizadorAtual.morada}
+                        onChange={(e) => setUtilizadorAtual({ ...utilizadorAtual, morada: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Perfis</label>
+                      <select
+                        className="form-control"
+                        value={novoPerfil}
+                        onChange={(e) => setNovoPerfil(e.target.value)}
+                      >
+                        <option value="">Selecione um perfil</option>
+                        {perfisDisponiveis.map((perfil) => (
+                          <option key={perfil.id} value={perfil.nome}>
+                            {perfil.nome}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        className="btn btn-info mt-2"
+                        onClick={() => {
+                          if (novoPerfil && !utilizadorAtual.perfis.includes(novoPerfil)) {
+                            setPerfis([...perfis, novoPerfil]);
+                            setNovoPerfil("");
+                          }
+                        }}
+                      >
+                        Adicionar Perfil
+                      </button>
+                      <ul>
+                        {perfis.map((perfil, index) => (
+                          <li key={index}>
+                            {perfil}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPerfis(perfis.filter((item) => item !== perfil));
+                              }}
+                              className="btn btn-danger btn-sm"
+                            >
+                              Remover
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <button type="submit" className="btn btn-success mt-2">
+                      Atualizar Utilizador
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ListarUtilizadores;
