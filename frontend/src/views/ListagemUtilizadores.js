@@ -120,36 +120,45 @@ const ListarUtilizadores = () => {
   };
 
   const handleCreateSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const response = await fetch("http://localhost:3000/api/utilizadores/utilizadores", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            nome: novoUtilizador.nome,
-            email: novoUtilizador.email,
-            morada: novoUtilizador.morada,
-            senha: novoUtilizador.senha, 
-            perfis: novoUtilizador.perfis,
-          }),
-      });
+  try {
+    const response = await fetch("http://localhost:3000/api/utilizadores/utilizadores", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nome: novoUtilizador.nome,
+        email: novoUtilizador.email,
+        morada: novoUtilizador.morada,
+        senha: novoUtilizador.senha, 
+        perfis: novoUtilizador.perfis,
+      }),
+    });
 
-      if (response.ok) {
-        const data = await response.json();
-        setUtilizadores([...utilizadores, data]);
-        alert("Novo utilizador criado com sucesso!");
-        setShowCreateModal(false);
-      } else {
-        alert("Erro ao criar utilizador!");
+    const data = await response.json();
+    
+    if (response.ok) {
+      // 1. Fechar o modal
+      setShowCreateModal(false);
+      // 2. Resetar o formulário
+      setNovoUtilizador({ nome: "", email: "", morada: "", senha: "", perfis: [] });
+      // 3. Recarregar a lista completa do servidor
+      const refreshResponse = await fetch("http://localhost:3000/api/utilizadores/utilizadores");
+      const refreshData = await refreshResponse.json();
+      if (Array.isArray(refreshData)) {
+        setUtilizadores(refreshData);
       }
-    } catch (error) {
-      console.error("Erro ao criar utilizador:", error);
-      alert("Erro ao criar utilizador!");
+      alert("Novo utilizador criado com sucesso!");
+    } else {
+      alert(data.message || "Erro ao criar utilizador!");
     }
-  };
+  } catch (error) {
+    console.error("Erro ao criar utilizador:", error);
+    alert("Erro ao criar utilizador!");
+  }
+};
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -231,8 +240,12 @@ const ListarUtilizadores = () => {
             {utilizadores && utilizadores.length > 0 ? (
               utilizadores
                 .filter((utilizador) => {
-                  const nomeMatch = utilizador.nome.toLowerCase().includes(filtroNome.toLowerCase());
-                  const perfilMatch = filtroPerfil === "" || (utilizador.perfis && utilizador.perfis.includes(filtroPerfil));
+                  const nomeMatch = utilizador.nome && utilizador.nome.toLowerCase().includes(filtroNome.toLowerCase());
+                  const perfilMatch = filtroPerfil === "" || 
+                                    (utilizador.perfis && 
+                                    (typeof utilizador.perfis === 'string' ? 
+                                      utilizador.perfis.includes(filtroPerfil) : 
+                                      utilizador.perfis.some(p => p.includes(filtroPerfil))));
                   return nomeMatch && perfilMatch;
                 })
                 .map((utilizador) => (

@@ -2,32 +2,26 @@ const Utilizador = require("../models/Utilizador");
 const UtilizadorPerfil = require("../models/PerfilUtilizador"); // Importa o modelo UtilizadorPerfil
 const Perfil = require("../models/Perfil"); // Importa o modelo Perfil
 
-// Função para listar todos os utilizadores
 const listarUtilizadores = async (req, res) => {
   try {
-    // Buscar todos os utilizadores
     const utilizadores = await Utilizador.findAll({ raw: true });
 
-    // Buscar os perfis associados a cada utilizador
     const perfisAssociados = await UtilizadorPerfil.findAll({
       attributes: ['id_utilizador', 'id_perfil'],  // Seleciona os ids de utilizador e perfil
       raw: true,
     });
 
-    // Adicionar os nomes dos perfis aos utilizadores
     const utilizadoresComPerfis = await Promise.all(utilizadores.map(async (utilizador) => {
-      // Filtra os perfis associados ao utilizador
       const perfisIds = perfisAssociados
         .filter(item => item.id_utilizador === utilizador.id_utilizador)
-        .map(item => item.id_perfil); // Extrai os id_perfil
+        .map(item => item.id_perfil);
 
-      // Busca os nomes dos perfis com base nos ids
       const perfisNomes = await Promise.all(perfisIds.map(async (id) => {
         const perfil = await Perfil.findOne({ 
           attributes: ['nome'], 
           where: { id_perfil: id }
         });
-        return perfil ? perfil.nome : null; // Retorna o nome do perfil ou null se não encontrado
+        return perfil ? perfil.nome : null;
       }));
 
       return {
