@@ -3,7 +3,7 @@ const fs        = require('fs');
 const path      = require('path');
 const Sequelize = require('sequelize');
 
-const DB_NAME = 'defaultdb';
+const DB_NAME = 'pint';
 const DB_USER = 'avnadmin';
 const DB_PASS = 'AVNS_0dRXW1jAWGD63pNyiKq';
 const DB_HOST = 'pg-pint-jmvbeselga-d39c.e.aivencloud.com';

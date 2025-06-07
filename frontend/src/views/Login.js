@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom"; // Importando o Link para navegação
+import "../css/login.css";
+
+
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -54,52 +57,60 @@ const Login = () => {
     };
 
     return (
-        <div className="container mt-5">
-            <h2>Login</h2>
-            <form onSubmit={handleLogin}>
-                <div className="form-group">
-                    <label htmlFor="email">Email:</label>
-                    <input
-                        type="email"
-                        id="email"
-                        className="form-control"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="senha">Palavra-passe:</label>
-                    <input
-                        type="password"
-                        id="senha"
-                        className="form-control"
-                        value={senha}
-                        onChange={(e) => setsenha(e.target.value)}
-                        required
-                    />
-                </div>
-                <button type="submit" className="btn btn-primary mt-3">
-                    Login
-                </button>
-            </form>
+  <div className="login-wrapper">
+    <div className="login-card">
+      <h2 className="text-center">Seja bem-vindo</h2>
+      <p className="text-center">
+        Faça o login ou <Link to="/solicitar" className="text-info">solicite uma conta</Link>
+      </p>
 
-            {/* Exibir mensagens de sucesso ou erro */}
-            {message && (
-                <div
-                    className={`mt-3 alert ${messageType === "success" ? "alert-success" : "alert-danger"}`}
-                    role="alert"
-                >
-                    {message}
-                </div>
-            )}
-
-            {/* Link para página de reset de senha */}
-            <div className="mt-3">
-                <p>Esqueceu sua senha? <Link to="/reset-password-request">Clique aqui para redefinir.</Link></p>
-            </div>
+      <form onSubmit={handleLogin} className="w-100">
+        <div className="mb-3 w-100">
+          <label htmlFor="email" className="form-label">Login</label>
+          <input
+            type="email"
+            id="email"
+            className="form-control"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </div>
-    );
+
+        <div className="mb-4 w-100">
+          <label htmlFor="senha" className="form-label">Palavra-passe</label>
+          <input
+            type="password"
+            id="senha"
+            className="form-control"
+            placeholder="Senha"
+            value={senha}
+            onChange={(e) => setsenha(e.target.value)}
+            required
+          />
+        </div>
+
+        <button type="submit" className="btn btn-primary w-100">Login</button>
+      </form>
+
+      {/* Exibir mensagens de sucesso ou erro */}
+      {message && (
+        <div
+          className={`mt-3 alert ${messageType === "success" ? "alert-success" : "alert-danger"}`}
+          role="alert"
+        >
+          {message}
+        </div>
+      )}
+
+      <div className="forgot mt-3 text-center">
+        Esqueceu sua senha? <Link to="/reset-password-request" className="text-info">Clique aqui</Link>
+      </div>
+    </div>
+  </div>
+);
 };
+
 
 export default Login;

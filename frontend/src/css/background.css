@@ -1,0 +1,8 @@
+/* css/background.css */
+body, html {
+  height: 100%;
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: url('/images/background.jpg') no-repeat center center fixed;
+  background-size: cover;
+}

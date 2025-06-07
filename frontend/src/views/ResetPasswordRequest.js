@@ -9,10 +9,10 @@ const ResetPasswordRequest = () => {
 
    const handleResetRequest = async (e) => {
     e.preventDefault();
-    console.log("Email enviado:", email); // Verifique o email
+    console.log("Email enviado:", email); 
     try {
         const response = await axios.post("http://localhost:3000/api/password/reset-password-request", { email });
-        console.log(response.data); // Veja a resposta do servidor
+        console.log(response.data);
         if (response.data.success) {
             setMessage("Código enviado. Verifique seu e-mail.");
             setTimeout(() => navigate("/reset-password"), 3000); 
@@ -20,7 +20,7 @@ const ResetPasswordRequest = () => {
             setMessage(response.data.message);
         }
     } catch (err) {
-        console.log("Erro ao solicitar reset:", err); // Captura o erro detalhado
+        console.log("Erro ao solicitar reset:", err); 
         setMessage("Erro ao solicitar o reset de senha.");
     }
 };
