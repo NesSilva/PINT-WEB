@@ -1,6 +1,11 @@
 const Utilizador = require("../models/Utilizador");
-const UtilizadorPerfil = require("../models/PerfilUtilizador"); // Importa o modelo UtilizadorPerfil
-const Perfil = require("../models/Perfil"); // Importa o modelo Perfil
+const UtilizadorPerfil = require("../models/PerfilUtilizador"); 
+const Perfil = require("../models/Perfil"); 
+const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
+const crypto = require("crypto");
+
+
 
 const listarUtilizadores = async (req, res) => {
   try {
@@ -60,14 +65,21 @@ const eliminarUtilizador = async (req, res) => {
   }
 };
 
-// Função para editar um utilizador
 const editarUtilizador = async (req, res) => {
   const { id_utilizador } = req.params;
-  const { nome, email, morada, perfis } = req.body;
+  const { nome, email, morada, perfis, senha } = req.body;
 
   try {
+    const dadosParaAtualizar = { nome, email, morada };
+
+    if (senha && senha.trim() !== "") {
+      const saltRounds = 10;
+      const senhaEncriptada = await bcrypt.hash(senha, saltRounds);
+      dadosParaAtualizar.senha = senhaEncriptada;
+    }
+
     const utilizadorAtualizado = await Utilizador.update(
-      { nome, email, morada },
+      dadosParaAtualizar,
       { where: { id_utilizador } }
     );
 
@@ -131,5 +143,130 @@ const criarUtilizador = async (req, res) => {
       return res.status(500).json({ message: "Erro ao criar utilizador." });
     }
   };
+
+const solicitarConta = async (req, res) => {
+    try {
+        const { email, numeroColaborador } = req.body;
+
+        const pedidoExistente = await Utilizador.findOne({ where: { email } });
+
+        if (pedidoExistente) {
+            return res.status(400).json({ 
+                success: false,
+                message: pedidoExistente.pedidoAceitoSN === null ? 
+                    "Já existe um pedido pendente para este email" :
+                    "Este email já possui uma conta ativa"
+            });
+        }
+
+        await Utilizador.create({
+            email,
+            numeroColaborador,
+            pedidoAceitoSN: null,
+            primeiroLogin: 0  
+            
+        });
+
+        return res.status(200).json({ 
+            success: true,
+            message: "Pedido de conta registrado com sucesso"
+        });
+
+    } catch (error) {
+        console.error("Erro ao processar pedido de conta:", error);
+        return res.status(500).json({ 
+            success: false,
+            message: "Erro ao processar pedido"
+        });
+    }
+};
+
+const atualizarPedidoAceite = async (req, res) => {
+  const { id_utilizador } = req.params;
+  const { pedidoAceitoSN } = req.body;
+
+  try {
+    const [linhasAfetadas] = await Utilizador.update(
+      { pedidoAceitoSN },
+      { where: { id_utilizador } }
+    );
+
+    if (linhasAfetadas === 0) {
+      return res.status(404).json({ message: "Utilizador não encontrado." });
+    }
+
+    return res.status(200).json({ message: "Estado do pedido atualizado com sucesso." });
+  } catch (error) {
+    console.error("Erro ao atualizar pedidoAceitoSN:", error);
+    return res.status(500).json({ message: "Erro interno ao atualizar pedido." });
+  }
+};
+
+const sendAccountAcceptedEmail = async (email, password) => {
+    let transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Conta aprovada - Acesso à plataforma",
+        text: `A sua conta foi aprovada com sucesso!
+
+Credenciais de acesso:
+Email: ${email}
+Senha temporária: ${password}
+
+Ao entrar pela primeira vez, será solicitado que altere sua senha.
+
+Acesse: https://seu-sistema.com/login
+        
+Obrigado,
+Equipe de suporte`
+    };
+
+    return transporter.sendMail(mailOptions);
+};
+
+const aceitarPedidoConta = async (req, res) => {
+    console.log("entreiiiiiiiiiiiiiiiii-----------------------------------------");
+    const { id_utilizador } = req.body;
+    console.log("Chamada para aceitarPedidoConta com ID:", id_utilizador);
+
+    try {
+        const utilizador = await Utilizador.findOne({ where: { id_utilizador } });
+
+
+        if (!utilizador || utilizador.pedidoAceitoSN === true) {
+            return res.status(404).json({ success: false, message: "Pedido não encontrado ou já processado." });
+        }
+
+        const tempPassword = crypto.randomBytes(4).toString("hex");
+        console.log("Senha temporária gerada:", tempPassword);
+
+        const hashedPassword = await bcrypt.hash(tempPassword, 12);
+        utilizador.senha = hashedPassword;
+        utilizador.pedidoAceitoSN = 1;
+        utilizador.primeiroLogin = 0;
+
+       await utilizador.save();
+      console.log("Utilizador salvo com sucesso:", utilizador.id_utilizador);
+
+      await sendAccountAcceptedEmail(utilizador.email, tempPassword).catch(err => {
+          console.error("Erro ao enviar email:", err);
+      });
+
+      return res.status(200).json({ success: true, message: "Conta aprovada e e-mail enviado com sucesso." });
+    } catch (error) {
+        console.error("Erro ao aprovar pedido:", error);
+        return res.status(500).json({ success: false, message: "Erro ao aprovar conta." });
+    }
+};
+
+
   
-module.exports = { listarUtilizadores, eliminarUtilizador, editarUtilizador , criarUtilizador};
+module.exports = { listarUtilizadores, eliminarUtilizador, editarUtilizador , criarUtilizador , solicitarConta , atualizarPedidoAceite , sendAccountAcceptedEmail , aceitarPedidoConta};

@@ -94,7 +94,7 @@ const Login = () => {
         <button type="submit" className="btn btn-primary w-100">Login</button>
       </form>
 
-      {/* Exibir mensagens de sucesso ou erro */}
+      {}
       {message && (
         <div
           className={`mt-3 alert ${messageType === "success" ? "alert-success" : "alert-danger"}`}
@@ -107,6 +107,10 @@ const Login = () => {
       <div className="forgot mt-3 text-center">
         Esqueceu sua senha? <Link to="/reset-password-request" className="text-info">Clique aqui</Link>
       </div>
+      <p className="text-center">
+        Faça o login ou <Link to="/solicitar" className="text-info">solicite uma conta</Link>
+      </p>
+
     </div>
   </div>
 );

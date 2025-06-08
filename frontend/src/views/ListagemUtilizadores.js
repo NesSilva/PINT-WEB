@@ -20,6 +20,12 @@ const ListarUtilizadores = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroPerfil, setFiltroPerfil] = useState("");
+  const [senha, setSenha] = React.useState(""); 
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [utilizadorParaAceitar, setUtilizadorParaAceitar] = useState(null);
+  const [senhaParaAceitar, setSenhaParaAceitar] = useState("");
+
+
 
   useEffect(() => {
     const fetchUtilizadores = async () => {
@@ -78,47 +84,53 @@ const ListarUtilizadores = () => {
   };
 
   const handleEditClick = (utilizador) => {
-    setUtilizadorAtual(utilizador);
-    setPerfis(Array.isArray(utilizador.perfis) ? utilizador.perfis : utilizador.perfis.split(/,\s*/));
-    setShowModal(true);
-  };
+  setUtilizadorAtual(utilizador);
+  setPerfis(Array.isArray(utilizador.perfis) ? utilizador.perfis : utilizador.perfis.split(/,\s*/));
+  setSenha(""); // limpa senha ao abrir modal
+  setShowModal(true);
+};
 
   const handleEditSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const response = await fetch(`http://localhost:3000/api/utilizadores/utilizadores/${utilizadorAtual.id_utilizador}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nome: utilizadorAtual.nome,
-          email: utilizadorAtual.email,
-          morada: utilizadorAtual.morada,
-          perfis,
-        }),
-      });
+  try {
+    // Cria o corpo da requisição incluindo senha somente se tiver valor
+    const corpo = {
+      nome: utilizadorAtual.nome,
+      email: utilizadorAtual.email,
+      morada: utilizadorAtual.morada,
+      perfis,
+    };
+    if (senha.trim() !== "") {
+      corpo.senha = senha.trim();
+    }
 
-      if (response.ok) {
-        setUtilizadores((prevUtilizadores) =>
-          prevUtilizadores.map((utilizador) =>
-            utilizador.id_utilizador === utilizadorAtual.id_utilizador
-              ? { ...utilizadorAtual, perfis: perfis.join(", ") }
-              : utilizador
-          )
-        );
-        alert("Utilizador atualizado com sucesso!");
-        setShowModal(false);
-      } else {
-        alert("Erro ao atualizar utilizador!");
-      }
-    } catch (error) {
-      console.error("Erro ao atualizar utilizador:", error);
+    const response = await fetch(`http://localhost:3000/api/utilizadores/utilizadores/${utilizadorAtual.id_utilizador}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(corpo),
+    });
+
+    if (response.ok) {
+      setUtilizadores((prevUtilizadores) =>
+        prevUtilizadores.map((utilizador) =>
+          utilizador.id_utilizador === utilizadorAtual.id_utilizador
+            ? { ...utilizadorAtual, perfis: perfis.join(", ") }
+            : utilizador
+        )
+      );
+      alert("Utilizador atualizado com sucesso!");
+      setShowModal(false);
+    } else {
       alert("Erro ao atualizar utilizador!");
     }
-  };
-
+  } catch (error) {
+    console.error("Erro ao atualizar utilizador:", error);
+    alert("Erro ao atualizar utilizador!");
+  }
+};
   const handleCreateSubmit = async (e) => {
   e.preventDefault();
 
@@ -140,11 +152,8 @@ const ListarUtilizadores = () => {
     const data = await response.json();
     
     if (response.ok) {
-      // 1. Fechar o modal
       setShowCreateModal(false);
-      // 2. Resetar o formulário
       setNovoUtilizador({ nome: "", email: "", morada: "", senha: "", perfis: [] });
-      // 3. Recarregar a lista completa do servidor
       const refreshResponse = await fetch("http://localhost:3000/api/utilizadores/utilizadores");
       const refreshData = await refreshResponse.json();
       if (Array.isArray(refreshData)) {
@@ -165,6 +174,60 @@ const ListarUtilizadores = () => {
     setUtilizadorAtual(null);
     setPerfis([]);
   };
+
+ const handlePedido = async (id, valor) => {
+  try {
+    const response = await fetch(`http://localhost:3000/api/utilizadores/pedido/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ pedidoAceitoSN: valor }),
+    });
+
+    if (response.ok) {
+      setUtilizadores((prev) =>
+        prev.map((u) =>
+          u.id_utilizador === id ? { ...u, pedidoAceitoSN: valor } : u
+        )
+      );
+    } else {
+      alert("Erro ao atualizar pedido");
+    }
+  } catch (error) {
+    console.error("Erro:", error);
+    alert("Erro ao enviar pedido");
+  }
+};
+
+const aceitarPedido = async (idUtilizador, senha) => {
+  try {
+    const response = await fetch("http://localhost:3000/api/utilizadores/admin/aceitar-pedido", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id_utilizador: idUtilizador,
+        senha: senha
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      alert("Pedido aceito com sucesso!");
+      // Aqui você pode atualizar o estado para refletir a mudança
+    } else {
+      const errorData = await response.json();
+      alert("Erro ao aceitar pedido: " + (errorData.message || response.statusText));
+    }
+  } catch (error) {
+    console.error("Erro ao aceitar pedido:", error);
+    alert("Erro ao aceitar pedido, verifique o console.");
+  }
+};
+
+
 
   const handleCloseCreateModal = () => {
     setShowCreateModal(false);
@@ -234,6 +297,8 @@ const ListarUtilizadores = () => {
               <th scope="col">Morada</th>
               <th scope="col">Perfis</th>
               <th scope="col">Ação</th>
+              <th scope="col">Pedido</th>
+
             </tr>
           </thead>
           <tbody>
@@ -268,6 +333,36 @@ const ListarUtilizadores = () => {
                         <i className="bi bi-trash"></i> Eliminar
                       </button>
                     </td>
+
+                    <td>
+                      {utilizador.pedidoAceitoSN === 0 ? (
+                        <>
+                        <button
+                          className="btn btn-success btn-sm mr-2"
+                          onClick={() => {
+                            setUtilizadorParaAceitar(utilizador);
+                            setShowPasswordModal(true);
+                          }}
+                        >
+                          Aceitar
+                        </button>
+
+
+                          <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => handlePedido(utilizador.id_utilizador, 2)}
+                          >
+                            Recusar
+                          </button>
+                        </>
+                      ) : utilizador.pedidoAceitoSN === 1 ? (
+                        <span className="text-success">Aceite</span>
+                      ) : utilizador.pedidoAceitoSN === 2 ? (
+                        <span className="text-danger">Negado</span>
+                      ) : null}
+                    </td>
+
+
                   </tr>
                 ))
             ) : (
@@ -424,6 +519,17 @@ const ListarUtilizadores = () => {
                       />
                     </div>
                     <div className="form-group">
+                      <label>Senha </label>
+                      <input
+                        type="password"
+                        className="form-control"
+                        value={senha}
+                        onChange={(e) => setSenha(e.target.value)}
+                        placeholder="Nova senha"
+                      />
+                    </div>
+
+                    <div className="form-group">
                       <label>Perfis</label>
                       <select
                         className="form-control"
@@ -475,6 +581,63 @@ const ListarUtilizadores = () => {
             </div>
           </div>
         )}
+
+        {showPasswordModal && utilizadorParaAceitar && (
+  <div className="modal fade show" style={{ display: 'block' }} role="dialog">
+    <div className="modal-dialog" role="document">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h5 className="modal-title">Confirme a senha para aceitar pedido</h5>
+          <button
+            type="button"
+            className="close"
+            onClick={() => {
+              setShowPasswordModal(false);
+              setSenhaParaAceitar("");
+              setUtilizadorParaAceitar(null);
+            }}
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div className="modal-body">
+          <input
+            type="password"
+            className="form-control"
+            placeholder="Senha"
+            value={senhaParaAceitar}
+            onChange={(e) => setSenhaParaAceitar(e.target.value)}
+          />
+        </div>
+        <div className="modal-footer">
+          <button
+            className="btn btn-secondary"
+            onClick={() => {
+              setShowPasswordModal(false);
+              setSenhaParaAceitar("");
+              setUtilizadorParaAceitar(null);
+            }}
+          >
+            Cancelar
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              aceitarPedido(utilizadorParaAceitar.id_utilizador, senhaParaAceitar);
+              setShowPasswordModal(false);
+              setSenhaParaAceitar("");
+              setUtilizadorParaAceitar(null);
+            }}
+          >
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
       </div>
     </div>
   );

@@ -11,15 +11,16 @@ const Utilizador = sequelize.define("Utilizador", {
     
     nome: { 
         type: DataTypes.STRING(100), 
-        allowNull: false 
+        allowNull: true 
     },
     email: { 
         type: DataTypes.STRING(100), 
         allowNull: false, 
-        unique: true },
+        unique: true 
+    },
     senha: { 
         type: DataTypes.STRING(255), 
-        allowNull: false
+        allowNull: true
     },
     morada:{
         type: DataTypes.STRING(255),
@@ -42,6 +43,18 @@ const Utilizador = sequelize.define("Utilizador", {
     primeiroLogin: {
         type: DataTypes.INTEGER, 
         allowNull: true,
+        defaultValue: 0
+
+    },
+    
+    pedidoAceitoSN: {
+        type: DataTypes.INTEGER, 
+        allowNull: true,
+    },
+
+    numeroColaborador: {
+        type: DataTypes.STRING,
+        allowNull: true
     },
 },
  { 

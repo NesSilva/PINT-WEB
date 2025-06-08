@@ -59,6 +59,22 @@ app.use("/api/dashboard", dashboardRoutes);
 const utilizadorRoutes = require("./routes/utilizadoresRoutes");
 app.use("/api/utilizadores", utilizadorRoutes);
 
+app.post('/api/utilizadores/admin/aceitar-pedido', (req, res) => {
+  const { id_utilizador, senha } = req.body;
+
+  // Lógica para aceitar o pedido: validar senha, atualizar status, etc.
+
+  // Exemplo:
+  if (!id_utilizador || !senha) {
+    return res.status(400).json({ message: "Parâmetros inválidos" });
+  }
+
+  // Suponha que aceite o pedido com sucesso:
+  // atualiza no banco e responde
+
+  return res.status(200).json({ message: "Pedido aceito com sucesso" });
+});
+
 
 
 const perfisRoutes = require("./routes/perfisRoutes");

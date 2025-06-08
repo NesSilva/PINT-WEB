@@ -17,12 +17,20 @@ const login = async (req, res) => {
       return res.status(404).json({ success: false, message: "Utilizador não encontrado." });
     }
 
-    const senhaCorreta = await bcrypt.compare(senha, utilizador.senha.replace("$2y$", "$2b$"));
+    // Log da senha e hash
+    console.log("🔑 Senha recebida:", senha);
+    console.log("🔒 Hash armazenado no banco:", utilizador.senha);
+
+    // Comparar senha enviada com hash armazenado
+    const senhaCorreta = await bcrypt.compare(senha, utilizador.senha);
+
+    console.log("✅ Senha confere?", senhaCorreta);
 
     if (!senhaCorreta) {
       return res.status(401).json({ success: false, message: "Palavra-passe incorreta." });
     }
 
+    // Busca perfis associados
     const associacoes = await UtilizadorPerfil.findAll({
       where: { id_utilizador: utilizador.id_utilizador }
     });
@@ -53,7 +61,7 @@ const login = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Erro no login:", error);
+    console.error("❌ Erro no login:", error);
     res.status(500).json({ success: false, message: "Erro no servidor." });
   }
 };

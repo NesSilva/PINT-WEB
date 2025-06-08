@@ -9,7 +9,7 @@ import DashboardAdministrador from "./views/DashboardAdministrador";
 import ListarUtilizadores from "./views/ListagemUtilizadores";
 import CriarCurso from "./views/CriarCurso"; // <--- IMPORTAR a nova página
 import ListarCursos from "./views/ListarCursos"; // importar o novo componente
-
+import SolicitarConta from "./views/SolicitarConta"
 import './App.css';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -27,6 +27,8 @@ function App() {
         <Route path="/utilizadores" element={<ListarUtilizadores />} />
         <Route path="/criar-curso" element={<CriarCurso />} /> {/* <-- NOVA ROTA */}
         <Route path="/cursos" element={<ListarCursos />} />
+        <Route path="/solicitar" element={<SolicitarConta />} />
+
 
       </Routes>
     </Router>
