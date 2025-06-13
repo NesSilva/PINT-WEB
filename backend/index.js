@@ -56,6 +56,12 @@ app.use("/api/password", passwordRoutes);
 const dashboardRoutes = require("./routes/dashboard");
 app.use("/api/dashboard", dashboardRoutes);
 
+const categoriaRoutes = require("./routes/routesCategoria");
+app.use("/api", categoriaRoutes);
+
+const areaFormacaoRoutes = require("./routes/areaFormacaoRoutes"); 
+app.use("/api", areaFormacaoRoutes); // Adicione esta linha
+
 const utilizadorRoutes = require("./routes/utilizadoresRoutes");
 app.use("/api/utilizadores", utilizadorRoutes);
 

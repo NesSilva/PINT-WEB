@@ -39,8 +39,19 @@ const Sidebar = () => {
           </Link>
         </li>
         <li className="nav-item mb-2">
+          <Link className="nav-link text-black" to="/gerenciar-categorias" state={{ user, perfil }}>
+            Categorias
+          </Link>
+          
+        </li>
+        <li className="nav-item mb-2">
+    <Link className="nav-link text-black" to="/gerir-areas-formacao" state={{ user, perfil }}>
+        Áreas de Formação
+    </Link>
+</li>
+        <li className="nav-item mb-2">
           <Link className="nav-link text-black" to="/formandos" state={{ user, perfil }}>
-            Formandos
+            Inscritos
           </Link>
         </li>
       </ul>
