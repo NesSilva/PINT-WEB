@@ -49,6 +49,7 @@ const Sidebar = () => {
         Áreas de Formação
     </Link>
 </li>
+
         <li className="nav-item mb-2">
           <Link className="nav-link text-black" to="/formandos" state={{ user, perfil }}>
             Inscritos

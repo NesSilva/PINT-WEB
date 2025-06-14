@@ -8,6 +8,8 @@ router.delete("/utilizadores/:id_utilizador", utilizadoresController.eliminarUti
 router.put("/utilizadores/:id_utilizador", utilizadoresController.editarUtilizador);
 router.post("/utilizadores", utilizadoresController.criarUtilizador);
 router.put("/pedido/:id_utilizador", utilizadoresController.atualizarPedidoAceite);
+router.get("/formadores", utilizadoresController.listarFormadores);
+
 router.post("/admin/aceitar-pedido", utilizadoresController.aceitarPedidoConta);
 
 router.post("/solicitar", async (req, res) => {

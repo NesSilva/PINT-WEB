@@ -141,7 +141,6 @@ const atualizarAreaFormacao = async (req, res) => {
     }
 };
 
-// Deletar área de formação (mantido igual)
 const deletarAreaFormacao = async (req, res) => {
     try {
         const { id } = req.params;

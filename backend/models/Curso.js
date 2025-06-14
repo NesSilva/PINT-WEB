@@ -1,9 +1,9 @@
-const {DataTypes } = require("sequelize");
+const {DataTypes} = require("sequelize");
 const sequelize = require("./basededados");
 const Utilizador = require("./Utilizador");
-
 const Categoria = require("./Categoria");
-const AreaFormacao = require("./AreaFormacao")
+const AreaFormacao = require("./AreaFormacao");
+const { all } = require("../routes/areaFormacaoRoutes");
 
 const Curso = sequelize.define("Curso", {
     id_curso: { 
@@ -31,24 +31,32 @@ const Curso = sequelize.define("Curso", {
         } 
     },
     id_formador: { 
-        type: DataTypes.INTEGER, 
+        type: DataTypes.INTEGER,
+        allowNull: true,  
         references: { 
             model: Utilizador, 
             key: "id_utilizador" 
         } 
     },
+    descricao_formador: {  
+        type: DataTypes.TEXT,
+        allowNull: true,
+        comment: "Descrição sobre o formador para os alunos"
+    },
     data_inicio: DataTypes.DATE,
     data_fim: DataTypes.DATE,
     vagas: { 
-        type: DataTypes.INTEGER, 
-        defaultValue: 0, 
+        type: DataTypes.INTEGER,
+        allowNull: true, 
+        defaultValue: null, 
         validate: { 
-            min: 0 
+            min: 1 
         } 
     },
     tipo: { 
-        type: DataTypes.STRING(20), 
+         type: DataTypes.STRING(20), 
         allowNull: false, 
+        defaultValue: "assincrono", // Valor padrão
         validate: { 
             isIn: [["sincrono", "assincrono"]] 
         } 

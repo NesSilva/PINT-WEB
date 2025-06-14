@@ -7,11 +7,10 @@ import PrimeiroLogin from './views/PrimeiroLogin';
 import SelecionarPerfil from "./views/SelecionarPerfil";
 import DashboardAdministrador from "./views/DashboardAdministrador";
 import ListarUtilizadores from "./views/ListagemUtilizadores";
-import CriarCurso from "./views/CriarCurso";
 import ListarCursos from "./views/ListarCursos";
 import SolicitarConta from "./views/SolicitarConta";
 import GerenciarCategorias from "./views/GerirCategorias";
-import GerirAreasFormacao from "./views/GerirAreasFormacao"; // Importe o novo componente
+import GerirAreasFormacao from "./views/GerirAreasFormacao";
 import './App.css';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -27,7 +26,6 @@ function App() {
         <Route path="/selecionar-perfil" element={<SelecionarPerfil />} />
         <Route path="/dashboard/administrador" element={<DashboardAdministrador />} />
         <Route path="/utilizadores" element={<ListarUtilizadores />} />
-        <Route path="/criar-curso" element={<CriarCurso />} />
         <Route path="/cursos" element={<ListarCursos />} />
         <Route path="/solicitar" element={<SolicitarConta />} />
         <Route path="/gerenciar-categorias" element={<GerenciarCategorias />} />

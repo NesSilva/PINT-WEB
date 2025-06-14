@@ -267,6 +267,41 @@ const aceitarPedidoConta = async (req, res) => {
     }
 };
 
+const listarFormadores = async (req, res) => {
+  try {
+    console.log("Buscando formadores...");
+    
+    const formadoresIds = await UtilizadorPerfil.findAll({
+      where: { id_perfil: 4 },
+      attributes: ['id_utilizador'],
+      raw: true
+    });
 
-  
-module.exports = { listarUtilizadores, eliminarUtilizador, editarUtilizador , criarUtilizador , solicitarConta , atualizarPedidoAceite , sendAccountAcceptedEmail , aceitarPedidoConta};
+    console.log("IDs encontrados:", formadoresIds);
+
+    const ids = formadoresIds.map(item => item.id_utilizador);
+    console.log("IDs extraídos:", ids);
+
+    const formadores = await Utilizador.findAll({
+      where: { id_utilizador: ids },
+      attributes: ['id_utilizador', 'nome'],
+      order: [['nome', 'ASC']],
+      raw: true
+    });
+
+    console.log("Formadores encontrados:", formadores);
+
+    res.json({ success: true, formadores });
+  } catch (error) {
+    console.error("Erro detalhado:", {
+      message: error.message,
+      stack: error.stack
+    });
+    res.status(500).json({ 
+      success: false, 
+      message: "Erro ao listar formadores",
+      error: error.message 
+    });
+  }
+};
+module.exports = { listarUtilizadores, eliminarUtilizador, editarUtilizador , criarUtilizador , solicitarConta , atualizarPedidoAceite , sendAccountAcceptedEmail , aceitarPedidoConta, listarFormadores};

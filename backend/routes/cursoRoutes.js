@@ -14,4 +14,7 @@ router.delete("/eliminar/:id_curso", cursoController.eliminarCurso);
 // Editar curso
 router.put("/editar/:id_curso", cursoController.editarCurso);
 
+router.get('/categorias', cursoController.listarCategoriasParaCurso); // Nova rota
+
+
 module.exports = router;
