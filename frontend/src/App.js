@@ -11,6 +11,7 @@ import ListarCursos from "./views/ListarCursos";
 import SolicitarConta from "./views/SolicitarConta";
 import GerenciarCategorias from "./views/GerirCategorias";
 import GerirAreasFormacao from "./views/GerirAreasFormacao";
+import DashboardFormando from "./views/DashboardFormando";
 import './App.css';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -30,6 +31,8 @@ function App() {
         <Route path="/solicitar" element={<SolicitarConta />} />
         <Route path="/gerenciar-categorias" element={<GerenciarCategorias />} />
         <Route path="/gerir-areas-formacao" element={<GerirAreasFormacao />} /> {/* Nova rota */}
+        <Route path="/dashboard/formando" element={<DashboardFormando />} />
+
       </Routes>
     </Router>
   );
