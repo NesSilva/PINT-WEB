@@ -16,6 +16,14 @@ const ForumPublicacao = sequelize.define("ForumPublicacao", {
             key: "id_utilizador"
         }
     },
+    id_categoria: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+        model: Categoria, // ou Area, dependendo do design
+        key: "id_categoria"
+    }
+    },
     titulo: {
         type: DataTypes.STRING(200),
         allowNull: false
