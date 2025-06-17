@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import "../css/login.css";
 
 const SolicitarConta = () => {
   const [email, setEmail] = useState("");
@@ -36,39 +38,49 @@ const SolicitarConta = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <h2>Solicitar Conta</h2>
-      <form onSubmit={handleSubmit} className="mt-4">
-        <div className="mb-3">
-          <label className="form-label">Email</label>
-          <input
-            type="email"
-            className="form-control"
-            value={email}
-            required
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Digite seu email"
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Número de Colaborador</label>
-          <input
-            type="text"
-            className="form-control"
-            value={numeroColaborador}
-            required
-            onChange={(e) => setNumeroColaborador(e.target.value)}
-            placeholder="Digite seu número de colaborador"
-          />
-        </div>
-        <button type="submit" className="btn btn-primary">Solicitar Conta</button>
-      </form>
+    <div className="login-wrapper">
+      <div className="login-card">
+        <h2 className="text-center">Solicitar conta</h2>
+        <p className="text-center">
+          Preencha e solicite o login ou <Link to="/" className="text-info">faça log in</Link>
+        </p>
 
-      {mensagem && (
-        <div className={`alert mt-3 alert-${tipoMensagem}`}>
-          {mensagem}
-        </div>
-      )}
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3 w-100">
+            <label htmlFor="email" className="form-label">Email</label>
+            <input
+              type="email"
+              id="email"
+              className="form-control"
+              placeholder="Digite seu email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="mb-4 w-100">
+            <label htmlFor="numeroColaborador" className="form-label">Número de colaborador</label>
+            <input
+              type="text"
+              id="numeroColaborador"
+              className="form-control"
+              placeholder="Digite seu número de colaborador"
+              value={numeroColaborador}
+              onChange={(e) => setNumeroColaborador(e.target.value)}
+              required
+            />
+          </div>
+
+          <button type="submit" className="btn btn-primary w-100">Solicitar conta</button>
+        </form>
+
+        {mensagem && (
+          <div className={`alert mt-3 alert-${tipoMensagem}`} role="alert">
+            {mensagem}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

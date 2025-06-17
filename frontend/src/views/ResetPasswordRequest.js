@@ -1,53 +1,69 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import "../css/login.css";
 
 const ResetPasswordRequest = () => {
-    const [email, setEmail] = useState("");
-    const [message, setMessage] = useState("");
-    const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("info");
+  const navigate = useNavigate();
 
-   const handleResetRequest = async (e) => {
+  const handleResetRequest = async (e) => {
     e.preventDefault();
-    console.log("Email enviado:", email); 
     try {
-        const response = await axios.post("http://localhost:3000/api/password/reset-password-request", { email });
-        console.log(response.data);
-        if (response.data.success) {
-            setMessage("Código enviado. Verifique seu e-mail.");
-            setTimeout(() => navigate("/reset-password"), 3000); 
-        } else {
-            setMessage(response.data.message);
-        }
+      const response = await axios.post("http://localhost:3000/api/password/reset-password-request", { email });
+      if (response.data.success) {
+        setMessage("Código enviado. Verifique seu e-mail.");
+        setMessageType("success");
+        setTimeout(() => navigate("/reset-password"), 3000);
+      } else {
+        setMessage(response.data.message);
+        setMessageType("danger");
+      }
     } catch (err) {
-        console.log("Erro ao solicitar reset:", err); 
-        setMessage("Erro ao solicitar o reset de senha.");
+      console.error("Erro ao solicitar reset:", err);
+      setMessage("Erro ao solicitar o reset de senha.");
+      setMessageType("danger");
     }
-};
+  };
 
-    
+  return (
+    <div className="login-wrapper">
+      <div className="login-card">
+        <h2 className="text-center">Solicitar recuperação</h2>
+        <p className="text-center">
+          Digite o seu email abaixo para receber um código de recuperação. Já tem conta?{" "}
+          <Link to="/" className="text-info">Voltar para login</Link>
+        </p>
 
-    return (
-        <div className="container mt-5">
-            <h2>Solicitar Código de Recuperação</h2>
-            <form onSubmit={handleResetRequest}>
-                <div className="form-group">
-                    <label>Email:</label>
-                    <input
-                        type="email"
-                        className="form-control"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
-                <button type="submit" className="btn btn-primary mt-3">
-                    Solicitar Código
-                </button>
-            </form>
-            {message && <p>{message}</p>}
-        </div>
-    );
+        <form onSubmit={handleResetRequest}>
+          <div className="mb-4 w-100">
+            <label htmlFor="email" className="form-label">Email</label>
+            <input
+              type="email"
+              id="email"
+              className="form-control"
+              placeholder="Digite seu email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <button type="submit" className="btn btn-primary w-100">
+            Solicitar código
+          </button>
+        </form>
+
+        {message && (
+          <div className={`alert mt-3 alert-${messageType}`} role="alert">
+            {message}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default ResetPasswordRequest;

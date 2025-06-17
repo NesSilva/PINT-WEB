@@ -105,8 +105,8 @@ sequelize.sync({
     logging: console.log,
 });
 
-app.listen(3000, "0.0.0.0", () => {
-    console.log("Server running on port 3000");
+app.listen(app.get("port"), "0.0.0.0", () => {
+  console.log(`Server running on port ${app.get("port")}`);
 });
 
 module.exports = app;

@@ -1,20 +1,23 @@
 .login-wrapper {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end; /* Alinha o card à direita */
   align-items: center;
   min-height: 100vh;
-  padding: 1.25rem;
+  background-image: url("/public/banner.png"); /* substitua pelo nome correto da tua imagem */
+  background-size: cover;
+  background-position: center;
+  padding: 2rem;
 }
 
 .login-card {
   background-color: rgba(0, 0, 0, 0.45);
-  padding: 2.5rem 2rem;
+  padding: 2.5rem;
   border-radius: 1rem;
   width: 100%;
-  max-width: 31.25rem;
-  box-shadow: 0 0 1.5625rem rgba(0, 0, 0, 0.6);
+  max-width: 30rem;
+  box-shadow: 0 0 1.5rem rgba(0, 0, 0, 0.6);
   color: white;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
 }
 
 .login-card h2 {
@@ -29,18 +32,11 @@
 }
 
 .login-card .form-label {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: white;
   margin-bottom: 0.5rem;
   display: block;
-}
-
-.login-card a.text-info {
-  color: white !important;
-  font-weight: 700;
-  text-decoration: underline;
-  font-size: 0.95rem;
 }
 
 .login-card input.form-control {
@@ -52,13 +48,11 @@
   background-color: rgba(255, 255, 255, 0.1);
   color: white;
   border: 1px solid #ccc;
-  box-sizing: border-box;
-  display: block;
 }
 
 .login-card input::placeholder {
   color: #ffffff;
-  opacity: 1;
+  opacity: 0.8;
 }
 
 .login-card .btn {
@@ -84,26 +78,23 @@
   font-size: 0.875rem;
   text-align: center;
   color: #cccccc;
-  margin-top: 0.875rem;
+  margin-top: 1rem;
 }
 
-@media (max-width: 36rem) {
+.login-card a.text-info {
+  color: white !important;
+  font-weight: bold;
+  text-decoration: underline;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+  .login-wrapper {
+    justify-content: center;
+  }
+
   .login-card {
-    padding: 1.875rem 1.25rem;
     max-width: 90%;
-  }
-
-  .login-card h2 {
-    font-size: 1.375rem;
-  }
-
-  .login-card input,
-  .login-card .btn {
-    font-size: 0.875rem;
-    height: 2.625rem;
-  }
-
-  .login-card .form-label {
-    font-size: 1rem;
+    padding: 2rem;
   }
 }
