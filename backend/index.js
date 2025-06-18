@@ -3,14 +3,6 @@ const app = express();
 const sequelize = require("./models/basededados");
 const authRoutes = require("./routes/auth");
 const passwordRoutes = require("./routes/passwordRoutes");
-const test1 = require("./models/denuncia")
-const test2 = require("./models/comentario")
-const test3 = require("./models/forumPublicação")
-const test4 = require("./models/mensaguem")
-
-
-
-
 
 
 // Configurações básicas
