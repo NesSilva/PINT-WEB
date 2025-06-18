@@ -37,6 +37,9 @@ const SidebarFormando = () => {
           <li className="nav-item">
             <Link to="#" className="nav-link">Certificados</Link>
           </li>
+          <li className="nav-item">
+            <Link to="/forum" className="nav-link">Fórum</Link>
+          </li>
         </ul>
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom"; // Importando o Link para navegação
+import { Link } from "react-router-dom"; 
 import "../css/login.css";
 
 
@@ -9,35 +9,29 @@ import "../css/login.css";
 const Login = () => {
     const [email, setEmail] = useState("");
     const [senha, setsenha] = useState("");
-    const [message, setMessage] = useState(""); // Estado para gerenciar a mensagem de sucesso/erro
-    const [messageType, setMessageType] = useState(""); // Estado para gerenciar o tipo da mensagem (sucesso ou erro)
+    const [message, setMessage] = useState(""); 
+    const [messageType, setMessageType] = useState(""); 
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
-        e.preventDefault(); // Evitar o comportamento padrão do formulário
+        e.preventDefault();
         try {
-            // Fazendo a requisição ao backend
             const response = await axios.post("http://localhost:3000/", {
                 email: email,
                 senha: senha
             });
 
             if (response.data.success) {
+                localStorage.setItem('usuarioId', response.data.user.id);
                 setMessage("Login efetuado com sucesso!");
                 setMessageType("success");
             
-                // Verifica se é o primeiro login
                 const primeiroLogin = response.data.user?.primeiroLogin;
                 
                 if (primeiroLogin === 0) {
-                    // Redireciona para página de alteração de senha obrigatória
-                    console.log("primeiroLogin:", response.data.user?.primeiroLogin);
-                    console.log("Resposta completa:", response.data);
-
 
                     navigate("/primeiro-login", { state: { email: email } });
                 } else {
-                    // Redireciona para a home normalmente
                     console.log("primeiroLogin:", response.data.user?.primeiroLogin);
 
                     const user = response.data.user;

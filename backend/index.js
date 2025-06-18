@@ -94,7 +94,9 @@ app.use("/api/cursos", cursoRoutes);
 const conteudoRoutes = require("./routes/conteudoCursoRoutes");
 app.use("/api/conteudo", conteudoRoutes);
 
-app.use('/api/comentarios', require('./routes/forumComentario'));
+const forumRoutes = require('./routes/forumRoutes');
+
+app.use('/api/forum', forumRoutes);
 
 app.get("/", (req, res) => {
     res.send("Bem-vindo à API de Filmes");

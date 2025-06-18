@@ -12,6 +12,9 @@ import SolicitarConta from "./views/SolicitarConta";
 import GerenciarCategorias from "./views/GerirCategorias";
 import GerirAreasFormacao from "./views/GerirAreasFormacao";
 import DashboardFormando from "./views/DashboardFormando";
+import ForumPublicacoes from "./views/ForumPublicacoes";
+import PublicacaoDetalhes from "./views/PublicacaoDetalhes";
+import NovaPublicacao from "./views/NovaPublicacao";
 import './App.css';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -20,6 +23,7 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Rotas existentes */}
         <Route path="/" element={<Login />} />
         <Route path="/reset-password-request" element={<ResetPasswordRequest />} />
         <Route path="/reset-password" element={<ResetPassword />} />
@@ -30,9 +34,11 @@ function App() {
         <Route path="/cursos" element={<ListarCursos />} />
         <Route path="/solicitar" element={<SolicitarConta />} />
         <Route path="/gerenciar-categorias" element={<GerenciarCategorias />} />
-        <Route path="/gerir-areas-formacao" element={<GerirAreasFormacao />} /> {/* Nova rota */}
+        <Route path="/gerir-areas-formacao" element={<GerirAreasFormacao />} />
         <Route path="/dashboard/formando" element={<DashboardFormando />} />
-
+        <Route path="/forum" element={<ForumPublicacoes />} />
+        <Route path="/forum/publicacao/:id_publicacao" element={<PublicacaoDetalhes />} />
+        <Route path="/forum/nova-publicacao" element={<NovaPublicacao />} />
       </Routes>
     </Router>
   );
