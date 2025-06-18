@@ -16,7 +16,9 @@ const criarPublicacao = async (req, res) => {
         console.log('Corpo da requisição:', req.body); // Log para depuração
         console.log('Arquivos recebidos:', req.files); // Log para depuração
 
-        const { id_autor, id_categoria, titulo, conteudo } = req.body;
+        if (!id_autor || !id_categoria || !titulo || !conteudo) {
+        return res.status(400).json({ success: false, message: "Dados incompletos" });
+        }
         const files = req.files?.anexos || []; // Acessa os arquivos corretamente
 
         if (!files || files.length === 0) {
@@ -129,27 +131,9 @@ const listarPublicacoes = async (req, res) => {
             order: [['data_publicacao', 'DESC']]
         });
 
-        // Calcular média de avaliações para cada publicação
-        const publicacoesComAvaliacao = await Promise.all(
-            publicacoes.map(async (publicacao) => {
-                const avaliacoes = await ForumAvaliacao.findAll({
-                    where: { id_publicacao: publicacao.id_publicacao }
-                });
-                
-                const somaAvaliacoes = avaliacoes.reduce((sum, av) => sum + av.avaliacao, 0);
-                const mediaAvaliacoes = avaliacoes.length > 0 ? (somaAvaliacoes / avaliacoes.length).toFixed(1) : 0;
-                
-                return {
-                    ...publicacao.toJSON(),
-                    media_avaliacoes: mediaAvaliacoes,
-                    total_avaliacoes: avaliacoes.length
-                };
-            })
-        );
-
         res.status(200).json({
             success: true,
-            publicacoes: publicacoesComAvaliacao
+            publicacoes
         });
     } catch (error) {
         console.error("Erro ao listar publicações:", error);
@@ -429,6 +413,45 @@ const adicionarAnexo = async (req, res) => {
   }
 };
 
+const processarAnexo = (file, id_publicacao) => {
+    return new Promise((resolve, reject) => {
+        const blobName = `forum-anexos/${uuidv4()}_${file.originalname}`;
+        const blob = bucket.file(blobName);
+        const blobStream = blob.createWriteStream({
+            metadata: {
+                contentType: file.mimetype,
+            },
+        });
+
+        blobStream.on('error', reject);
+
+        blobStream.on('finish', async () => {
+            try {
+                await blob.makePublic();
+                const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+                const anexoCriado = await ForumAnexo.create({
+                    id_publicacao,
+                    nome_arquivo: file.originalname,
+                    caminho_arquivo: blob.name,
+                    tipo_arquivo: file.mimetype,
+                    tamanho: file.size,
+                    url: publicUrl
+                });
+                resolve(anexoCriado);
+            } catch (e) {
+                reject(e);
+            }
+        });
+
+        blobStream.end(file.buffer);
+    });
+};
+
+// Em criarPublicacao:
+const anexosPromises = files.map(file => processarAnexo(file, novaPublicacao.id_publicacao));
+await Promise.all(anexosPromises);
+
+
 module.exports = {
     criarPublicacao,
     listarPublicacoes,
@@ -437,5 +460,7 @@ module.exports = {
     avaliarPublicacao,
     denunciarConteudo,
     obterPublicacao,
-    adicionarAnexo
+    adicionarAnexo,
+    processarAnexo,
+
 };

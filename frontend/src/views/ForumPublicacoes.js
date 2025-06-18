@@ -17,11 +17,13 @@ const ForumPublicacoes = () => {
         const carregarDados = async () => {
             try {
                 const [responsePublicacoes, responseCategorias] = await Promise.all([
-                    axios.get('/api/forum/publicacoes'),
+                    axios.get('http://localhost:3000/api/forum'),
                     axios.get('http://localhost:3000/api/categorias')
                 ]);
                 
                 setPublicacoes(responsePublicacoes.data.publicacoes);
+                console.log("Dados recebidos das publicações:", responsePublicacoes.data);
+
                 setCategorias(responseCategorias.data.categorias);
                 setLoading(false);
             } catch (error) {
