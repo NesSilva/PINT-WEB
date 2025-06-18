@@ -1,5 +1,9 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import "../css/sidebar.css";
+
+// Ícones Lucide
+import { Users, BookOpen, Layers, Grid, UserCheck } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -18,40 +22,39 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="bg-white text-black p-3" style={{ width: '220px', borderRight: '1px solid #ddd', minHeight: '100vh' }}>
-      <a href="#" onClick={handleLogoClick} style={{ display: 'block' }}>
-        <img 
-          src="/logotipo-softinsa.png" 
-          alt="Logotipo Softinsa" 
-          style={{ width: "150px", height: "auto" }} 
-        />
+    <div className="custom-sidebar">
+      <a href="#" onClick={handleLogoClick}>
+        <img src="/logotipo-softinsa.png" alt="Logotipo Softinsa" />
       </a>
 
       <ul className="nav flex-column mt-4">
-        <li className="nav-item mb-2">
-          <Link className="nav-link text-black" to="/utilizadores" state={{ user, perfil }}>
+        <li className="nav-item">
+          <Link className="nav-link" to="/utilizadores" state={{ user, perfil }}>
+            <Users size={18} className="me-2" />
             Utilizadores
           </Link>
         </li>
-        <li className="nav-item mb-2">
-          <Link className="nav-link text-black" to="/cursos" state={{ user, perfil }}>
+        <li className="nav-item">
+          <Link className="nav-link" to="/cursos" state={{ user, perfil }}>
+            <BookOpen size={18} className="me-2" />
             Cursos
           </Link>
         </li>
-        <li className="nav-item mb-2">
-          <Link className="nav-link text-black" to="/gerenciar-categorias" state={{ user, perfil }}>
+        <li className="nav-item">
+          <Link className="nav-link" to="/gerenciar-categorias" state={{ user, perfil }}>
+            <Layers size={18} className="me-2" />
             Categorias
           </Link>
-          
         </li>
-        <li className="nav-item mb-2">
-    <Link className="nav-link text-black" to="/gerir-areas-formacao" state={{ user, perfil }}>
-        Áreas de Formação
-    </Link>
-</li>
-
-        <li className="nav-item mb-2">
-          <Link className="nav-link text-black" to="/formandos" state={{ user, perfil }}>
+        <li className="nav-item">
+          <Link className="nav-link" to="/gerir-areas-formacao" state={{ user, perfil }}>
+            <Grid size={18} className="me-2" />
+            Áreas de Formação
+          </Link>
+        </li>
+        <li className="nav-item">
+          <Link className="nav-link" to="/formandos" state={{ user, perfil }}>
+            <UserCheck size={18} className="me-2" />
             Inscritos
           </Link>
         </li>

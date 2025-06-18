@@ -20,6 +20,7 @@
     "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
     "firebase-admin": "^13.3.0",
+    "lucide-react": "^0.517.0",
     "multer": "^1.4.5-lts.2",
     "nodemailer": "^6.10.0",
     "react": "^18.3.1",
