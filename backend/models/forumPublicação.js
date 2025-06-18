@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("./basededados");
 const Utilizador = require("./Utilizador");
-
+const Categoria = require("./Categoria"); // ou Area, dependendo do design
 const ForumPublicacao = sequelize.define("ForumPublicacao", {
     id_publicacao: {
         type: DataTypes.INTEGER,
