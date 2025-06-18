@@ -9,25 +9,24 @@ const Categoria = require("../models/Categoria");
 const upload = require("../firebase/upload");
 const { bucket } = require("../firebase/firebaseConfig");
 const { v4: uuidv4 } = require("uuid");
+const { sequelize } = require('../models/basededados'); 
 
 // Criar uma nova publicação no fórum
 const criarPublicacao = async (req, res) => {
     try {
-        console.log('Corpo da requisição:', req.body); // Log para depuração
-        console.log('Arquivos recebidos:', req.files); // Log para depuração
+        console.log('Corpo da requisição:', req.body);
+        console.log('Arquivos recebidos:', req.files);
+
+        // EXTRAI DADOS CORRETAMENTE
+        const { id_autor, id_categoria, titulo, conteudo } = req.body;
 
         if (!id_autor || !id_categoria || !titulo || !conteudo) {
-        return res.status(400).json({ success: false, message: "Dados incompletos" });
-        }
-        const files = req.files?.anexos || []; // Acessa os arquivos corretamente
-
-        if (!files || files.length === 0) {
-            console.log('Nenhum arquivo recebido');
-        } else {
-            console.log(`Recebidos ${files.length} arquivo(s)`);
+            return res.status(400).json({ success: false, message: "Dados incompletos" });
         }
 
-        // Criar a publicação
+        const files = req.files?.anexos || [];
+
+        // Cria publicação
         const novaPublicacao = await ForumPublicacao.create({
             id_autor,
             id_categoria,
@@ -35,62 +34,46 @@ const criarPublicacao = async (req, res) => {
             conteudo
         });
 
-        // Processar anexos se existirem
+        // Processa anexos
         if (files.length > 0) {
-            console.log('Processando anexos...');
-            
-            const anexosPromises = files.map(async (file) => {
-                try {
-                    console.log(`Processando arquivo: ${file.originalname}`);
-                    
+            const anexosPromises = files.map((file) => {
+                return new Promise((resolve, reject) => {
                     const blobName = `forum-anexos/${uuidv4()}_${file.originalname}`;
                     const blob = bucket.file(blobName);
-                    
                     const blobStream = blob.createWriteStream({
                         metadata: {
                             contentType: file.mimetype,
                         },
                     });
 
-                    await new Promise((resolve, reject) => {
-                        blobStream.on('error', (error) => {
-                            console.error('Erro no upload:', error);
-                            reject(error);
-                        });
-                        
-                        blobStream.on('finish', async () => {
-                            console.log(`Upload concluído para ${file.originalname}`);
-                            try {
-                                await blob.makePublic();
-                                const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-                                
-                                console.log(`Criando registro no banco para ${file.originalname}`);
-                                return ForumAnexo.create({
-                                    id_publicacao: novaPublicacao.id_publicacao,
-                                    nome_arquivo: file.originalname,
-                                    caminho_arquivo: blob.name,
-                                    tipo_arquivo: file.mimetype,
-                                    tamanho: file.size,
-                                    url: publicUrl
-                                });
-                            } catch (error) {
-                                console.error('Erro ao criar registro:', error);
-                                reject(error);
-                            }
-                        });
-                        
-                        blobStream.end(file.buffer);
+                    blobStream.on('error', (error) => {
+                        console.error('Erro no upload:', error);
+                        reject(error);
                     });
-                    
-                    console.log(`Arquivo ${file.originalname} processado com sucesso`);
-                } catch (error) {
-                    console.error(`Erro ao processar arquivo ${file.originalname}:`, error);
-                    throw error;
-                }
+
+                    blobStream.on('finish', async () => {
+                        try {
+                            await blob.makePublic();
+                            const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+                            const anexo = await ForumAnexo.create({
+                                id_publicacao: novaPublicacao.id_publicacao,
+                                nome_arquivo: file.originalname,
+                                caminho_arquivo: blob.name,
+                                tipo_arquivo: file.mimetype,
+                                tamanho: file.size,
+                                url: publicUrl
+                            });
+                            resolve(anexo);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    });
+
+                    blobStream.end(file.buffer);
+                });
             });
 
             await Promise.all(anexosPromises);
-            console.log('Todos os anexos foram processados');
         }
 
         res.status(201).json({
@@ -103,8 +86,7 @@ const criarPublicacao = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Erro ao criar publicação",
-            error: error.message,
-            stack: error.stack // Adiciona a stack trace para depuração
+            error: error.message
         });
     }
 };
