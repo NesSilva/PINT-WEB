@@ -413,43 +413,6 @@ const adicionarAnexo = async (req, res) => {
   }
 };
 
-const processarAnexo = (file, id_publicacao) => {
-    return new Promise((resolve, reject) => {
-        const blobName = `forum-anexos/${uuidv4()}_${file.originalname}`;
-        const blob = bucket.file(blobName);
-        const blobStream = blob.createWriteStream({
-            metadata: {
-                contentType: file.mimetype,
-            },
-        });
-
-        blobStream.on('error', reject);
-
-        blobStream.on('finish', async () => {
-            try {
-                await blob.makePublic();
-                const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-                const anexoCriado = await ForumAnexo.create({
-                    id_publicacao,
-                    nome_arquivo: file.originalname,
-                    caminho_arquivo: blob.name,
-                    tipo_arquivo: file.mimetype,
-                    tamanho: file.size,
-                    url: publicUrl
-                });
-                resolve(anexoCriado);
-            } catch (e) {
-                reject(e);
-            }
-        });
-
-        blobStream.end(file.buffer);
-    });
-};
-
-// Em criarPublicacao:
-const anexosPromises = files.map(file => processarAnexo(file, novaPublicacao.id_publicacao));
-await Promise.all(anexosPromises);
 
 
 module.exports = {
@@ -461,6 +424,5 @@ module.exports = {
     denunciarConteudo,
     obterPublicacao,
     adicionarAnexo,
-    processarAnexo,
 
 };
