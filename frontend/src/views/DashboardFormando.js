@@ -66,32 +66,47 @@ const DashboardFormando = () => {
   const [categoriaFiltro, setCategoriaFiltro] = useState('');
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const categoriasRes = await axios.get('http://localhost:3000/api/categorias');
-              setCategorias(categoriasRes.data.categorias || []);
-              
-              const areasRes = await axios.get('http://localhost:3000/api/areas-formacao');
-              setAreas(areasRes.data.areas || []);
-        const response = await fetch("http://localhost:3000/api/cursos");
-        const result = await response.json();
+  const fetchData = async () => {
+    try {
+      const categoriasRes = await axios.get('http://localhost:3000/api/categorias');
+      setCategorias(categoriasRes.data.categorias || []);
 
-        console.log('Cursos recebidos:', result);
+      const areasRes = await axios.get('http://localhost:3000/api/areas-formacao');
+      setAreas(areasRes.data.areas || []);
 
-        const cursos = result.data;
+      const response = await fetch("http://localhost:3000/api/cursos");
+      const result = await response.json();
 
-        const agendados = cursos.filter(curso => curso.estado === "agendado");
+      const cursos = result.data;
 
-        setCursosAgendados(agendados);
-        setLoading(false);
-      } catch (error) {
-        console.error("Erro ao buscar dados:", error);
-        setLoading(false);
-      }
-    };
+      const cursosAtualizados = cursos.map(curso => {
+        const hoje = new Date();
+        const dataInicio = new Date(curso.data_inicio);
+        const dataFim = new Date(curso.data_fim);
 
-    fetchData();
-  }, []);
+        let estadoAtualizado = curso.estado;
+
+        if (hoje > dataFim) {
+          estadoAtualizado = "terminado";
+        } else if (hoje >= dataInicio && hoje <= dataFim) {
+          estadoAtualizado = "em-curso";
+        }
+        // Caso contrário, mantém estado original
+
+        return { ...curso, estado: estadoAtualizado };
+      });
+
+      setCursosAgendados(cursosAtualizados);
+      setLoading(false);
+    } catch (error) {
+      console.error("Erro ao buscar dados:", error);
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
+
 
   // Função para transformar URL do Firebase em URL de download direto
   const transformFirebaseUrl = (url) => {
@@ -199,6 +214,8 @@ const DashboardFormando = () => {
                         <th>Data de Início</th>
                         <th>Data de Fim</th>
                         <th>Tipo</th>
+                            <th>Estado</th>
+
                       </tr>
                     </thead>
                     <tbody>
@@ -262,6 +279,10 @@ const DashboardFormando = () => {
                                 {curso.tipo === 'sincrono' ? 'Síncrono' : 'Assíncrono'}
                               </span>
                             </td>
+                            <tr key={curso.id_curso}>
+      {/* outras colunas */}
+      <td>{curso.estado}</td>
+    </tr>
                           </tr>
                         );
                       })}

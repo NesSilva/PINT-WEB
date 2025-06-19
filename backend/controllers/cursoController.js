@@ -182,6 +182,19 @@ const editarCurso = async (req, res) => {
       });
     }
 
+    // Validação das datas
+    if (!req.body.data_inicio || isNaN(new Date(req.body.data_inicio).getTime())) {
+      return res.status(400).json({ message: "Data de início inválida" });
+    }
+
+    if (!req.body.data_fim || isNaN(new Date(req.body.data_fim).getTime())) {
+      return res.status(400).json({ message: "Data de fim inválida" });
+    }
+
+    // Formata as datas corretamente
+    const dataInicioFormatada = new Date(req.body.data_inicio).toISOString();
+    const dataFimFormatada = new Date(req.body.data_fim).toISOString();
+
     await curso.update({
       titulo: req.body.titulo,
       descricao: req.body.descricao,
@@ -189,8 +202,8 @@ const editarCurso = async (req, res) => {
       id_area: req.body.id_area,
       id_formador: req.body.id_formador || null,
       descricao_formador: req.body.id_formador ? req.body.descricao_formador : null,
-      data_inicio: new Date(req.body.data_inicio),
-      data_fim: new Date(req.body.data_fim),
+      data_inicio: dataInicioFormatada,
+      data_fim: dataFimFormatada,
       vagas: tipo === "sincrono" ? Number(req.body.vagas) : null,
       tipo: tipo
     });

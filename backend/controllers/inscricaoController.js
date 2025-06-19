@@ -1,4 +1,35 @@
 const Inscricao = require("../models/Inscricoes");
+const Utilizador = require("../models/Utilizador");
+const Curso = require("../models/Curso"); // Ajuste conforme o nome correto do seu modelo de cursos
+const nodemailer = require("nodemailer");
+
+const enviarEmailConfirmacaoInscricao = async (email, nomeCurso, dataInicio) => {
+  let transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: `Confirmação de inscrição no curso: ${nomeCurso}`,
+    text: `Olá,
+
+Sua inscrição no curso "${nomeCurso}" foi realizada com sucesso!
+
+O curso inicia em: ${new Date(dataInicio).toLocaleDateString('pt-PT')}
+
+Obrigado por se inscrever!
+
+Atenciosamente,
+Equipe do curso`
+  };
+
+  return transporter.sendMail(mailOptions);
+};
 
 const criarInscricao = async (req, res) => {
   try {
@@ -14,17 +45,29 @@ const criarInscricao = async (req, res) => {
     });
 
     if (inscricaoExistente) {
-      // Se já existe, retorna erro 409 (conflito)
       return res.status(409).json({ mensagem: "Usuário já está inscrito neste curso." });
     }
 
-    // Se não existe, cria nova inscrição
+    // Cria nova inscrição
     const novaInscricao = await Inscricao.create({
       id_utilizador,
       id_curso,
       data_inscricao: new Date(),
       status: "pendente"
     });
+
+    // Buscar utilizador e curso para enviar email
+    const utilizador = await Utilizador.findOne({ where: { id_utilizador } });
+    const curso = await Curso.findOne({ where: { id_curso } });
+
+    if (utilizador && curso) {
+      try {
+        await enviarEmailConfirmacaoInscricao(utilizador.email, curso.titulo, curso.data_inicio);
+      } catch (err) {
+        console.error("Erro ao enviar email de confirmação de inscrição:", err);
+        // Não interrompe o processo, só loga o erro
+      }
+    }
 
     return res.status(201).json(novaInscricao);
   } catch (error) {

@@ -78,6 +78,10 @@ app.use('/uploads/forum', express.static('uploads/forum'));
 const inscricaoRoutes = require("./routes/inscricaoRoutes");
 app.use("/api/inscricoes", inscricaoRoutes);
 
+const notificacaoRoutes = require("./routes/noticacoesRoute");
+app.use("/api/notificacoes", notificacaoRoutes);
+
+
 app.get("/", (req, res) => {
     res.send("Bem-vindo à API de Filmes");
 });
