@@ -23,7 +23,7 @@ const sequelize = new Sequelize(
     port: DB_PORT,
     dialect: 'postgres',
     pool: {
-      max: 20,       
+      max: 5,       
       min: 0,
       idle: 10000
     },

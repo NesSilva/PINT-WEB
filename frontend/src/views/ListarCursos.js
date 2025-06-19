@@ -39,7 +39,7 @@ const ListarCursos = () => {
 useEffect(() => {
   const fetchDados = async () => {
     try {
-      const cursosRes = await axios.get("http://localhost:3000/api/cursos");
+      const cursosRes = await axios.get("http://localhost:3000/api/cursos/todos");
       setCursos(cursosRes.data);
       
       const categoriasRes = await axios.get('http://localhost:3000/api/categorias');
@@ -65,7 +65,7 @@ useEffect(() => {
 
   const fetchCursos = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/cursos");
+      const response = await axios.get("http://localhost:3000/api/cursos/todos");
       setCursos(response.data);
     } catch (error) {
       console.error("Erro ao buscar cursos:", error);

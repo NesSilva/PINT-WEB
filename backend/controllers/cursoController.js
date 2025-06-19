@@ -1,6 +1,7 @@
 const Curso = require("../models/Curso");
 const Utilizador = require("../models/Utilizador");
 const ConteudoCurso = require("../models/ConteudoCurso");
+
 // cursoController.js (criarCurso)
 const listarCategoriasParaCurso = async (req, res) => {
   try {
@@ -62,29 +63,69 @@ const criarCurso = async (req, res) => {
   }
 };
 
+const { Op } = require('sequelize');
+
 const listarCursos = async (req, res) => {
   try {
     const cursos = await Curso.findAll();
 
-    // Atualiza estados e obtém cursos com formador
-    const cursosComFormador = await Promise.all(
+    const cursosCompleto = await Promise.all(
       cursos.map(async (curso) => {
-        // Atualiza o estado do curso
         await atualizarEstadoCurso(curso);
         
-        const formador = await Utilizador.findOne({ where: { id_utilizador: curso.id_formador } });
+        const formador = curso.id_formador 
+          ? await Utilizador.findOne({ where: { id_utilizador: curso.id_formador } })
+          : null;
+
+        const conteudoImagem = await ConteudoCurso.findOne({
+          where: {
+            id_curso: curso.id_curso,
+            [Op.or]: [
+              { 
+                [Op.and]: [
+                  { url: { [Op.not]: null } },
+                  { url: { [Op.ne]: '' } }, 
+                  { 
+                    [Op.or]: [
+                      { tipo_conteudo: 'imagem' },
+                      { url: { [Op.iLike]: '%.jpg%' } },
+                      { url: { [Op.iLike]: '%.jpeg%' } },
+                      { url: { [Op.iLike]: '%.png%' } },
+                      { url: { [Op.iLike]: '%.gif%' } },
+                      { url: { [Op.iLike]: '%.webp%' } },
+                      { url: { [Op.iLike]: '%.bmp%' } },
+                      { url: { [Op.iLike]: '%.svg%' } },
+                      { url: { [Op.iLike]: '%storage.googleapis.com%' } }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          order: [['id_conteudo', 'ASC']],
+          limit: 1
+        });
+
         return {
           ...curso.toJSON(),
           nome_formador: formador ? formador.nome : "Formador não associado",
-          estado: curso.estado // Inclui o estado atualizado
+          estado: curso.estado,
+          imagem_capa: conteudoImagem?.url || null
         };
       })
     );
 
-    res.status(200).json(cursosComFormador);
+    res.status(200).json({
+      success: true,
+      data: cursosCompleto
+    });
   } catch (error) {
     console.error("Erro ao listar cursos:", error);
-    res.status(500).json({ error: "Erro ao listar cursos" });
+    res.status(500).json({ 
+      success: false,
+      message: "Erro ao listar cursos",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 
@@ -188,4 +229,30 @@ const atualizarEstadoCurso = async (curso) => {
   return novoEstado;
 };
 
-module.exports = { criarCurso, listarCursos, eliminarCurso, editarCurso,listarCategoriasParaCurso, atualizarEstadoCurso };
+
+const listarTodosCursos = async (req, res) => {
+  try {
+    const cursos = await Curso.findAll();
+
+    // Atualiza estados e obtém cursos com formador
+    const cursosComFormador = await Promise.all(
+      cursos.map(async (curso) => {
+        // Atualiza o estado do curso
+        await atualizarEstadoCurso(curso);
+        
+        const formador = await Utilizador.findOne({ where: { id_utilizador: curso.id_formador } });
+        return {
+          ...curso.toJSON(),
+          nome_formador: formador ? formador.nome : "Formador não associado",
+          estado: curso.estado // Inclui o estado atualizado
+        };
+      })
+    );
+
+    res.status(200).json(cursosComFormador);
+  } catch (error) {
+    console.error("Erro ao listar cursos:", error);
+    res.status(500).json({ error: "Erro ao listar cursos" });
+  }
+};
+module.exports = { criarCurso, listarCursos, eliminarCurso, editarCurso,listarCategoriasParaCurso, atualizarEstadoCurso, listarTodosCursos };
