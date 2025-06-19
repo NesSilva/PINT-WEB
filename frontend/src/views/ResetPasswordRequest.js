@@ -12,7 +12,7 @@ const ResetPasswordRequest = () => {
   const handleResetRequest = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:3000/api/password/reset-password-request", { email });
+      const response = await axios.post("https://backend-8pyn.onrender.com/api/password/reset-password-request", { email });
       if (response.data.success) {
         setMessage("Código enviado. Verifique seu e-mail.");
         setMessageType("success");

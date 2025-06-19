@@ -38,7 +38,7 @@ const NovaPublicacao = () => {
     useEffect(() => {
         const carregarCategorias = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/api/categorias');
+                const response = await axios.get('https://backend-8pyn.onrender.com/api/categorias');
                 setCategorias(response.data.categorias);
             } catch (error) {
                 console.error('Erro ao carregar categorias:', error);
@@ -70,7 +70,7 @@ const NovaPublicacao = () => {
                 formData.append('imagem', fileList[0].originFileObj);
             }
 
-            const response = await axios.post('http://localhost:3000/api/forum/topico/criar', formData, {
+            const response = await axios.post('https://backend-8pyn.onrender.com/api/forum/topico/criar', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }

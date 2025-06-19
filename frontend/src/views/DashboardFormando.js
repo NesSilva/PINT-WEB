@@ -25,14 +25,14 @@ const DashboardFormando = () => {
     const fetchData = async () => {
       try {
         // Buscar cursos agendados
-        const responseCursos = await fetch("http://localhost:3000/api/cursos");
+        const responseCursos = await fetch("https://backend-8pyn.onrender.com/api/cursos");
         const cursos = await responseCursos.json();
         const agendados = cursos.filter(curso => curso.estado === "agendado");
 
         // Buscar conteúdos para cada curso
         const conteudosPromises = agendados.map(async (curso) => {
           try {
-            const response = await fetch(`http://localhost:3000/api/cursos/${curso.id_curso}/conteudos`);
+            const response = await fetch(`https://backend-8pyn.onrender.com/api/cursos/${curso.id_curso}/conteudos`);
             const conteudos = await response.json();
             return { cursoId: curso.id_curso, conteudos };
           } catch (error) {
