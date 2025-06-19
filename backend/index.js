@@ -75,6 +75,9 @@ app.use('/api/forum/comentario', forumComentarioRoutes);
 // Servir imagens dos uploads (deixa isso depois de todas as rotas)
 app.use('/uploads/forum', express.static('uploads/forum'));
 
+const inscricaoRoutes = require("./routes/inscricaoRoutes");
+app.use("/api/inscricoes", inscricaoRoutes);
+
 app.get("/", (req, res) => {
     res.send("Bem-vindo à API de Filmes");
 });
