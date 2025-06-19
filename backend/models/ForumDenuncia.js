@@ -1,57 +1,25 @@
-// models/ForumDenuncia.js
-const { DataTypes } = require("sequelize");
-const sequelize = require("./basededados");
-const Utilizador = require("./Utilizador");
-const ForumPublicacao = require("./forumPublicação");
+const { DataTypes } = require('sequelize');
+const sequelize = require('./basededados');
+const ForumTopico = require('./ForumTopico');
+const Utilizador = require('./Utilizador');
 
-const ForumDenuncia = sequelize.define("ForumDenuncia", {
-    id_denuncia: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    id_publicacao: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-            model: ForumPublicacao,
-            key: "id_publicacao"
-        }
-    },
-    id_comentario: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-            model: "forum_comentarios",
-            key: "id_comentario"
-        }
-    },
-    id_denunciante: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: Utilizador,
-            key: "id_utilizador"
-        }
-    },
-    motivo: {
-        type: DataTypes.TEXT,
-        allowNull: false
-    },
-    data_denuncia: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
-    },
-    status: {
-        type: DataTypes.STRING(20),
-        defaultValue: "pendente",
-        validate: {
-            isIn: [["pendente", "analisado", "rejeitado"]]
-        }
-    }
+const ForumDenuncia = sequelize.define('ForumDenuncia', {
+  id_denuncia: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  id_topico: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: ForumTopico, key: 'id_topico' }
+  },
+  id_utilizador: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: Utilizador, key: 'id_utilizador' }
+  },
+  motivo: { type: DataTypes.STRING(500), allowNull: false },
+  data_denuncia: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
 }, {
-    tableName: "forum_denuncias",
-    timestamps: false
+  tableName: 'forum_denuncias',
+  timestamps: false
 });
 
 module.exports = ForumDenuncia;

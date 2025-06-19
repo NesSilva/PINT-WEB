@@ -4,7 +4,6 @@ const sequelize = require("./models/basededados");
 const authRoutes = require("./routes/auth");
 const passwordRoutes = require("./routes/passwordRoutes");
 
-
 // Configurações básicas
 app.set("port", process.env.PORT || 3000);
 
@@ -28,22 +27,15 @@ app.use(express.json());
 
 require('dotenv').config();  // Carrega as variáveis do arquivo .env
 
-console.log('teste-------------------------');  // Deverá mostrar o seu email
+// Debug de variáveis de ambiente
+console.log('teste-------------------------');
+console.log(process.env.EMAIL_USER);
+console.log(process.env.EMAIL_PASS);
+console.log('teste-------------------------');
 
-// Verificando se as variáveis de ambiente estão carregadas
-console.log(process.env.EMAIL_USER);  // Deverá mostrar o seu email
-console.log(process.env.EMAIL_PASS);  // Deverá mostrar a sua senha de aplicativo
-console.log('teste-------------------------');  // Deverá mostrar o seu email
-
-// index.js (ou seu arquivo principal)
-app.use(express.json()); // Isso deve estar ANTES das rotas
-app.use(express.urlencoded({ extended: true }));
-
-
+// Rotas principais
 app.use("/", authRoutes);
-
-app.use("/api/password", passwordRoutes); 
-
+app.use("/api/password", passwordRoutes);
 
 const dashboardRoutes = require("./routes/dashboard");
 app.use("/api/dashboard", dashboardRoutes);
@@ -51,49 +43,43 @@ app.use("/api/dashboard", dashboardRoutes);
 const categoriaRoutes = require("./routes/routesCategoria");
 app.use("/api", categoriaRoutes);
 
-const areaFormacaoRoutes = require("./routes/areaFormacaoRoutes"); 
-app.use("/api", areaFormacaoRoutes); // Adicione esta linha
+const areaFormacaoRoutes = require("./routes/areaFormacaoRoutes");
+app.use("/api", areaFormacaoRoutes);
 
 const utilizadorRoutes = require("./routes/utilizadoresRoutes");
 app.use("/api/utilizadores", utilizadorRoutes);
 
 app.post('/api/utilizadores/admin/aceitar-pedido', (req, res) => {
-  const { id_utilizador, senha } = req.body;
-
-  // Lógica para aceitar o pedido: validar senha, atualizar status, etc.
-
-  // Exemplo:
-  if (!id_utilizador || !senha) {
-    return res.status(400).json({ message: "Parâmetros inválidos" });
-  }
-
-  // Suponha que aceite o pedido com sucesso:
-  // atualiza no banco e responde
-
-  return res.status(200).json({ message: "Pedido aceito com sucesso" });
+    const { id_utilizador, senha } = req.body;
+    if (!id_utilizador || !senha) {
+        return res.status(400).json({ message: "Parâmetros inválidos" });
+    }
+    return res.status(200).json({ message: "Pedido aceito com sucesso" });
 });
-
-
 
 const perfisRoutes = require("./routes/perfisRoutes");
 app.use("/api/perfis", perfisRoutes);
 
 const cursoRoutes = require("./routes/cursoRoutes");
-
 app.use("/api/cursos", cursoRoutes);
-
 
 const conteudoRoutes = require("./routes/conteudoCursoRoutes");
 app.use("/api/conteudo", conteudoRoutes);
 
-const forumRoutes = require('./routes/forumRoutes');
+// --- NOVAS ROTAS DO FÓRUM ---
+const forumTopicoRoutes = require('./routes/forumTopico');
+const forumComentarioRoutes = require('./routes/forumComentario');
+app.use('/api/forum/topico', forumTopicoRoutes);
+app.use('/api/forum/comentario', forumComentarioRoutes);
 
-app.use('/api/forum', forumRoutes);
+// Servir imagens dos uploads (deixa isso depois de todas as rotas)
+app.use('/uploads/forum', express.static('uploads/forum'));
 
 app.get("/", (req, res) => {
     res.send("Bem-vindo à API de Filmes");
 });
 
+// Sequelize sync
 sequelize.sync({
     force: false,
     alter: true,
@@ -101,7 +87,7 @@ sequelize.sync({
 });
 
 app.listen(app.get("port"), "0.0.0.0", () => {
-  console.log(`Server running on port ${app.get("port")}`);
+    console.log(`Server running on port ${app.get("port")}`);
 });
 
 module.exports = app;

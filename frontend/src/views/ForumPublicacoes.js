@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Card, List, Rate, Space, Typography, Button, Tag, Row, Col } from 'antd';
-import { MessageOutlined, FileOutlined, StarOutlined, PlusOutlined } from '@ant-design/icons';
+import { Card, List, Space, Typography, Button, Tag, Row, Col, Rate, Popconfirm, message } from 'antd';
+import { MessageOutlined, FileOutlined, PlusOutlined, EditOutlined, DeleteOutlined, StarFilled } from '@ant-design/icons';
 import Layout from "../components/Layout"; 
 
 const { Title, Text } = Typography;
@@ -12,22 +12,21 @@ const ForumPublicacoes = () => {
     const [loading, setLoading] = useState(true);
     const [categorias, setCategorias] = useState([]);
     const [categoriaSelecionada, setCategoriaSelecionada] = useState(null);
+    const usuarioId = localStorage.getItem('usuarioId');
+    const navigate = useNavigate();
 
     useEffect(() => {
         const carregarDados = async () => {
             try {
                 const [responsePublicacoes, responseCategorias] = await Promise.all([
-                    axios.get('http://localhost:3000/api/forum'),
-                    axios.get('http://localhost:3000/api/categorias')
+                    axios.get('/api/forum/topico/todos'),
+                    axios.get('/api/categorias')
                 ]);
                 
-                setPublicacoes(responsePublicacoes.data.publicacoes);
-                console.log("Dados recebidos das publicações:", responsePublicacoes.data);
-
+                setPublicacoes(responsePublicacoes.data.topicos);
                 setCategorias(responseCategorias.data.categorias);
                 setLoading(false);
             } catch (error) {
-                console.error('Erro ao carregar dados:', error);
                 setLoading(false);
             }
         };
@@ -37,6 +36,20 @@ const ForumPublicacoes = () => {
 
     const filtrarPorCategoria = (idCategoria) => {
         setCategoriaSelecionada(idCategoria);
+    };
+
+    const removerTopico = async (id_topico) => {
+        try {
+            await axios.delete(`/api/forum/topico/remover/${id_topico}`);
+            message.success("Tópico removido!");
+            setPublicacoes(prev => prev.filter(t => t.id_topico !== id_topico));
+        } catch {
+            message.error("Erro ao remover tópico");
+        }
+    };
+
+    const editarTopico = (id_topico) => {
+        navigate(`/forum/publicacao/${id_topico}?editar=1`);
     };
 
     const publicacoesFiltradas = categoriaSelecionada 
@@ -85,35 +98,56 @@ const ForumPublicacoes = () => {
                         size="large"
                         loading={loading}
                         dataSource={publicacoesFiltradas}
-                        renderItem={publicacao => (
-                            <List.Item
-                                key={publicacao.id_publicacao}
-                                extra={
-                                    <Space direction="vertical" align="center">
-                                        <Rate 
-                                            disabled 
-                                            value={parseFloat(publicacao.media_avaliacoes)} 
-                                            allowHalf 
-                                        />
-                                        <Text>{publicacao.media_avaliacoes} ({publicacao.total_avaliacoes})</Text>
-                                    </Space>
-                                }
-                            >
-                                <Card
-                                    title={<Link to={`/forum/publicacao/${publicacao.id_publicacao}`}>{publicacao.titulo}</Link>}
-                                    style={{ marginBottom: '20px' }}
-                                >
-                                    <div dangerouslySetInnerHTML={{ __html: publicacao.conteudo.substring(0, 200) + '...' }} />
-                                    
-                                    <Space style={{ marginTop: '16px' }} size="middle">
-                                        <Tag icon={<MessageOutlined />}>{publicacao.ForumComentarios?.length || 0} Comentários</Tag>
-                                        <Tag icon={<FileOutlined />}>{publicacao.ForumAnexos?.length || 0} Anexos</Tag>
-                                        <Text type="secondary">Postado por: {publicacao.autor.nome}</Text>
-                                        <Text type="secondary">Categoria: {publicacao.Categoria.nome}</Text>
-                                    </Space>
-                                </Card>
-                            </List.Item>
-                        )}
+                        locale={{ emptyText: "Nenhuma publicação encontrada." }}
+                        renderItem={publicacao => {
+                            // Mostra botões só para autor ou admin (coloque o id do admin se quiser liberar geral)
+                            const isOwner = String(usuarioId) === String(publicacao.id_utilizador) || usuarioId === "1";
+                            return (
+                                <List.Item key={publicacao.id_topico}>
+                                    <Card
+                                        title={<Link to={`/forum/publicacao/${publicacao.id_topico}`}>{publicacao.titulo}</Link>}
+                                        style={{ marginBottom: '20px' }}
+                                        extra={
+                                            <Space>
+                                                {/* Média de avaliação, se disponível */}
+                                                {publicacao.media_avaliacoes &&
+                                                    <span>
+                                                        <Rate
+                                                            disabled
+                                                            allowHalf
+                                                            value={Number(publicacao.media_avaliacoes)}
+                                                            style={{ fontSize: 16, color: "#faad14" }}
+                                                        />
+                                                        <span style={{ marginLeft: 4, fontWeight: 500 }}>{parseFloat(publicacao.media_avaliacoes).toFixed(1)}</span>
+                                                    </span>
+                                                }
+                                                {isOwner && (
+                                                    <>
+                                                        <Button icon={<EditOutlined />} onClick={() => editarTopico(publicacao.id_topico)} />
+                                                        <Popconfirm
+                                                            title="Remover tópico?"
+                                                            onConfirm={() => removerTopico(publicacao.id_topico)}
+                                                            okText="Sim"
+                                                            cancelText="Não"
+                                                        >
+                                                            <Button icon={<DeleteOutlined />} danger />
+                                                        </Popconfirm>
+                                                    </>
+                                                )}
+                                            </Space>
+                                        }
+                                    >
+                                        <div>
+                                            {publicacao.conteudo?.substring(0, 200)}...
+                                        </div>
+                                        <Space style={{ marginTop: '16px' }} size="middle">
+                                            <Text type="secondary">Postado por: {publicacao.autor?.nome}</Text>
+                                            <Text type="secondary">Categoria: {publicacao.categoria?.nome}</Text>
+                                        </Space>
+                                    </Card>
+                                </List.Item>
+                            );
+                        }}
                     />
                 </Col>
             </Row>

@@ -49,50 +49,46 @@ const NovaPublicacao = () => {
     }, []);
 
     const handleSubmit = async (values) => {
-    try {
-        setLoading(true);
-        const usuarioId = localStorage.getItem('usuarioId');
+        try {
+            setLoading(true);
+            const usuarioId = localStorage.getItem('usuarioId');
 
-        if (!usuarioId) {
-            message.error('Utilizador não autenticado! Faça login novamente.');
+            if (!usuarioId) {
+                message.error('Utilizador não autenticado! Faça login novamente.');
+                setLoading(false);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('id_autor', usuarioId);
+            formData.append('id_categoria', values.categoria);
+            formData.append('titulo', values.titulo);
+            formData.append('conteudo', values.conteudo);
+
+            // Apenas o primeiro arquivo será enviado como imagem (ajuste se backend aceitar múltiplos)
+            if (fileList.length > 0 && fileList[0].originFileObj) {
+                formData.append('imagem', fileList[0].originFileObj);
+            }
+
+            const response = await axios.post('http://localhost:3000/api/forum/topico/criar', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            message.success('Publicação criada com sucesso!');
+            // Use o nome correto da propriedade retornada pelo backend: response.data.topico.id_topico
+            navigate(`/forum/publicacao/${response.data.topico.id_topico}`);
+        } catch (error) {
+            console.error('Erro detalhado:', error.response?.data || error.message);
+            message.error(error.response?.data?.message || 'Erro ao criar publicação');
+        } finally {
             setLoading(false);
-            return;
         }
+    };
 
-        const formData = new FormData();
-        formData.append('id_autor', usuarioId);
-        formData.append('id_categoria', values.categoria);
-        formData.append('titulo', values.titulo);
-        formData.append('conteudo', values.conteudo);
-
-        // Verifique os arquivos antes de enviar
-        console.log('Arquivos a serem enviados:', fileList);
-        
-        fileList.forEach((file, index) => {
-            if (file.originFileObj) {
-                formData.append(`anexos`, file.originFileObj);
-            } else {
-                console.warn(`Arquivo na posição ${index} não tem originFileObj`);
-            }
-        });
-
-        const response = await axios.post('http://localhost:3000/api/forum/publicacao/criar', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        });
-
-        message.success('Publicação criada com sucesso!');
-        navigate(`/forum/publicacao/${response.data.publicacao.id_publicacao}`);
-    } catch (error) {
-        console.error('Erro detalhado:', error.response?.data || error.message);
-        message.error(error.response?.data?.message || 'Erro ao criar publicação');
-        setLoading(false);
-    }
-};
     // Configuração do upload antes de enviar
     const beforeUpload = (file) => {
-        // Adiciona o arquivo à lista sem fazer upload automático
         setFileList(prev => [...prev, file]);
         return false; // Impede o upload automático
     };
@@ -163,9 +159,9 @@ const NovaPublicacao = () => {
                                     fileList={fileList}
                                     beforeUpload={beforeUpload}
                                     onRemove={onRemove}
-                                    multiple
+                                    multiple={false} // Apenas um arquivo por vez
                                 >
-                                    <Button icon={<UploadOutlined />}>Selecionar Arquivos</Button>
+                                    <Button icon={<UploadOutlined />}>Selecionar Arquivo</Button>
                                 </Upload>
                             </Form.Item>
                             

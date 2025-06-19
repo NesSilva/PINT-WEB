@@ -1,162 +1,189 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import { 
-    Card, 
-    List, 
-    Rate, 
-    Space, 
-    Typography, 
-    Button, 
-    Tag, 
-    Form, 
-    Input, 
-    message, 
-    Upload, 
-    Row, 
+import {
+    Card,
+    List,
+    Space,
+    Typography,
+    Button,
+    Row,
     Col,
     Breadcrumb,
-    Divider
+    Divider,
+    Form,
+    Input,
+    message,
+    Rate,
+    Modal
 } from 'antd';
-import { 
-    MessageOutlined, 
-    FileOutlined, 
-    StarOutlined, 
-    UploadOutlined,
+import {
     HomeOutlined,
-    FolderOutlined
+    FolderOutlined,
+    ExclamationCircleOutlined
 } from '@ant-design/icons';
-import Layout from "../components/Layout"; 
+import Layout from "../components/Layout";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
 const PublicacaoDetalhes = () => {
     const { id_publicacao } = useParams();
-    const usuarioId = localStorage.getItem('usuarioId'); 
-    const [publicacao, setPublicacao] = useState(null);
+    const id_topico = id_publicacao;
+    const usuarioId = localStorage.getItem('usuarioId');
+
+    const [topico, setTopico] = useState(null);
     const [loading, setLoading] = useState(true);
     const [comentario, setComentario] = useState('');
+    const [comentarios, setComentarios] = useState([]);
     const [avaliacao, setAvaliacao] = useState(0);
-    const [usuarioAvaliou, setUsuarioAvaliou] = useState(false);
-    const [fileList, setFileList] = useState([]);
+
+    // Modal denúncia
+    const [denunciaModal, setDenunciaModal] = useState(false);
+    const [motivoDenuncia, setMotivoDenuncia] = useState('');
 
     useEffect(() => {
-        const carregarPublicacao = async () => {
+        const carregarTopico = async () => {
             try {
-                const response = await axios.get(`/api/forum/publicacao/${id_publicacao}`);
-                setPublicacao(response.data.publicacao);
-                
-                // Verificar se o usuário já avaliou
-                const usuarioId = 0; // Obter ID do usuário logado
-                // const avaliacaoUsuario = await axios.get(`/api/forum/avaliacao/usuario/${id_publicacao}/${usuarioId}`);
-                // setUsuarioAvaliou(avaliacaoUsuario.data.avaliou);
-                
+                const response = await axios.get(`/api/forum/topico/${id_topico}`);
+                setTopico(response.data.topico);
                 setLoading(false);
             } catch (error) {
-                console.error('Erro ao carregar publicação:', error);
+                setTopico(null);
                 setLoading(false);
             }
         };
+        carregarTopico();
+    }, [id_topico]);
 
-        carregarPublicacao();
-    }, [id_publicacao]);
+    useEffect(() => {
+        const carregarComentarios = async () => {
+            try {
+                const response = await axios.get(`/api/forum/comentario/${id_topico}`);
+                setComentarios(response.data.comentarios);
+            } catch (error) {
+                setComentarios([]);
+            }
+        };
+        if (topico) carregarComentarios();
+    }, [topico, id_topico]);
 
+    // Envio de comentário
     const handleComentarioSubmit = async () => {
+        if (!comentario.trim()) {
+            message.error('Digite um comentário!');
+            return;
+        }
         try {
-            // const usuarioId = ...; // Obter ID do usuário logado
-            await axios.post('/api/forum/comentario/adicionar', {
-                id_publicacao,
-                id_autor: usuarioId,
-                conteudo: comentario
+            await axios.post('/api/forum/comentario/criar', {
+                id_topico,
+                conteudo: comentario,
+                id_utilizador: usuarioId
             });
-            
             message.success('Comentário adicionado com sucesso!');
             setComentario('');
-            // Recarregar os comentários
-            const response = await axios.get(`/api/forum/publicacao/${id_publicacao}`);
-            setPublicacao(response.data.publicacao);
-        } catch (error) {
-            console.error('Erro ao adicionar comentário:', error);
+            const response = await axios.get(`/api/forum/comentario/${id_topico}`);
+            setComentarios(response.data.comentarios);
+        } catch {
             message.error('Erro ao adicionar comentário');
         }
     };
 
-    const handleAvaliacaoChange = async (value) => {
+    // Handler de avaliação
+    const handleAvaliacao = async (value) => {
         try {
-            // const usuarioId = ...; // Obter ID do usuário logado
-            await axios.post('/api/forum/avaliacao/adicionar', {
-                id_publicacao,
-                id_utilizador: usuarioId,
-                avaliacao: value
-            });
-            
             setAvaliacao(value);
-            setUsuarioAvaliou(true);
-            message.success('Avaliação registrada com sucesso!');
-            
-            // Recarregar a publicação para atualizar a média
-            const response = await axios.get(`/api/forum/publicacao/${id_publicacao}`);
-            setPublicacao(response.data.publicacao);
-        } catch (error) {
-            console.error('Erro ao avaliar publicação:', error);
-            message.error('Erro ao avaliar publicação');
-        }
-    };
-
-    const handleUpload = async (options) => {
-        const { file } = options;
-        
-        try {
-            const formData = new FormData();
-            formData.append('arquivo', file);
-            formData.append('id_publicacao', id_publicacao);
-            
-            await axios.post('/api/forum/anexo/adicionar', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+            await axios.post('/api/forum/topico/avaliar', {
+                id_topico,
+                id_utilizador: usuarioId,
+                nota: value
             });
-            
-            message.success('Arquivo anexado com sucesso!');
-            setFileList([]);
-            
-            // Recarregar a publicação para mostrar o novo anexo
-            const response = await axios.get(`/api/forum/publicacao/${id_publicacao}`);
-            setPublicacao(response.data.publicacao);
-        } catch (error) {
-            console.error('Erro ao anexar arquivo:', error);
-            message.error('Erro ao anexar arquivo');
+            message.success('Avaliação registrada!');
+        } catch {
+            message.error('Erro ao avaliar tópico');
         }
     };
 
-    const handleDenuncia = async (tipo, id) => {
+    // Handler de denúncia
+    const abrirModalDenuncia = () => setDenunciaModal(true);
+    const enviarDenuncia = async () => {
+        if (!motivoDenuncia.trim()) {
+            message.error('Digite o motivo da denúncia');
+            return;
+        }
         try {
-            // const usuarioId = ...; // Obter ID do usuário logado
-            const motivo = prompt('Por favor, informe o motivo da denúncia:');
-            
-            if (motivo) {
-                await axios.post('/api/forum/denuncia/registrar', {
-                    [`id_${tipo}`]: id,
-                    id_denunciante: usuarioId,
-                    motivo
-                });
-                
-                message.success('Denúncia registrada com sucesso!');
-            }
-        } catch (error) {
-            console.error('Erro ao registrar denúncia:', error);
+            await axios.post('/api/forum/topico/denunciar', {
+                id_topico,
+                id_utilizador: usuarioId,
+                motivo: motivoDenuncia
+            });
+            setDenunciaModal(false);
+            setMotivoDenuncia('');
+            message.success('Denúncia registrada!');
+        } catch {
             message.error('Erro ao registrar denúncia');
         }
     };
 
-    if (loading) {
-        return <Layout>Carregando...</Layout>;
-    }
+    // Editar tópico (implemente navegação ou modal conforme seu fluxo)
+const editarTopico = () => {
+    message.info("Função de edição pode abrir um modal ou redirecionar para um formulário.");
+    // Exemplo: window.location.href = `/forum/publicacao/${id_topico}?editar=1`;
+};
 
-    if (!publicacao) {
-        return <Layout>Publicação não encontrada</Layout>;
+const removerTopico = async () => {
+    try {
+        await axios.delete(`/api/forum/topico/remover/${id_topico}`);
+        message.success("Tópico removido!");
+        window.location.href = '/forum';
+    } catch {
+        message.error("Erro ao remover tópico.");
     }
+};
+
+const editarComentario = (comentario) => {
+    message.info("Função de editar comentário pode abrir um modal/form.");
+    // Exemplo: abrir modal de edição rápida aqui
+};
+
+const removerComentario = async (id_comentario) => {
+    try {
+        await axios.delete(`/api/forum/comentario/remover/${id_comentario}`);
+        message.success("Comentário removido!");
+        setComentarios(c => c.filter(cm => cm.id_comentario !== id_comentario));
+    } catch {
+        message.error("Erro ao remover comentário.");
+    }
+};
+
+const denunciarComentario = (id_comentario) => {
+    Modal.confirm({
+        title: "Denunciar comentário",
+        content: (
+            <Input.TextArea
+                rows={4}
+                placeholder="Explique o motivo da denúncia..."
+                onChange={e => setMotivoDenuncia(e.target.value)}
+            />
+        ),
+        onOk: async () => {
+            try {
+                await axios.post('/api/forum/comentario/denunciar', {
+                    id_comentario,
+                    id_utilizador: usuarioId,
+                    motivo: motivoDenuncia
+                });
+                setMotivoDenuncia('');
+                message.success('Denúncia registrada!');
+            } catch {
+                message.error('Erro ao registrar denúncia!');
+            }
+        }
+    });
+};
+
+    if (loading) return <Layout>Carregando...</Layout>;
+    if (!topico) return <Layout>Publicação não encontrada</Layout>;
 
     return (
         <Layout>
@@ -167,76 +194,61 @@ const PublicacaoDetalhes = () => {
                 <Breadcrumb.Item>
                     <Link to="/forum"><FolderOutlined /> Fórum</Link>
                 </Breadcrumb.Item>
-                <Breadcrumb.Item>{publicacao.titulo}</Breadcrumb.Item>
+                <Breadcrumb.Item>{topico.titulo}</Breadcrumb.Item>
             </Breadcrumb>
 
             <Row gutter={[16, 16]}>
                 <Col span={24}>
-                    <Card
-                        title={<Title level={3}>{publicacao.titulo}</Title>}
+                   <Card title={<Title level={3}>{topico.titulo}</Title>}
                         extra={
                             <Space>
-                                <Rate 
-                                    disabled={usuarioAvaliou}
-                                    value={parseFloat(publicacao.media_avaliacoes)} 
-                                    onChange={handleAvaliacaoChange}
-                                    allowHalf 
-                                />
-                                <Text>({publicacao.total_avaliacoes} avaliações)</Text>
-                            </Space>
-                        }
-                    >
-                        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                            <Paragraph>
-                                <div dangerouslySetInnerHTML={{ __html: publicacao.conteudo }} />
-                            </Paragraph>
-                            
-                            <Space>
-                                <Text type="secondary">Autor: {publicacao.autor.nome}</Text>
-                                <Text type="secondary">Categoria: {publicacao.Categoria.nome}</Text>
-                                <Text type="secondary">Data: {new Date(publicacao.data_publicacao).toLocaleDateString()}</Text>
-                                <Button 
-                                    type="link" 
-                                    danger 
-                                    onClick={() => handleDenuncia('publicacao', publicacao.id_publicacao)}
+                                <Rate allowClear value={avaliacao} onChange={handleAvaliacao} />
+                                <Button
+                                    type="link"
+                                    icon={<ExclamationCircleOutlined />}
+                                    danger
+                                    onClick={abrirModalDenuncia}
                                 >
                                     Denunciar
                                 </Button>
+                                {String(usuarioId) === String(topico.id_utilizador) && (
+                                    <>
+                                        <Button
+                                            type="default"
+                                            onClick={() => editarTopico()}
+                                            style={{ marginLeft: 8 }}
+                                        >
+                                            Editar
+                                        </Button>
+                                        <Button
+                                            danger
+                                            onClick={() => removerTopico()}
+                                        >
+                                            Remover
+                                        </Button>
+                                    </>
+                                )}
                             </Space>
-                            
-                            {publicacao.ForumAnexos?.length > 0 && (
-                                <div>
-                                    <Title level={5}>Anexos</Title>
-                                    <List
-                                        dataSource={publicacao.ForumAnexos}
-                                        renderItem={anexo => (
-                                            <List.Item>
-                                                <a href={anexo.caminho_arquivo} target="_blank" rel="noopener noreferrer">
-                                                    <FileOutlined /> {anexo.nome_arquivo}
-                                                </a>
-                                            </List.Item>
-                                        )}
-                                    />
-                                </div>
+                        }>
+                        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                            {topico.imagem_url && (
+                                <img
+                                    src={topico.imagem_url}
+                                    alt="Anexo"
+                                    style={{ maxWidth: '300px', maxHeight: '200px', marginBottom: 16 }}
+                                />
                             )}
-                            
-                            <Upload
-                                fileList={fileList}
-                                customRequest={handleUpload}
-                                onChange={({ fileList }) => setFileList(fileList)}
-                                beforeUpload={() => false}
-                            >
-                                <Button icon={<UploadOutlined />}>Anexar Arquivo</Button>
-                            </Upload>
+                            <Paragraph>{topico.conteudo}</Paragraph>
+                            <Space>
+                                <Text type="secondary">Autor: {topico.autor?.nome || topico.id_utilizador}</Text>
+                                <Text type="secondary">Categoria: {topico.categoria?.nome || topico.id_categoria}</Text>
+                                <Text type="secondary">Data: {new Date(topico.data_criacao).toLocaleDateString()}</Text>
+                            </Space>
                         </Space>
                     </Card>
                 </Col>
-
                 <Col span={24}>
-                    <Card 
-                        title={`Comentários (${publicacao.ForumComentarios?.length || 0})`} 
-                        style={{ marginTop: '20px' }}
-                    >
+                    <Card title={`Comentários (${comentarios.length})`} style={{ marginTop: '20px' }}>
                         <Form onFinish={handleComentarioSubmit}>
                             <Form.Item>
                                 <TextArea
@@ -252,35 +264,76 @@ const PublicacaoDetalhes = () => {
                                 </Button>
                             </Form.Item>
                         </Form>
-                        
                         <Divider />
-                        
                         <List
-                            dataSource={publicacao.ForumComentarios}
-                            renderItem={comentario => (
-                                <List.Item
-                                    actions={[
-                                        <Button 
-                                            type="link" 
-                                            danger 
-                                            onClick={() => handleDenuncia('comentario', comentario.id_comentario)}
-                                        >
-                                            Denunciar
-                                        </Button>
-                                    ]}
-                                >
-                                    <List.Item.Meta
-                                        avatar={<img src={comentario.autor.foto_perfil} alt={comentario.autor.nome} style={{ width: '40px', borderRadius: '50%' }} />}
-                                        title={<Text strong>{comentario.autor.nome}</Text>}
-                                        description={new Date(comentario.data_comentario).toLocaleString()}
-                                    />
-                                    <Paragraph>{comentario.conteudo}</Paragraph>
-                                </List.Item>
-                            )}
-                        />
+    dataSource={comentarios}
+    locale={{ emptyText: 'Nenhum comentário ainda.' }}
+    renderItem={comentario => (
+            <List.Item
+                actions={String(usuarioId) === String(comentario.id_utilizador) ? [
+                    <Button
+                        type="link"
+                        onClick={() => editarComentario(comentario)}
+                    >
+                        Editar
+                    </Button>,
+                    <Button
+                        type="link"
+                        danger
+                        onClick={() => removerComentario(comentario.id_comentario)}
+                    >
+                        Remover
+                    </Button>,
+                    <Button
+                        type="link"
+                        onClick={() => denunciarComentario(comentario.id_comentario)}
+                    >
+                        Denunciar
+                    </Button>
+                ] : [
+                    <Button
+                        type="link"
+                        onClick={() => denunciarComentario(comentario.id_comentario)}
+                    >
+                        Denunciar
+                    </Button>
+                ]}
+            >
+                <List.Item.Meta
+                    title={<Text strong>{comentario.autor?.nome || comentario.id_utilizador}</Text>}
+                    description={new Date(comentario.data_criacao).toLocaleString()}
+                />
+                <Paragraph>{comentario.conteudo}</Paragraph>
+                {comentario.imagem_url && (
+                    <img
+                        src={comentario.imagem_url}
+                        alt="Comentário Anexo"
+                        style={{ maxWidth: '200px', maxHeight: '120px' }}
+                    />
+                )}
+            </List.Item>
+        )}
+    />
+
                     </Card>
                 </Col>
             </Row>
+
+            <Modal
+                title="Denunciar tópico"
+                open={denunciaModal}
+                onOk={enviarDenuncia}
+                onCancel={() => setDenunciaModal(false)}
+                okText="Enviar denúncia"
+                cancelText="Cancelar"
+            >
+                <Input.TextArea
+                    rows={4}
+                    placeholder="Explique o motivo da denúncia..."
+                    value={motivoDenuncia}
+                    onChange={e => setMotivoDenuncia(e.target.value)}
+                />
+            </Modal>
         </Layout>
     );
 };
