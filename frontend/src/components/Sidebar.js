@@ -50,10 +50,11 @@ const Sidebar = () => {
     </Link>
 </li>
 
-        <li className="nav-item mb-2">
-          <Link className="nav-link text-black" to="/formandos" state={{ user, perfil }}>
-            Inscritos
-          </Link>
+        <li>
+          <Link className="nav-link text-black" to="/inscricoes" state={{ user, perfil }}>
+  Inscrições
+</Link>
+
         </li>
       </ul>
     </div>

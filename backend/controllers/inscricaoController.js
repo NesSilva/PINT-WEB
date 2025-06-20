@@ -76,4 +76,15 @@ const criarInscricao = async (req, res) => {
   }
 };
 
-module.exports = { criarInscricao };
+const listarInscricoes = async (req, res) => {
+  try {
+    const inscricoes = await Inscricao.findAll();
+
+    return res.status(200).json(inscricoes);
+  } catch (error) {
+    console.error("Erro ao listar inscrições:", error);
+    return res.status(500).json({ mensagem: "Erro ao listar inscrições." });
+  }
+};
+
+module.exports = { criarInscricao, listarInscricoes };
