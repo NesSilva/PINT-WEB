@@ -21,7 +21,7 @@ const PrimeiroLogin = () => {
         }
 
         try {
-            const response = await axios.post("http://localhost:3000/api/password/first-login", {
+            const response = await axios.post("https://backend-8pyn.onrender.com/api/password/first-login", {
                 email,
                 newPassword,
             });
