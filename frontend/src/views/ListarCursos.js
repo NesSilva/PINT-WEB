@@ -188,12 +188,21 @@ useEffect(() => {
       return;
     }
 
-    const formDataToSend = new FormData();
-    Object.keys(cursoParaEditar).forEach(key => {
-      formDataToSend.append(key, cursoParaEditar[key]);
-    });
+    // Prepara os dados para envio
+    const dadosAtualizados = {
+      titulo: cursoParaEditar.titulo,
+      descricao: cursoParaEditar.descricao,
+      id_categoria: cursoParaEditar.id_categoria,
+      id_area: cursoParaEditar.id_area,
+      id_formador: cursoParaEditar.id_formador || null,
+      descricao_formador: cursoParaEditar.id_formador ? cursoParaEditar.descricao_formador : null,
+      data_inicio: cursoParaEditar.data_inicio,
+      data_fim: cursoParaEditar.data_fim,
+      vagas: cursoParaEditar.id_formador ? Number(cursoParaEditar.vagas) : null
+    };
 
     const response = await axios.put(
+<<<<<<< HEAD
       `https://backend-8pyn.onrender.com/api/cursos/editar/${cursoParaEditar.id_curso}`,
       formDataToSend,
       {
@@ -201,7 +210,24 @@ useEffect(() => {
           "Content-Type": "multipart/form-data",
         },
       }
+=======
+      `http://localhost:3000/api/cursos/editar/${cursoParaEditar.id_curso}`,
+      dadosAtualizados
+>>>>>>> ines
     );
+
+    // Se houver arquivo para enviar, faz separadamente
+    if (cursoParaEditar.ficheiro) {
+      const formDataArquivo = new FormData();
+      formDataArquivo.append("file", cursoParaEditar.ficheiro);
+      formDataArquivo.append("id_curso", cursoParaEditar.id_curso);
+      formDataArquivo.append("tipo_conteudo", "material");
+      formDataArquivo.append("descricao", "Material do curso");
+
+      await axios.post("http://localhost:3000/api/conteudo/adicionar", formDataArquivo, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+    }
 
     setMessage("Curso atualizado com sucesso!");
     setMessageType("success");
@@ -552,11 +578,11 @@ useEffect(() => {
           <Form.Group className="mb-2">
             <Form.Label>Data Início:</Form.Label>
             <Form.Control
-              type="date"
-              name="data_inicio"
-              value={cursoParaEditar.data_inicio?.split("T")[0] || ""}
-              onChange={handleEditChange}
-            />
+  type="date"
+  name="data_inicio"
+  value={cursoParaEditar.data_inicio?.split("T")[0] || ""}
+  onChange={handleEditChange}
+/>
           </Form.Group>
           <Form.Group className="mb-2">
             <Form.Label>Data Fim:</Form.Label>

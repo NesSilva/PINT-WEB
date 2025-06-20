@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import axios from "axios";
+
 
 const ListarUtilizadores = () => {
   const [utilizadores, setUtilizadores] = useState([]);
@@ -24,6 +26,14 @@ const ListarUtilizadores = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [utilizadorParaAceitar, setUtilizadorParaAceitar] = useState(null);
   const [senhaParaAceitar, setSenhaParaAceitar] = useState("");
+  const [progressoCursos, setProgressoCursos] = useState([]);
+const [utilizadorSelecionado, setUtilizadorSelecionado] = useState(null);
+const [dataInicio, setDataInicio] = useState("");
+const [dataFim, setDataFim] = useState("");
+const [showProgressoModal, setShowProgressoModal] = useState(false);
+  const [cursos, setCursos] = useState([]);
+
+
 
 
 
@@ -44,6 +54,14 @@ const ListarUtilizadores = () => {
       }
     };
 
+    const fetchCursos = async () => {
+    try {
+      const res = await axios.get("http://localhost:3000/api/cursos/todos");
+      setCursos(res.data);
+    } catch (err) {
+      console.error("Erro ao buscar cursos:", err);
+    }
+  };
     const fetchPerfis = async () => {
       try {
         const response = await fetch("https://backend-8pyn.onrender.com/api/perfis");
@@ -60,8 +78,23 @@ const ListarUtilizadores = () => {
 
     fetchUtilizadores();
     fetchPerfis();
+    fetchCursos();
   }, []);
 
+    const getTituloCurso = (id_curso) => {
+    const curso = cursos.find((c) => c.id_curso === id_curso);
+    return curso ? curso.titulo : "Desconhecido";
+  };
+
+   const getDataInicio = (id_curso) => {
+    const curso = cursos.find((c) => c.id_curso === id_curso);
+    return curso ? curso.data_fim : "Dia não definido";
+  };
+
+  const getDataFim = (id_curso) => {
+    const curso = cursos.find((c) => c.id_curso === id_curso);
+    return curso ? curso.data_inicio : "Dia não definido";
+  };
   const handleDeleteClick = async (id_utilizador) => {
     const confirmDelete = window.confirm("Tem certeza que deseja eliminar este utilizador?");
     if (confirmDelete) {
@@ -83,6 +116,27 @@ const ListarUtilizadores = () => {
     }
   };
 
+  const buscarProgresso = async (id) => {
+      console.log("ID do utilizador:", id); // <-- ADICIONAR ISTO
+
+  try {
+    let url = `http://localhost:3000/api/progressos/utilizador/${id}`;
+    const query = [];
+
+    if (dataInicio) query.push(`dataInicio=${dataInicio}`);
+    if (dataFim) query.push(`dataFim=${dataFim}`);
+
+    if (query.length > 0) url += `?${query.join("&")}`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+    setProgressoCursos(data);
+  } catch (err) {
+    console.error("Erro ao buscar progresso:", err);
+  }
+};
+
+
   const handleEditClick = (utilizador) => {
   setUtilizadorAtual(utilizador);
   setPerfis(Array.isArray(utilizador.perfis) ? utilizador.perfis : utilizador.perfis.split(/,\s*/));
@@ -94,7 +148,6 @@ const ListarUtilizadores = () => {
   e.preventDefault();
 
   try {
-    // Cria o corpo da requisição incluindo senha somente se tiver valor
     const corpo = {
       nome: utilizadorAtual.nome,
       email: utilizadorAtual.email,
@@ -298,6 +351,8 @@ const aceitarPedido = async (idUtilizador, senha) => {
               <th scope="col">Perfis</th>
               <th scope="col">Ação</th>
               <th scope="col">Pedido</th>
+              <th scope="col">Percurso</th> 
+
 
             </tr>
           </thead>
@@ -361,6 +416,19 @@ const aceitarPedido = async (idUtilizador, senha) => {
                         <span className="text-danger">Negado</span>
                       ) : null}
                     </td>
+                    <td>
+  <button
+    className="btn btn-info btn-sm"
+    onClick={() => {
+      setUtilizadorSelecionado(utilizador);
+      setShowProgressoModal(true);
+      buscarProgresso(utilizador.id_utilizador);
+    }}
+  >
+    Ver Percurso
+  </button>
+</td>
+
 
 
                   </tr>
@@ -477,6 +545,66 @@ const aceitarPedido = async (idUtilizador, senha) => {
             </div>
           </div>
         )}
+
+        {showProgressoModal && (
+  <div className="modal fade show" style={{ display: 'block' }} role="dialog">
+    <div className="modal-dialog modal-lg" role="document">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h5 className="modal-title">Progresso de {utilizadorSelecionado?.nome}</h5>
+          <button type="button" className="close" onClick={() => setShowProgressoModal(false)}>
+            <span>&times;</span>
+          </button>
+        </div>
+        <div className="modal-body">
+          <div className="row mb-6">
+            <div className="col">
+              <label>Data Início</label>
+              <input type="date" className="form-control" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} />
+            </div>
+            <div className="col">
+              <label>Data Fim</label>
+              <input type="date" className="form-control" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
+            </div>
+            <div className="col d-flex align-items-end">
+              <button className="btn btn-secondary w-100" onClick={() => buscarProgresso(utilizadorSelecionado.id_utilizador)}>
+                Filtrar
+              </button>
+            </div>
+          </div>
+
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>Curso</th>
+                <th>Processo</th>
+                <th>Data Inicio </th>
+                <th>Data Fim</th>
+              </tr>
+            </thead>
+            <tbody>
+  {progressoCursos.length > 0 ? (
+    progressoCursos.map((item) => (
+      <tr key={item.id_progresso}>
+        <td>{getTituloCurso(item.id_curso)}</td> {/* Corrigido para usar item.id_curso */}
+        <td>{item.percentual_completo}%</td>
+        <td>{getDataInicio(item.id_curso)}</td> {/* Corrigido para usar item.id_curso */}
+        <td>{getDataFim(item.id_curso)}</td> {/* Corrigido para usar item.id_curso */}
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="3">Sem dados encontrados.</td>
+    </tr>
+  )}
+</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
 
         {/* Modal de Edição de Utilizador */}
         {showModal && utilizadorAtual && (

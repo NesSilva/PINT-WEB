@@ -12,28 +12,51 @@ const DetalhesCurso = () => {
   const [curso, setCurso] = useState(null);
   const [conteudos, setConteudos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [inscricaoStatus, setInscricaoStatus] = useState(null);
+const calcularDataInscricao = (dataInicio) => {
+  const dt = new Date(dataInicio);
+  dt.setDate(dt.getDate() - 1);
+  return dt;
+};
+
+const dataInscricao = curso ? calcularDataInscricao(curso.data_inicio) : null;
+
+
 
   // Estado para modal de visualização (imagem, vídeo ou PDF)
   const [modalContent, setModalContent] = useState(null);
 
   useEffect(() => {
-    const fetchCurso = async () => {
-      try {
-        const cursoRes = await axios.get(`http://localhost:3000/api/cursos/${id_curso}`);
-        setCurso(cursoRes.data);
+  const fetchData = async () => {
+    try {
+      const cursoRes = await axios.get(`http://localhost:3000/api/cursos/${id_curso}`);
+      setCurso(cursoRes.data);
 
-        const conteudosRes = await axios.get(`http://localhost:3000/api/conteudo/curso/${id_curso}`);
-        setConteudos(conteudosRes.data);
+      const conteudosRes = await axios.get(`http://localhost:3000/api/conteudo/curso/${id_curso}`);
+      setConteudos(conteudosRes.data);
 
-        setLoading(false);
-      } catch (error) {
-        console.error("Erro ao carregar curso:", error);
-        setLoading(false);
+      // Verifica inscrição do usuário
+      const userLocal = localStorage.getItem('usuarioId');
+      if (userLocal) {
+        const inscricaoRes = await axios.get(`http://localhost:3000/api/inscricoes/usuario/${userLocal}/curso/${id_curso}`);
+        if (inscricaoRes.data && inscricaoRes.data.id_utilizador) {
+  setInscricaoStatus("Já inscrito neste curso.");
+} else {
+  setInscricaoStatus(null);
+}
+
       }
-    };
 
-    fetchCurso();
-  }, [id_curso]);
+      setLoading(false);
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, [id_curso]);
+
 
   if (loading) return <div>Carregando detalhes do curso...</div>;
   if (!curso) return <div>Curso não encontrado.</div>;
@@ -47,6 +70,32 @@ const DetalhesCurso = () => {
   const fecharModal = () => {
     setModalContent(null);
   };
+ const inscreverNoCurso = async () => {
+  try {
+    const userLocal = localStorage.getItem('usuarioId');
+    if (!userLocal) {
+      alert("Utilizador não autenticado.");
+      return;
+    }
+
+    await axios.post("http://localhost:3000/api/inscricoes", {
+      id_utilizador: userLocal,
+      id_curso: curso.id_curso
+    });
+
+    setInscricaoStatus("Inscrição realizada com sucesso!");
+  } catch (error) {
+    if (error.response && error.response.status === 409) {
+      setInscricaoStatus(error.response.data.mensagem); // exibe: "Usuário já está inscrito neste curso."
+    } else {
+      setInscricaoStatus("Erro ao realizar inscrição.");
+    }
+    console.error("Erro ao inscrever:", error);
+  }
+};
+
+
+
 
   // Categorizar conteúdos
   const conteudosPorTipo = {
@@ -82,8 +131,8 @@ const DetalhesCurso = () => {
         <h2>{curso.titulo}</h2>
         <p><strong>Descrição:</strong> {curso.descricao}</p>
         <p><strong>Categoria:</strong> {curso.categoria}</p>
-        <p><strong>Data de Início:</strong> {new Date(curso.data_inicio).toLocaleDateString('pt-PT')}</p>
-        <p><strong>Data de Fim:</strong> {new Date(curso.data_fim).toLocaleDateString('pt-PT')}</p>
+        <p><strong>Data de Inscrição:</strong> {dataInscricao ? dataInscricao.toLocaleDateString('pt-PT') : '-'}</p>
+
 
         <hr />
 
@@ -218,6 +267,18 @@ const DetalhesCurso = () => {
           </div>
         )}
       </div>
+<button 
+  className="btn btn-primary mb-3" 
+  onClick={inscreverNoCurso} 
+  disabled={inscricaoStatus === "Inscrição realizada com sucesso!"}
+>
+  Inscrever-se
+</button>
+
+
+{inscricaoStatus && <p className={inscricaoStatus.includes("Erro") ? "text-danger" : "text-success"}>{inscricaoStatus}</p>}
+
+
     </div>
   );
 };
