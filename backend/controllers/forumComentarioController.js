@@ -1,6 +1,7 @@
 const ForumComentario = require('../models/ForumComentario');
 const Utilizador = require('../models/Utilizador');
 const ForumDenuncia = require('../models/ForumDenuncia');
+const ForumComentarioLike = require('../models/ForumComentarioLike');
 
 // Criar comentário (com imagem)
 const criarComentario = async (req, res) => {
@@ -31,6 +32,11 @@ const listarComentariosPorTopico = async (req, res) => {
       include: [{ model: Utilizador, as: 'autor', attributes: ['nome'] }],
       order: [['data_criacao', 'ASC']]
     });
+    // Adiciona contagem de likes para cada comentário
+    for (let comentario of comentarios) {
+      const count = await ForumComentarioLike.count({ where: { id_comentario: comentario.id_comentario } });
+      comentario.dataValues.likes = count;
+    }
     res.json({ success: true, comentarios });
   } catch (error) {
     res.status(500).json({ success: false, message: "Erro ao listar comentários" });
@@ -89,10 +95,55 @@ const removerComentario = async (req, res) => {
   }
 };
 
+// Curtir comentário
+const likeComentario = async (req, res) => {
+  try {
+    const { id_comentario } = req.params;
+    const id_utilizador = req.body.id_utilizador;
+    // Impede likes duplicados
+    const [like, created] = await ForumComentarioLike.findOrCreate({
+      where: { id_comentario, id_utilizador }
+    });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Erro ao curtir comentário" });
+  }
+};
+
+// Descurtir comentário
+const unlikeComentario = async (req, res) => {
+  try {
+    const { id_comentario } = req.params;
+    const id_utilizador = req.body.id_utilizador;
+    await ForumComentarioLike.destroy({
+      where: { id_comentario, id_utilizador }
+    });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Erro ao remover like" });
+  }
+};
+
+// Contar likes de um comentário
+const getLikesCount = async (req, res) => {
+  try {
+    const { id_comentario } = req.params;
+    const count = await ForumComentarioLike.count({ where: { id_comentario } });
+    res.json({ success: true, likes: count });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Erro ao buscar likes" });
+  }
+};
+
+
+
 module.exports = {
   criarComentario,
   listarComentariosPorTopico,
   denunciarComentario,
   editarComentario,
-  removerComentario
+  removerComentario,
+  likeComentario,
+  unlikeComentario,
+  getLikesCount
 };

@@ -69,25 +69,34 @@ const PublicacaoDetalhes = () => {
     }, [topico, id_topico]);
 
     // Envio de comentário
+    const [fileList, setFileList] = useState(null); // no topo
+
     const handleComentarioSubmit = async () => {
         if (!comentario.trim()) {
             message.error('Digite um comentário!');
             return;
         }
         try {
-            await axios.post('/api/forum/comentario/criar', {
-                id_topico,
-                conteudo: comentario,
-                id_utilizador: usuarioId
+            const formData = new FormData();
+            formData.append('id_topico', id_topico);
+            formData.append('conteudo', comentario);
+            formData.append('id_utilizador', usuarioId);
+            if (fileList && fileList[0]) {
+                formData.append('imagem', fileList[0]);
+            }
+            await axios.post('/api/forum/comentario/criar', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
             message.success('Comentário adicionado com sucesso!');
             setComentario('');
+            setFileList(null);
             const response = await axios.get(`/api/forum/comentario/${id_topico}`);
             setComentarios(response.data.comentarios);
         } catch {
             message.error('Erro ao adicionar comentário');
         }
     };
+
 
     // Handler de avaliação
     const handleAvaliacao = async (value) => {
@@ -122,6 +131,18 @@ const PublicacaoDetalhes = () => {
             message.success('Denúncia registrada!');
         } catch {
             message.error('Erro ao registrar denúncia');
+        }
+    };
+
+    const curtirComentario = async (id_comentario) => {
+    try {
+        await axios.post(`/api/forum/comentario/${id_comentario}/like`, { id_utilizador: usuarioId });
+
+        // Atualiza comentários para refletir novo número de likes:
+        const response = await axios.get(`/api/forum/comentario/${id_topico}`);
+        setComentarios(response.data.comentarios);
+    } catch {
+        message.error("Erro ao curtir comentário!");
         }
     };
 
@@ -259,61 +280,71 @@ const denunciarComentario = (id_comentario) => {
                                 />
                             </Form.Item>
                             <Form.Item>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={e => setFileList(e.target.files)}
+                                />
+                            </Form.Item>
+                            <Form.Item>
                                 <Button type="primary" htmlType="submit">
                                     Enviar Comentário
                                 </Button>
                             </Form.Item>
                         </Form>
-                        <Divider />
+                        <Divider /> 
                         <List
-    dataSource={comentarios}
-    locale={{ emptyText: 'Nenhum comentário ainda.' }}
-    renderItem={comentario => (
-            <List.Item
-                actions={String(usuarioId) === String(comentario.id_utilizador) ? [
-                    <Button
-                        type="link"
-                        onClick={() => editarComentario(comentario)}
-                    >
-                        Editar
-                    </Button>,
-                    <Button
-                        type="link"
-                        danger
-                        onClick={() => removerComentario(comentario.id_comentario)}
-                    >
-                        Remover
-                    </Button>,
-                    <Button
-                        type="link"
-                        onClick={() => denunciarComentario(comentario.id_comentario)}
-                    >
-                        Denunciar
-                    </Button>
-                ] : [
-                    <Button
-                        type="link"
-                        onClick={() => denunciarComentario(comentario.id_comentario)}
-                    >
-                        Denunciar
-                    </Button>
-                ]}
+                        dataSource={[...comentarios].sort((a, b) => (b.likes || 0) - (a.likes || 0))} // Ordena por likes!
+                        locale={{ emptyText: 'Nenhum comentário ainda.' }}
+                        renderItem={comentario => (
+                            <List.Item
+                                actions={[
+                                    <Button 
+                                    type="link" 
+                                    onClick={() => curtirComentario(comentario.id_comentario)}
+                                    >
+                                    Curtir ({comentario.likes})
+                                    </Button>,
+                                    ...(String(usuarioId) === String(comentario.id_utilizador)
+                                        ? [
+                                            <Button
+                                                type="link"
+                                                onClick={() => editarComentario(comentario)}
+                                            >
+                                                Editar
+                                            </Button>,
+                                            <Button
+                                                type="link"
+                                                danger
+                                                onClick={() => removerComentario(comentario.id_comentario)}
+                                            >
+                                                Remover
+                                            </Button>
+                                        ]
+                                        : []),
+                                    <Button
+                                        type="link"
+                                        onClick={() => denunciarComentario(comentario.id_comentario)}
+                                    >
+                                        Denunciar
+                                    </Button>
+                                ]}
             >
-                <List.Item.Meta
-                    title={<Text strong>{comentario.autor?.nome || comentario.id_utilizador}</Text>}
-                    description={new Date(comentario.data_criacao).toLocaleString()}
+            <List.Item.Meta
+                title={<Text strong>{comentario.autor?.nome || comentario.id_utilizador}</Text>}
+                description={new Date(comentario.data_criacao).toLocaleString()}
+            />
+            <Paragraph>{comentario.conteudo}</Paragraph>
+            {comentario.imagem_url && (
+                <img
+                    src={comentario.imagem_url}
+                    alt="Comentário Anexo"
+                    style={{ maxWidth: '200px', maxHeight: '120px' }}
                 />
-                <Paragraph>{comentario.conteudo}</Paragraph>
-                {comentario.imagem_url && (
-                    <img
-                        src={comentario.imagem_url}
-                        alt="Comentário Anexo"
-                        style={{ maxWidth: '200px', maxHeight: '120px' }}
-                    />
-                )}
-            </List.Item>
-        )}
-    />
+            )}
+        </List.Item>
+    )}
+/>
 
                     </Card>
                 </Col>
