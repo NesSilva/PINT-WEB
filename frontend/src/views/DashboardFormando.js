@@ -1,29 +1,142 @@
-import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import SidebarFormando from "../components/SidebarFormando";
-import { Bar } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-} from "chart.js";
+import React, { useEffect, useState } from 'react';
+import { useLocation, Link } from 'react-router-dom';
+import SidebarFormando from '../components/SidebarFormando';
+import { Card, Row, Col, Container, Badge } from 'react-bootstrap';
+import { FaBookOpen, FaClock, FaCheckCircle, FaStar, FaSearch } from 'react-icons/fa';
+import axios from 'axios';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+// Função para transformar URL do Firebase em URL de download direto
+const transformFirebaseUrl = (url) => {
+  if (!url) return null;
+  if (url.includes('firebasestorage.googleapis.com/v0/b/') || !url.includes('storage.googleapis.com')) {
+    return url;
+  }
+
+  const matches = url.match(/https:\/\/storage\.googleapis\.com\/([^\/]+)\/(.+)/);
+  if (matches) {
+    const bucketName = matches[1];
+    const filePath = matches[2];
+    return `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodeURIComponent(filePath)}?alt=media`;
+  }
+
+  return url;
+};
+
+// Componente para o cartão do curso
+const CourseCard = ({ curso, areas, categorias }) => {
+  const imagemCurso = transformFirebaseUrl(curso.imagem_capa);
+  const areaCurso = areas.find(a => a.id_area === curso.id_area)?.nome || 'N/A';
+  const categoriaCurso = categorias.find(c => c.id_categoria === curso.id_categoria)?.nome || 'N/A';
+  const dataInicio = new Date(curso.data_inicio).toLocaleDateString('pt-PT');
+  const dataFim = new Date(curso.data_fim).toLocaleDateString('pt-PT');
+  const isSincrono = curso.tipo === 'sincrono';
+
+  return (
+    <Card className="h-100 shadow-sm">
+      <div className="position-relative">
+        <Card.Img 
+          variant="top" 
+          src={imagemCurso || 'https://via.placeholder.com/300x150?text=Sem+Imagem'} 
+          alt={`Capa do curso ${curso.titulo}`}
+          style={{ height: '150px', objectFit: 'cover' }}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = 'https://via.placeholder.com/300x150?text=Sem+Imagem';
+          }}
+        />
+        <div className="position-absolute top-0 end-0 m-2">
+          <span className={`badge ${isSincrono ? 'bg-primary' : 'bg-success'}`}>
+            {isSincrono ? 'Síncrono' : 'Assíncrono'}
+          </span>
+        </div>
+      </div>
+      <Card.Body className="d-flex flex-column">
+        <div className="mb-2">
+          <span className="badge bg-light text-dark me-2">{areaCurso}</span>
+          <span className="badge bg-light text-dark">{categoriaCurso}</span>
+        </div>
+        <Card.Title className="h5 mb-3">
+          <Link to={`/curso/${curso.id_curso}`} className="text-decoration-none text-dark">
+            {curso.titulo}
+          </Link>
+        </Card.Title>
+        <Card.Text className="text-muted small mb-3 flex-grow-1">
+          {curso.descricao?.substring(0, 100)}{curso.descricao?.length > 100 ? '...' : ''}
+        </Card.Text>
+        <div className="d-flex justify-content-between align-items-center mt-auto">
+          <div className="d-flex align-items-center text-muted small">
+            <FaClock className="me-1" />
+            <span>{curso.duracao || 'N/A'}</span>
+          </div>
+          <Badge bg="light" text="dark" className="border">
+            {curso.nivel || 'Todos os níveis'}
+          </Badge>
+        </div>
+      </Card.Body>
+      <Card.Footer className="bg-white border-top-0">
+        <div className="d-flex justify-content-between align-items-center">
+          <div>
+            <small className="text-muted">Início: {dataInicio}</small>
+          </div>
+          <Link to={`/curso/${curso.id_curso}`} className="btn btn-sm btn-primary">
+            Ver detalhes
+          </Link>
+        </div>
+      </Card.Footer>
+    </Card>
+  );
+};
+
+// Componente para descrição expandível com "Mostrar mais / Mostrar menos"
+const DescricaoExpandivel = ({ texto, limite = 100 }) => {
+  const [expandido, setExpandido] = useState(false);
+
+  if (!texto) return <span>Sem descrição</span>;
+
+  const mostrarTexto = expandido ? texto : texto.slice(0, limite);
+
+  return (
+    <div style={{ maxWidth: '300px' }}>
+      <p style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
+        {mostrarTexto}
+        {!expandido && texto.length > limite ? '...' : ''}
+      </p>
+      {texto.length > limite && (
+        <button 
+          onClick={() => setExpandido(!expandido)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#0d6efd',
+            cursor: 'pointer',
+            padding: 0,
+            fontSize: '0.875rem',
+            fontWeight: '600',
+          }}
+          aria-expanded={expandido}
+        >
+          {expandido ? 'Mostrar menos' : 'Mostrar mais'}
+        </button>
+      )}
+    </div>
+  );
+};
 
 const DashboardFormando = () => {
   const location = useLocation();
   const { user } = location.state || {};
   const [cursosAgendados, setCursosAgendados] = useState([]);
-  const [conteudosPorCurso, setConteudosPorCurso] = useState({});
   const [loading, setLoading] = useState(true);
+  const [categorias, setCategorias] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [areaFiltro, setAreaFiltro] = useState('');
+  const [categoriaFiltro, setCategoriaFiltro] = useState('');
+  const [cursosFiltrados, setCursosFiltrados] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+<<<<<<< HEAD
         // Buscar cursos agendados
         const responseCursos = await fetch("https://backend-8pyn.onrender.com/api/cursos");
         const cursos = await responseCursos.json();
@@ -46,12 +159,22 @@ const DashboardFormando = () => {
           acc[cursoId] = conteudos;
           return acc;
         }, {});
+=======
+        const [categoriasRes, areasRes, cursosRes] = await Promise.all([
+          axios.get('http://localhost:3000/api/categorias'),
+          axios.get('http://localhost:3000/api/areas-formacao'),
+          fetch('http://localhost:3000/api/cursos').then(res => res.json())
+        ]);
+>>>>>>> beselga
 
+        setCategorias(categoriasRes.data.categorias || []);
+        setAreas(areasRes.data.areas || []);
+        
+        const agendados = (cursosRes.data || []).filter(curso => curso.estado === 'agendado');
         setCursosAgendados(agendados);
-        setConteudosPorCurso(conteudosMap);
         setLoading(false);
       } catch (error) {
-        console.error("Erro ao buscar dados:", error);
+        console.error('Erro ao buscar dados:', error);
         setLoading(false);
       }
     };
@@ -59,192 +182,130 @@ const DashboardFormando = () => {
     fetchData();
   }, []);
 
-  // ALTERAÇÃO PRINCIPAL 1: Função para encontrar a primeira imagem nos conteúdos de um curso
-  const getPrimeiraImagem = (cursoId) => {
-    const conteudos = conteudosPorCurso[cursoId] || [];
-    console.log('Conteúdos para curso', cursoId, conteudos); // Debug
-    
-    const conteudoComImagem = conteudos.find(conteudo => {
-      if (!conteudo.url) return false;
-      
-      // Verifica se é uma URL do Firebase Storage (qualquer arquivo)
-      if (conteudo.url.includes('storage.googleapis.com')) {
-        return true;
-      }
-      
-      // Para outros casos, verifica extensão de imagem
-      return /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(conteudo.url);
-    });
-    
-    console.log('Imagem encontrada:', conteudoComImagem?.url); // Debug
-    return conteudoComImagem ? conteudoComImagem.url : null;
-  };
+  // Using the transformFirebaseUrl function defined at the top of the file
 
-  // Função para transformar URL do Firebase em URL de download direto
-  const transformFirebaseUrl = (url) => {
-    if (!url) return null;
+  useEffect(() => {
+    let filtrados = [...cursosAgendados];
     
-    // Se já é uma URL de download direto, retorna como está
-    if (url.includes('firebasestorage.googleapis.com/v0/b/')) {
-      return url;
+    if (areaFiltro) {
+      filtrados = filtrados.filter(curso => curso.id_area === areaFiltro);
     }
     
-    // Transforma URL de visualização em URL de download
-    const matches = url.match(/https:\/\/storage\.googleapis\.com\/([^\/]+)\/(.+)/);
-    if (matches) {
-      return `https://firebasestorage.googleapis.com/v0/b/${matches[1]}/o/${encodeURIComponent(matches[2])}?alt=media`;
+    if (categoriaFiltro) {
+      filtrados = filtrados.filter(curso => curso.id_categoria === categoriaFiltro);
     }
     
-    return url;
-  };
+    setCursosFiltrados(filtrados);
+  }, [cursosAgendados, areaFiltro, categoriaFiltro]);
 
-  if (!user) return <p>Utilizador não autenticado.</p>;
+  if (!user) {
+    return (
+      <div className="container mt-4">
+        <div className="alert alert-danger">Utilizador não autenticado.</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="d-flex" style={{ minHeight: '100vh' }}>
-      <SidebarFormando />
-
-      <div className="container-fluid mt-4" style={{ marginLeft: '200px' }}>
-        <h2>Olá {user.nome} 👋</h2>
-        <p className="text-muted">Bem-vindo ao seu painel de formando</p>
-        <hr />
-        
-        <div className="row mb-4">
-          <div className="col-md-12">
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">Cursos Agendados</h5>
-                {loading ? (
-                  <p>Carregando cursos...</p>
-                ) : cursosAgendados.length > 0 ? (
-                  <div className="table-responsive">
-                    <table className="table table-hover">
-                      <thead>
-                        <tr>
-                          <th>Imagem</th>
-                          <th>Título</th>
-                          <th>Descrição</th>
-                          <th>Data de Início</th>
-                          <th>Data de Fim</th>
-                          <th>Tipo</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {cursosAgendados.map((curso) => {
-                          const imagemUrl = getPrimeiraImagem(curso.id_curso);
-                          const imagemCurso = transformFirebaseUrl(imagemUrl);
-                          
-                          return (
-                            <tr key={curso.id_curso}>
-                              {/* ALTERAÇÃO PRINCIPAL 2: Renderização da imagem com fallback */}
-                              <td>
-                                {imagemCurso ? (
-                                  <img 
-                                    src={imagemCurso} 
-                                    alt={`Imagem do curso ${curso.titulo}`} 
-                                    style={{ 
-                                      width: '50px', 
-                                      height: '50px', 
-                                      objectFit: 'cover',
-                                      backgroundColor: '#f5f5f5' 
-                                    }}
-                                    onError={(e) => {
-                                      e.target.onerror = null; 
-                                      e.target.src = 'https://via.placeholder.com/50?text=Sem+Imagem';
-                                    }}
-                                  />
-                                ) : (
-                                  <span className="text-muted">Sem imagem</span>
-                                )}
-                              </td>
-                              <td>{curso.titulo}</td>
-                              <td>{curso.descricao}</td>
-                              <td>{new Date(curso.data_inicio).toLocaleDateString('pt-PT')}</td>
-                              <td>{new Date(curso.data_fim).toLocaleDateString('pt-PT')}</td>
-                              <td>
-                                <span className={`badge ${curso.tipo === 'sincrono' ? 'bg-primary' : 'bg-success'}`}>
-                                  {curso.tipo === 'sincrono' ? 'Síncrono' : 'Assíncrono'}
-                                </span>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p>Não existem cursos agendados no momento.</p>
-                )}
+    <div className="container-fluid">
+      <div className="row">
+        <SidebarFormando />
+        <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h1 className="h3 mb-0">Bem-vindo de volta, {user?.nome || 'Utilizador'}</h1>
+            <div className="d-flex">
+              <div className="input-group" style={{ width: '300px' }}>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  placeholder="Pesquisar cursos..." 
+                />
+                <button className="btn btn-primary" type="button">
+                  <FaSearch />
+                </button>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Restante do código do gráfico permanece igual */}
-        <div className="row">
-          <div className="col-md-12">
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">Próximos Cursos</h5>
-                {loading ? (
-                  <p>Carregando...</p>
-                ) : (
-                  <div style={{ height: '400px' }}>
-                    {cursosAgendados.length > 0 ? (
-                      <Bar 
-                        data={{
-                          labels: cursosAgendados.map(curso => curso.titulo),
-                          datasets: [{
-                            label: 'Dias até início',
-                            data: cursosAgendados.map(curso => {
-                              const hoje = new Date();
-                              const dataInicio = new Date(curso.data_inicio);
-                              const diffTime = dataInicio - hoje;
-                              return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                            }),
-                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 1
-                          }]
-                        }}
-                        options={{
-                          responsive: true,
-                          plugins: {
-                            legend: {
-                              position: 'top',
-                            },
-                            title: {
-                              display: true,
-                              text: 'Dias até o início dos cursos'
-                            },
-                            tooltip: {
-                              callbacks: {
-                                label: function(context) {
-                                  return `${context.raw} dias`;
-                                }
-                              }
-                            }
-                          },
-                          scales: {
-                            y: {
-                              beginAtZero: true,
-                              title: {
-                                display: true,
-                                text: 'Dias'
-                              }
-                            }
-                          }
-                        }}
-                      />
-                    ) : (
-                      <p className="text-center py-5">Nenhum curso agendado para exibir</p>
-                    )}
-                  </div>
-                )}
-              </div>
+          {/* Filtros */}
+          <div className="row mb-4">
+            <div className="col-md-4">
+              <select
+                className="form-select"
+                value={areaFiltro}
+                onChange={e => setAreaFiltro(e.target.value)}
+              >
+                <option value="">Todas as áreas</option>
+                {areas.map(area => (
+                  <option key={area.id_area} value={area.id_area}>
+                    {area.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-4">
+              <select
+                className="form-select"
+                value={categoriaFiltro}
+                onChange={e => setCategoriaFiltro(e.target.value)}
+              >
+                <option value="">Todas as categorias</option>
+                {categorias.map(cat => (
+                  <option key={cat.id_categoria} value={cat.id_categoria}>
+                    {cat.nome}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
-        </div>
+
+          {/* Cursos em Destaque */}
+          <div className="mb-5">
+            <h2 className="h4 mb-4">Cursos em Destaque</h2>
+            <Row xs={1} md={2} lg={3} className="g-4">
+              {cursosFiltrados.slice(0, 3).map(curso => (
+                <Col key={curso.id_curso}>
+                  <CourseCard curso={curso} areas={areas} categorias={categorias} />
+                </Col>
+              ))}
+            </Row>
+          </div>
+
+          {/* Todos os Cursos */}
+          <div>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="h4 mb-0">Todos os Cursos</h2>
+              <div className="text-muted">
+                {cursosFiltrados.length} cursos encontrados
+              </div>
+            </div>
+            
+            {loading ? (
+              <div className="text-center py-5">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Carregando...</span>
+                </div>
+                <p className="mt-2">A carregar cursos...</p>
+              </div>
+            ) : cursosFiltrados.length > 0 ? (
+              <Row xs={1} md={2} lg={3} className="g-4">
+                {cursosFiltrados.map(curso => (
+                  <Col key={curso.id_curso}>
+                    <CourseCard curso={curso} areas={areas} categorias={categorias} />
+                  </Col>
+                ))}
+              </Row>
+            ) : (
+              <div className="text-center py-5">
+                <div className="mb-3">
+                  <FaBookOpen size={48} className="text-muted" />
+                </div>
+                <h3 className="h5">Nenhum curso encontrado</h3>
+                <p className="text-muted">Tente ajustar os filtros de pesquisa</p>
+              </div>
+            )}
+          </div>
+        </main>
       </div>
     </div>
   );

@@ -23,4 +23,12 @@ router.post('/adicionar', (req, res, next) => {
   }
 });
 
+router.get('/curso/:id_curso', async (req, res) => {
+  try {
+    const conteudos = await ConteudoCurso.findAll({ where: { id_curso: req.params.id_curso } });
+    res.json(conteudos);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
   module.exports = router;

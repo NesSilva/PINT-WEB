@@ -39,7 +39,11 @@ const ListarCursos = () => {
 useEffect(() => {
   const fetchDados = async () => {
     try {
+<<<<<<< HEAD
       const cursosRes = await axios.get("https://backend-8pyn.onrender.com/api/cursos");
+=======
+      const cursosRes = await axios.get("http://localhost:3000/api/cursos/todos");
+>>>>>>> beselga
       setCursos(cursosRes.data);
       
       const categoriasRes = await axios.get('https://backend-8pyn.onrender.com/api/categorias');
@@ -65,7 +69,11 @@ useEffect(() => {
 
   const fetchCursos = async () => {
     try {
+<<<<<<< HEAD
       const response = await axios.get("https://backend-8pyn.onrender.com/api/cursos");
+=======
+      const response = await axios.get("http://localhost:3000/api/cursos/todos");
+>>>>>>> beselga
       setCursos(response.data);
     } catch (error) {
       console.error("Erro ao buscar cursos:", error);
