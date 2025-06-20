@@ -81,6 +81,10 @@ app.use("/api/inscricoes", inscricaoRoutes);
 const notificacaoRoutes = require("./routes/noticacoesRoute");
 app.use("/api/notificacoes", notificacaoRoutes);
 
+const progressoRoutes = require("./routes/progressos");
+app.use("/api/progressos/", progressoRoutes);
+
+
 
 app.get("/", (req, res) => {
     res.send("Bem-vindo à API de Filmes");

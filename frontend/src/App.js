@@ -44,6 +44,7 @@
           <Route path="/forum/nova-publicacao" element={<NovaPublicacao />} />
           <Route path="/curso/:id_curso" element={<DetalhesCurso />} />
           <Route path="/inscricoes" element={<Inscricoes />} /> // adiciona no Routes
+          
 
 
         </Routes>
