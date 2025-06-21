@@ -90,6 +90,9 @@ app.get("/", (req, res) => {
     res.send("Bem-vindo à API de Filmes");
 });
 
+const certificadosRouter = require("./routes/Certificado");
+app.use("/api/certificados", certificadosRouter);
+
 // Sequelize sync
 sequelize.sync({
     force: false,

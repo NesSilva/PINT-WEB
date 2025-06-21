@@ -24,6 +24,10 @@ const ProgressoCurso = sequelize.define("ProgressoCurso", {
             key: "id_curso" 
         } 
     },
+    horas_curso: { 
+        type: DataTypes.INTEGER, 
+        defaultValue: 0, 
+        validate: { min: 0 } },
     percentual_completo: { 
         type: DataTypes.DECIMAL(5,2), 
         defaultValue: 0, 
@@ -32,7 +36,7 @@ const ProgressoCurso = sequelize.define("ProgressoCurso", {
         type: DataTypes.DECIMAL(5,2), 
         defaultValue: 0, 
         validate: { min: 0, max: 100 } },
-        
+
     ultima_atualizacao: { 
         type: DataTypes.DATE, 
     }

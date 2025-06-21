@@ -62,6 +62,32 @@ const MeusCursos = () => {
     return n.toFixed(2);
   };
 
+  // Função para gerar certificado e fazer download do PDF
+  const gerarCertificado = async (id_curso) => {
+    const userId = user?.id_utilizador || localStorage.getItem("usuarioId");
+
+    try {
+      // Inserir certificado na base de dados
+      const res = await axios.post("http://localhost:3000/api/certificados", {
+        id_utilizador: userId,
+        id_curso,
+      });
+
+      if (res.data.success) {
+        alert("Certificado gerado com sucesso!");
+        // Fazer download do PDF do certificado
+        const url = `http://localhost:3000/api/certificados/pdf?user=${userId}&curso=${id_curso}`;
+        window.open(url, "_blank");
+      }
+    } catch (error) {
+      if (error.response?.status === 409) {
+        alert("Você já tem um certificado para este curso.");
+      } else {
+        alert("Erro ao gerar certificado.");
+      }
+    }
+  };
+
   if (loading) return <div>Carregando cursos...</div>;
 
   return (
@@ -95,16 +121,35 @@ const MeusCursos = () => {
                   <p style={{ margin: "0.25rem 0", color: "#7f8c8d" }}>
                     <strong>Data de Inscrição:</strong> {new Date(inscricao.data_inscricao).toLocaleDateString()}
                   </p>
+                  <p style={{ margin: "0.25rem 0", color: "#7f8c8d" }}>
+                    <strong>Horas de trabalho:</strong> {inscricao.horas_curso}
+                  </p>
                   {nota !== null && (
-                    <p
-                      style={{
-                        margin: "0.5rem 0 0 0",
-                        fontWeight: "600",
-                        color: Number(nota) >= 70 ? "#27ae60" : "#c0392b",
-                      }}
-                    >
-                      Nota do Curso: {formatNota(nota)}%
-                    </p>
+                    <>
+                      <p
+                        style={{
+                          margin: "0.5rem 0 0 0",
+                          fontWeight: "600",
+                          color: Number(nota) >= 70 ? "#27ae60" : "#c0392b",
+                        }}
+                      >
+                        Nota do Curso: {formatNota(nota)}%
+                      </p>
+                      <button
+                        style={{
+                          marginTop: "1rem",
+                          padding: "0.5rem 1rem",
+                          borderRadius: "4px",
+                          border: "none",
+                          backgroundColor: "#2980b9",
+                          color: "white",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => gerarCertificado(inscricao.id_curso)}
+                      >
+                        Gerar Certificado
+                      </button>
+                    </>
                   )}
                 </div>
               );
