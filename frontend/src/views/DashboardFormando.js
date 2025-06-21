@@ -134,39 +134,13 @@ const DashboardFormando = () => {
   const [cursosFiltrados, setCursosFiltrados] = useState([]);
 
   useEffect(() => {
-<<<<<<< HEAD
     const fetchData = async () => {
       try {
-<<<<<<< HEAD
-        // Buscar cursos agendados
-        const responseCursos = await fetch("https://backend-8pyn.onrender.com/api/cursos");
-        const cursos = await responseCursos.json();
-        const agendados = cursos.filter(curso => curso.estado === "agendado");
-
-        // Buscar conteúdos para cada curso
-        const conteudosPromises = agendados.map(async (curso) => {
-          try {
-            const response = await fetch(`https://backend-8pyn.onrender.com/api/cursos/${curso.id_curso}/conteudos`);
-            const conteudos = await response.json();
-            return { cursoId: curso.id_curso, conteudos };
-          } catch (error) {
-            console.error(`Erro ao buscar conteúdos para curso ${curso.id_curso}:`, error);
-            return { cursoId: curso.id_curso, conteudos: [] };
-          }
-        });
-
-        const conteudosResults = await Promise.all(conteudosPromises);
-        const conteudosMap = conteudosResults.reduce((acc, { cursoId, conteudos }) => {
-          acc[cursoId] = conteudos;
-          return acc;
-        }, {});
-=======
         const [categoriasRes, areasRes, cursosRes] = await Promise.all([
           axios.get('http://localhost:3000/api/categorias'),
           axios.get('http://localhost:3000/api/areas-formacao'),
           fetch('http://localhost:3000/api/cursos').then(res => res.json())
         ]);
->>>>>>> beselga
 
         setCategorias(categoriasRes.data.categorias || []);
         setAreas(areasRes.data.areas || []);
@@ -179,49 +153,9 @@ const DashboardFormando = () => {
         setLoading(false);
       }
     };
-=======
-  const fetchData = async () => {
-    try {
-      const categoriasRes = await axios.get('http://localhost:3000/api/categorias');
-      setCategorias(categoriasRes.data.categorias || []);
 
-      const areasRes = await axios.get('http://localhost:3000/api/areas-formacao');
-      setAreas(areasRes.data.areas || []);
-
-      const response = await fetch("http://localhost:3000/api/cursos");
-      const result = await response.json();
-
-      const cursos = result.data;
-
-      const cursosAtualizados = cursos.map(curso => {
-        const hoje = new Date();
-        const dataInicio = new Date(curso.data_inicio);
-        const dataFim = new Date(curso.data_fim);
-
-        let estadoAtualizado = curso.estado;
-
-        if (hoje > dataFim) {
-          estadoAtualizado = "terminado";
-        } else if (hoje >= dataInicio && hoje <= dataFim) {
-          estadoAtualizado = "em-curso";
-        }
-        // Caso contrário, mantém estado original
-
-        return { ...curso, estado: estadoAtualizado };
-      });
-
-      setCursosAgendados(cursosAtualizados);
-      setLoading(false);
-    } catch (error) {
-      console.error("Erro ao buscar dados:", error);
-      setLoading(false);
-    }
-  };
-
-  fetchData();
-}, []);
->>>>>>> ines
-
+    fetchData();
+  }, []);
 
   // Using the transformFirebaseUrl function defined at the top of the file
 
@@ -248,7 +182,6 @@ const DashboardFormando = () => {
   }
 
   return (
-<<<<<<< HEAD
     <div className="container-fluid">
       <div className="row">
         <SidebarFormando />
@@ -266,162 +199,6 @@ const DashboardFormando = () => {
                   <FaSearch />
                 </button>
               </div>
-=======
-  <div className="d-flex" style={{ minHeight: '100vh' }}>
-    <SidebarFormando />
-
-    <div className="container-fluid mt-4" style={{ marginLeft: '200px' }}>
-      <h2>Olá {user.nome} 👋</h2>
-      <p className="text-muted">Bem-vindo ao seu painel de formando</p>
-      <hr />
-
-      {/* Filtros */}
-      <div className="row mb-3">
-        <div className="col-md-3">
-          <label htmlFor="areaFiltro" className="form-label">Filtrar por Área</label>
-          <select
-            id="areaFiltro"
-            className="form-select"
-            value={areaFiltro}
-            onChange={e => setAreaFiltro(e.target.value)}
-          >
-            <option value="">Todas as áreas</option>
-            {areas.map(area => (
-  <option key={area.id_area} value={area.id_area}>
-    {area.nome}
-  </option>
-))}
-
-          </select>
-        </div>
-
-        <div className="col-md-3">
-          <label htmlFor="categoriaFiltro" className="form-label">Filtrar por Categoria</label>
-          <select
-            id="categoriaFiltro"
-            className="form-select"
-            value={categoriaFiltro}
-            onChange={e => setCategoriaFiltro(e.target.value)}
-          >
-            <option value="">Todas as categorias</option>
-            {categorias.map(cat => (
-  <option key={cat.id_categoria} value={cat.id_categoria}>
-    {cat.nome}
-  </option>
-))}
-
-          </select>
-        </div>
-      </div>
-
-      {/* Cursos Agendados */}
-      <div className="row mb-4">
-        <div className="col-md-12">
-          <div className="card">
-            <div className="card-body">
-              <h5 className="card-title">Cursos Agendados</h5>
-              {loading ? (
-                <div className="text-center py-4">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Carregando...</span>
-                  </div>
-                  <p className="mt-2">Carregando cursos...</p>
-                </div>
-              ) : cursosFiltrados.length > 0 ? (
-                <div className="table-responsive">
-                  <table className="table table-hover align-middle">
-                    <thead>
-                      <tr>
-                        <th style={{ width: '80px' }}>Imagem</th>
-                        <th>Título</th>
-                        <th>Descrição</th>
-                        <th>Categoria</th>
-                        <th>ID Categoria</th>
-                        <th>ID Área</th>
-                        <th>Data de Início</th>
-                        <th>Data de Fim</th>
-                        <th>Tipo</th>
-                            <th>Estado</th>
-
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {cursosFiltrados.map((curso) => {
-                        const imagemCurso = transformFirebaseUrl(curso.imagem_capa);
-
-                        return (
-                          <tr key={curso.id_curso}>
-                            <td>
-                              {imagemCurso ? (
-                                <div className="d-flex justify-content-center">
-                                  <img
-                                    src={imagemCurso}
-                                    alt={`Capa do curso ${curso.titulo}`}
-                                    className="img-thumbnail"
-                                    style={{
-                                      width: '60px',
-                                      height: '60px',
-                                      objectFit: 'cover',
-                                      backgroundColor: '#f8f9fa'
-                                    }}
-                                    onError={(e) => {
-                                      e.target.onerror = null;
-                                      e.target.src = 'https://via.placeholder.com/60?text=Sem+Imagem';
-                                      e.target.style.objectFit = 'contain';
-                                    }}
-                                  />
-                                </div>
-                              ) : (
-                                <div
-                                  className="d-flex align-items-center justify-content-center"
-                                  style={{
-                                    width: '60px',
-                                    height: '60px',
-                                    backgroundColor: '#f8f9fa',
-                                    border: '1px solid #dee2e6'
-                                  }}
-                                >
-                                  <FontAwesomeIcon icon={faImage} className="text-muted" />
-                                </div>
-                              )}
-                            </td>
-                            <td className="fw-semibold">
-                              <Link to={`/curso/${curso.id_curso}`}>
-                                {curso.titulo}
-                              </Link>
-                            </td>
-                            <td>
-                              <DescricaoExpandivel texto={curso.descricao} limite={100} />
-                            </td>
-                            <td>
-                              <DescricaoExpandivel texto={curso.categoria} limite={100} />
-                            </td>
-                            <td>{categorias.find(c => c.id_categoria === curso.id_categoria)?.nome || 'Categoria não encontrada'}</td>
-                            <td>{areas.find(a => a.id_area === curso.id_area)?.nome || 'Área não encontrada'}</td>
-
-                            <td>{new Date(curso.data_inicio).toLocaleDateString('pt-PT')}</td>
-                            <td>{new Date(curso.data_fim).toLocaleDateString('pt-PT')}</td>
-                            <td>
-                              <span className={`badge ${curso.tipo === 'sincrono' ? 'bg-primary' : 'bg-success'}`}>
-                                {curso.tipo === 'sincrono' ? 'Síncrono' : 'Assíncrono'}
-                              </span>
-                            </td>
-                            <tr key={curso.id_curso}>
-      {/* outras colunas */}
-      <td>{curso.estado}</td>
-    </tr>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="text-center py-5">
-                  <p className="text-muted">Não existem cursos que correspondam aos filtros.</p>
-                </div>
-              )}
->>>>>>> ines
             </div>
           </div>
 
