@@ -15,6 +15,8 @@ import DashboardFormando from "./views/DashboardFormando";
 import ForumPublicacoes from "./views/ForumPublicacoes";
 import PublicacaoDetalhes from "./views/PublicacaoDetalhes";
 import NovaPublicacao from "./views/NovaPublicacao";
+import DashboardFormador from "./views/DashboardFormador";
+import FormadorCursos from "./views/FormadorCursos";
 import './App.css';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -39,6 +41,8 @@ function App() {
         <Route path="/forum" element={<ForumPublicacoes />} />
         <Route path="/forum/publicacao/:id_publicacao" element={<PublicacaoDetalhes />} />
         <Route path="/forum/nova-publicacao" element={<NovaPublicacao />} />
+        <Route path="/dashboard/formador" element={<DashboardFormador />} />
+        <Route path="/formador/cursos" element={<FormadorCursos />} />
       </Routes>
     </Router>
   );
