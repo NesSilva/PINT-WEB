@@ -65,8 +65,8 @@ useEffect(() => {
 
   const fetchCursos = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/cursos/todos");
-      setCursos(response.data);
+      const { data } = await axios.get("http://localhost:3000/api/cursos/todos");
+      setCursos(data);
     } catch (error) {
       console.error("Erro ao buscar cursos:", error);
     }
@@ -193,7 +193,7 @@ useEffect(() => {
       vagas: cursoParaEditar.id_formador ? Number(cursoParaEditar.vagas) : null
     };
 
-    const response = await axios.put(
+    await axios.put(
       `http://localhost:3000/api/cursos/editar/${cursoParaEditar.id_curso}`,
       dadosAtualizados
     );

@@ -1,5 +1,5 @@
 // views/Inscricoes.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
 
@@ -49,24 +49,23 @@ const Inscricoes = () => {
   }, []);
 
   // Funções para obter nome do utilizador e título do curso pelo id
-  const getNomeUtilizador = (id_utilizador) => {
+  const getNomeUtilizador = useCallback((id_utilizador) => {
     const user = utilizadores.find((u) => u.id_utilizador === id_utilizador);
     return user ? user.nome : "Desconhecido";
-  };
+  }, [utilizadores]);
 
-  const getTituloCurso = (id_curso) => {
+  const getTituloCurso = useCallback((id_curso) => {
     const curso = cursos.find((c) => c.id_curso === id_curso);
-    return curso ? curso.titulo : "Desconhecido";
-  };
+    return curso ? curso.titulo : "Curso desconhecido";
+  }, [cursos]);
 
   // Função para filtrar inscrições baseado no nome do utilizador e título do curso
   useEffect(() => {
-    const nomeFiltro = filtros.nome_utilizador.toLowerCase();
-    const tituloFiltro = filtros.titulo_curso.toLowerCase();
-
-    const filtradas = inscricoes.filter((inscricao) => {
+    const filtradas = inscricoes.filter(inscricao => {
       const nomeUser = getNomeUtilizador(inscricao.id_utilizador).toLowerCase();
       const tituloCurso = getTituloCurso(inscricao.id_curso).toLowerCase();
+      const nomeFiltro = filtros.nome_utilizador.toLowerCase();
+      const tituloFiltro = filtros.titulo_curso.toLowerCase();
 
       const matchUtilizador = nomeUser.includes(nomeFiltro);
       const matchCurso = tituloCurso.includes(tituloFiltro);
@@ -75,7 +74,7 @@ const Inscricoes = () => {
     });
 
     setInscricoesFiltradas(filtradas);
-  }, [filtros, inscricoes, utilizadores, cursos]);
+  }, [filtros, inscricoes, getNomeUtilizador, getTituloCurso]);
 
   return (
     <div style={{ display: "flex" }}>

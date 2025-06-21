@@ -222,11 +222,8 @@ const [showProgressoModal, setShowProgressoModal] = useState(false);
   }
 };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setUtilizadorAtual(null);
-    setPerfis([]);
-  };
+  // Modal is being handled by the Modal component's onHide prop
+  // No need for a separate handleCloseModal function
 
  const handlePedido = async (id, valor) => {
   try {
@@ -267,7 +264,7 @@ const aceitarPedido = async (idUtilizador, senha) => {
     });
 
     if (response.ok) {
-      const data = await response.json();
+      await response.json();
       alert("Pedido aceito com sucesso!");
       // Aqui você pode atualizar o estado para refletir a mudança
     } else {

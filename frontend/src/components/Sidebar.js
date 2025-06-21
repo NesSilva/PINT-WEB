@@ -19,13 +19,24 @@ const Sidebar = () => {
 
   return (
     <div className="bg-white text-black p-3" style={{ width: '220px', borderRight: '1px solid #ddd', minHeight: '100vh' }}>
-      <a href="#" onClick={handleLogoClick} style={{ display: 'block' }}>
+      <button 
+        onClick={handleLogoClick} 
+        style={{ 
+          background: 'none',
+          border: 'none',
+          padding: 0,
+          cursor: 'pointer',
+          display: 'block',
+          width: '100%',
+          textAlign: 'left'
+        }}
+      >
         <img 
           src="/logotipo-softinsa.png" 
           alt="Logotipo Softinsa" 
           style={{ width: "150px", height: "auto" }} 
         />
-      </a>
+      </button>
 
       <ul className="nav flex-column mt-4">
         <li className="nav-item mb-2">

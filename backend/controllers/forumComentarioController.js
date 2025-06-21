@@ -95,32 +95,25 @@ const removerComentario = async (req, res) => {
   }
 };
 
-// Curtir comentário
-const likeComentario = async (req, res) => {
+// Curtir/Descurtir comentário (toggle)
+const toggleLikeComentario = async (req, res) => {
   try {
     const { id_comentario } = req.params;
     const id_utilizador = req.body.id_utilizador;
-    // Impede likes duplicados
-    const [like, created] = await ForumComentarioLike.findOrCreate({
-      where: { id_comentario, id_utilizador }
-    });
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Erro ao curtir comentário" });
-  }
-};
 
-// Descurtir comentário
-const unlikeComentario = async (req, res) => {
-  try {
-    const { id_comentario } = req.params;
-    const id_utilizador = req.body.id_utilizador;
-    await ForumComentarioLike.destroy({
+    const likeExistente = await ForumComentarioLike.findOne({
       where: { id_comentario, id_utilizador }
     });
-    res.json({ success: true });
+
+    if (likeExistente) {
+      await likeExistente.destroy();
+      return res.json({ success: true, message: 'Like removido' });
+    } else {
+      await ForumComentarioLike.create({ id_comentario, id_utilizador });
+      return res.json({ success: true, message: 'Like adicionado' });
+    }
   } catch (error) {
-    res.status(500).json({ success: false, message: "Erro ao remover like" });
+    res.status(500).json({ success: false, message: "Erro ao alternar like", error: error.message });
   }
 };
 
@@ -143,7 +136,6 @@ module.exports = {
   denunciarComentario,
   editarComentario,
   removerComentario,
-  likeComentario,
-  unlikeComentario,
+  toggleLikeComentario,
   getLikesCount
 };

@@ -3,13 +3,18 @@ const router = express.Router();
 const cursoController = require('../controllers/cursoController');
 const upload = require('../firebase/upload'); // Adicione esta linha
 const Curso = require('../models/Curso');  // certifique-se que está importado
+const cursoControllerFormador = require('../controllers/cursoControllerFormador');
 
 
 // Criar curso
 router.post("/criar", cursoController.criarCurso);
-// Listar cursos
+
+// Listar todos os cursos (admin)
 router.get('/', cursoController.listarCursos);
 router.get('/todos', cursoController.listarTodosCursos);
+
+// Listar cursos do formador
+router.get('/formador/:id', cursoControllerFormador.listarCursosPorFormador);
 
 // Eliminar curso
 router.delete("/eliminar/:id_curso", cursoController.eliminarCurso);
@@ -17,8 +22,8 @@ router.delete("/eliminar/:id_curso", cursoController.eliminarCurso);
 // Editar curso
 router.put("/editar/:id_curso", cursoController.editarCurso);
 
-router.get('/categorias', cursoController.listarCategoriasParaCurso); // Nova rota
-
+// Categorias
+router.get('/categorias', cursoController.listarCategoriasParaCurso);
 
 router.get('/:id_curso', async (req, res) => {
   try {

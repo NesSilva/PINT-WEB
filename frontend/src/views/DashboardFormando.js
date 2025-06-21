@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import SidebarFormando from '../components/SidebarFormando';
-import { Card, Row, Col, Container, Badge } from 'react-bootstrap';
-import { FaBookOpen, FaClock, FaCheckCircle, FaStar, FaSearch } from 'react-icons/fa';
+import { Card, Row, Col, Badge } from 'react-bootstrap';
+import { FaBookOpen, FaClock, FaSearch } from 'react-icons/fa'; // Removed unused icons
 import axios from 'axios';
 
 // Função para transformar URL do Firebase em URL de download direto
@@ -84,41 +84,6 @@ const CourseCard = ({ curso, areas, categorias }) => {
         </div>
       </Card.Footer>
     </Card>
-  );
-};
-
-// Componente para descrição expandível com "Mostrar mais / Mostrar menos"
-const DescricaoExpandivel = ({ texto, limite = 100 }) => {
-  const [expandido, setExpandido] = useState(false);
-
-  if (!texto) return <span>Sem descrição</span>;
-
-  const mostrarTexto = expandido ? texto : texto.slice(0, limite);
-
-  return (
-    <div style={{ maxWidth: '300px' }}>
-      <p style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
-        {mostrarTexto}
-        {!expandido && texto.length > limite ? '...' : ''}
-      </p>
-      {texto.length > limite && (
-        <button 
-          onClick={() => setExpandido(!expandido)}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#0d6efd',
-            cursor: 'pointer',
-            padding: 0,
-            fontSize: '0.875rem',
-            fontWeight: '600',
-          }}
-          aria-expanded={expandido}
-        >
-          {expandido ? 'Mostrar menos' : 'Mostrar mais'}
-        </button>
-      )}
-    </div>
   );
 };
 
