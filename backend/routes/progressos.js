@@ -7,7 +7,6 @@ const ProgressoCurso = require("../models/ProcessoCurso");
 
 const Curso = require("../models/Curso");
 
-// routes/progressos.js
 router.get("/utilizador/:id", async (req, res) => {
   const { id } = req.params;
 

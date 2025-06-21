@@ -86,15 +86,16 @@ const [showProgressoModal, setShowProgressoModal] = useState(false);
     return curso ? curso.titulo : "Desconhecido";
   };
 
-   const getDataInicio = (id_curso) => {
-    const curso = cursos.find((c) => c.id_curso === id_curso);
-    return curso ? curso.data_fim : "Dia não definido";
-  };
+  const getDataInicio = (id_curso) => {
+  const curso = cursos.find((c) => c.id_curso === id_curso);
+  return curso ? curso.data_inicio : "Dia não definido";
+};
 
-  const getDataFim = (id_curso) => {
-    const curso = cursos.find((c) => c.id_curso === id_curso);
-    return curso ? curso.data_inicio : "Dia não definido";
-  };
+const getDataFim = (id_curso) => {
+  const curso = cursos.find((c) => c.id_curso === id_curso);
+  return curso ? curso.data_fim : "Dia não definido";
+};
+
   const handleDeleteClick = async (id_utilizador) => {
     const confirmDelete = window.confirm("Tem certeza que deseja eliminar este utilizador?");
     if (confirmDelete) {
@@ -584,7 +585,53 @@ const aceitarPedido = async (idUtilizador, senha) => {
             </thead>
             <tbody>
   {progressoCursos.length > 0 ? (
-    progressoCursos.map((item) => (
+  progressoCursos
+ .filter((item) => {
+  const dataInicioCurso = new Date(getDataInicio(item.id_curso));
+  const dataFimCurso = new Date(getDataFim(item.id_curso));
+
+  // Apenas dataInicio → cursos com data de início igual
+  if (dataInicio && !dataFim) {
+    const filtro = new Date(dataInicio);
+    return (
+      dataInicioCurso.getFullYear() === filtro.getFullYear() &&
+      dataInicioCurso.getMonth() === filtro.getMonth() &&
+      dataInicioCurso.getDate() === filtro.getDate()
+    );
+  }
+
+  // Apenas dataFim → cursos com data de fim igual
+  if (!dataInicio && dataFim) {
+    const filtro = new Date(dataFim);
+    return (
+      dataFimCurso.getFullYear() === filtro.getFullYear() &&
+      dataFimCurso.getMonth() === filtro.getMonth() &&
+      dataFimCurso.getDate() === filtro.getDate()
+    );
+  }
+
+  // Ambos definidos → cursos com dataInicio == dataInicio e dataFim == dataFim
+  if (dataInicio && dataFim) {
+    const inicioFiltro = new Date(dataInicio);
+    const fimFiltro = new Date(dataFim);
+
+    return (
+      dataInicioCurso.getFullYear() === inicioFiltro.getFullYear() &&
+      dataInicioCurso.getMonth() === inicioFiltro.getMonth() &&
+      dataInicioCurso.getDate() === inicioFiltro.getDate() &&
+      dataFimCurso.getFullYear() === fimFiltro.getFullYear() &&
+      dataFimCurso.getMonth() === fimFiltro.getMonth() &&
+      dataFimCurso.getDate() === fimFiltro.getDate()
+    );
+  }
+
+  // Nenhum filtro → mostrar todos
+  return true;
+})
+
+
+    .map((item) => (
+
       <tr key={item.id_progresso}>
         <td>{getTituloCurso(item.id_curso)}</td> {/* Corrigido para usar item.id_curso */}
         <td>{item.percentual_completo}%</td>
