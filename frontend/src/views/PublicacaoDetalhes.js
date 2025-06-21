@@ -1,27 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import {
-    Card,
-    List,
-    Space,
-    Typography,
-    Button,
-    Row,
-    Col,
-    Breadcrumb,
-    Divider,
-    Form,
-    Input,
-    message,
-    Rate,
-    Modal
-} from 'antd';
-import {
-    HomeOutlined,
-    FolderOutlined,
-    ExclamationCircleOutlined
-} from '@ant-design/icons';
+import { Card, List, Space, Typography, Button, Row, Col, Breadcrumb, Divider, Form, Input, message, Rate, Modal } from 'antd';
+import { HomeOutlined, FolderOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import Layout from "../components/Layout";
 
 const { Title, Text, Paragraph } = Typography;
@@ -41,7 +22,7 @@ const PublicacaoDetalhes = () => {
     // Modal denúncia
     const [denunciaModal, setDenunciaModal] = useState(false);
     const [motivoDenuncia, setMotivoDenuncia] = useState('');
-
+    axios.defaults.baseURL = "http://localhost:3000";
     useEffect(() => {
         const carregarTopico = async () => {
             try {
@@ -135,14 +116,16 @@ const PublicacaoDetalhes = () => {
     };
 
     const curtirComentario = async (id_comentario) => {
-    try {
-        await axios.post(`/api/forum/comentario/${id_comentario}/like`, { id_utilizador: usuarioId });
+        try {
+            await axios.post(`/api/forum/comentario/${id_comentario}/like`, {
+                id_utilizador: usuarioId
+            });
 
-        // Atualiza comentários para refletir novo número de likes:
-        const response = await axios.get(`/api/forum/comentario/${id_topico}`);
-        setComentarios(response.data.comentarios);
-    } catch {
-        message.error("Erro ao curtir comentário!");
+            // Recarrega os comentários após curtir/descurtir
+            const response = await axios.get(`/api/forum/comentario/${id_topico}`);
+            setComentarios(response.data.comentarios);
+        } catch {
+            message.error("Erro ao curtir/descurtir comentário!");
         }
     };
 
