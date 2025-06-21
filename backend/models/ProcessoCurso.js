@@ -28,6 +28,11 @@ const ProgressoCurso = sequelize.define("ProgressoCurso", {
         type: DataTypes.DECIMAL(5,2), 
         defaultValue: 0, 
         validate: { min: 0, max: 100 } },
+    nota_curso:{ 
+        type: DataTypes.DECIMAL(5,2), 
+        defaultValue: 0, 
+        validate: { min: 0, max: 100 } },
+        
     ultima_atualizacao: { 
         type: DataTypes.DATE, 
     }

@@ -63,9 +63,9 @@ const SidebarFormando = () => {
             )}
           </Link>
         </li>
-        <li className="nav-item">
-          <Link to="/meus-cursos" className="nav-link">Meus Cursos</Link>
-        </li>
+        <Link to="/meus-cursos" className="nav-link" state={{ user }}>
+          Meus Cursos
+        </Link>
         <li className="nav-item">
           <Link to="/certificados" className="nav-link">Certificados</Link>
         </li>

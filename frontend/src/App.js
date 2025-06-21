@@ -17,7 +17,7 @@
   import NovaPublicacao from "./views/NovaPublicacao";
   import DetalhesCurso from './views/DetalheCurso';
   import Inscricoes from './views/Inscricoes'
-
+  import MeusCursos from './views/MeusCursos';
   import './App.css';
   import 'bootstrap';
   import 'bootstrap/dist/css/bootstrap.min.css';
@@ -44,6 +44,8 @@
           <Route path="/forum/nova-publicacao" element={<NovaPublicacao />} />
           <Route path="/curso/:id_curso" element={<DetalhesCurso />} />
           <Route path="/inscricoes" element={<Inscricoes />} /> // adiciona no Routes
+          <Route path="/meus-cursos" element={<MeusCursos />} />
+
           
 
 
