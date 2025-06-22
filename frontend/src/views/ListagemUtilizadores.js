@@ -56,7 +56,7 @@ const [showProgressoModal, setShowProgressoModal] = useState(false);
 
     const fetchCursos = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/cursos/todos");
+      const res = await axios.get("https://backend-8pyn.onrender.com/api/cursos/todos");
       setCursos(res.data);
     } catch (err) {
       console.error("Erro ao buscar cursos:", err);
@@ -120,7 +120,7 @@ const [showProgressoModal, setShowProgressoModal] = useState(false);
       console.log("ID do utilizador:", id); // <-- ADICIONAR ISTO
 
   try {
-    let url = `http://localhost:3000/api/progressos/utilizador/${id}`;
+    let url = `https://backend-8pyn.onrender.com/api/progressos/utilizador/${id}`;
     const query = [];
 
     if (dataInicio) query.push(`dataInicio=${dataInicio}`);

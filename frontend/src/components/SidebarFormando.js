@@ -11,7 +11,7 @@ const SidebarFormando = () => {
 
   useEffect(() => {
     if (user?.id_utilizador) {
-      axios.get(`http://localhost:3000/api/notificacoes/${user.id_utilizador}`)
+      axios.get(`https://backend-8pyn.onrender.com/api/notificacoes/${user.id_utilizador}`)
         .then(res => {
           if (res.data.success) {
             setNotificacoes(res.data.notificacoes);

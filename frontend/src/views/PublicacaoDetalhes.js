@@ -22,7 +22,7 @@ const PublicacaoDetalhes = () => {
     // Modal denúncia
     const [denunciaModal, setDenunciaModal] = useState(false);
     const [motivoDenuncia, setMotivoDenuncia] = useState('');
-    axios.defaults.baseURL = "http://localhost:3000";
+    axios.defaults.baseURL = "https://backend-8pyn.onrender.com";
     useEffect(() => {
         const carregarTopico = async () => {
             try {

@@ -13,7 +13,7 @@ const Inscricoes = () => {
   // Busca inscrições sem filtro (busca tudo)
   const fetchInscricoes = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/inscricoes");
+      const res = await axios.get("https://backend-8pyn.onrender.com/api/inscricoes");
       setInscricoes(res.data);
       setInscricoesFiltradas(res.data);
     } catch (err) {
@@ -24,7 +24,7 @@ const Inscricoes = () => {
   // Busca todos os utilizadores
   const fetchUtilizadores = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/utilizadores/utilizadores");
+      const res = await axios.get("https://backend-8pyn.onrender.com/api/utilizadores/utilizadores");
       setUtilizadores(res.data);
     } catch (err) {
       console.error("Erro ao buscar utilizadores:", err);
@@ -34,7 +34,7 @@ const Inscricoes = () => {
   // Busca todos os cursos
   const fetchCursos = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/cursos/todos");
+      const res = await axios.get("https://backend-8pyn.onrender.com/api/cursos/todos");
       setCursos(res.data);
     } catch (err) {
       console.error("Erro ao buscar cursos:", err);

@@ -29,16 +29,16 @@ const dataInscricao = curso ? calcularDataInscricao(curso.data_inicio) : null;
   useEffect(() => {
   const fetchData = async () => {
     try {
-      const cursoRes = await axios.get(`http://localhost:3000/api/cursos/${id_curso}`);
+      const cursoRes = await axios.get(`https://backend-8pyn.onrender.com/api/cursos/${id_curso}`);
       setCurso(cursoRes.data);
 
-      const conteudosRes = await axios.get(`http://localhost:3000/api/conteudo/curso/${id_curso}`);
+      const conteudosRes = await axios.get(`https://backend-8pyn.onrender.com/api/conteudo/curso/${id_curso}`);
       setConteudos(conteudosRes.data);
 
       // Verifica inscrição do usuário
       const userLocal = localStorage.getItem('usuarioId');
       if (userLocal) {
-        const inscricaoRes = await axios.get(`http://localhost:3000/api/inscricoes/usuario/${userLocal}/curso/${id_curso}`);
+        const inscricaoRes = await axios.get(`https://backend-8pyn.onrender.com/api/inscricoes/usuario/${userLocal}/curso/${id_curso}`);
         if (inscricaoRes.data && inscricaoRes.data.id_utilizador) {
   setInscricaoStatus("Já inscrito neste curso.");
 } else {
@@ -78,7 +78,7 @@ const dataInscricao = curso ? calcularDataInscricao(curso.data_inicio) : null;
       return;
     }
 
-    await axios.post("http://localhost:3000/api/inscricoes", {
+    await axios.post("https://backend-8pyn.onrender.com/api/inscricoes", {
       id_utilizador: userLocal,
       id_curso: curso.id_curso
     });

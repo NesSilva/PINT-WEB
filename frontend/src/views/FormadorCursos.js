@@ -20,9 +20,9 @@ const FormadorCursos = () => {
     }, [user]);
 
     const fetchCursosDoFormador = async (idFormador) => {
-    console.log("Buscando cursos do formador em:", `http://localhost:3000/api/cursos/formador/${idFormador}`);
+    console.log("Buscando cursos do formador em:", `https://backend-8pyn.onrender.com/api/cursos/formador/${idFormador}`);
     try {
-        const response = await axios.get(`http://localhost:3000/api/cursos/formador/${idFormador}`);
+        const response = await axios.get(`https://backend-8pyn.onrender.com/api/cursos/formador/${idFormador}`);
         setCursos(response.data || []);
     } catch (error) {
         setCursos([]);

@@ -102,9 +102,9 @@ const DashboardFormando = () => {
     const fetchData = async () => {
       try {
         const [categoriasRes, areasRes, cursosRes] = await Promise.all([
-          axios.get('http://localhost:3000/api/categorias'),
-          axios.get('http://localhost:3000/api/areas-formacao'),
-          fetch('http://localhost:3000/api/cursos').then(res => res.json())
+          axios.get('https://backend-8pyn.onrender.com/api/categorias'),
+          axios.get('https://backend-8pyn.onrender.com/api/areas-formacao'),
+          fetch('https://backend-8pyn.onrender.com/api/cursos').then(res => res.json())
         ]);
 
         setCategorias(categoriasRes.data.categorias || []);

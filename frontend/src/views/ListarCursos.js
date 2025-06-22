@@ -39,17 +39,17 @@ const ListarCursos = () => {
 useEffect(() => {
   const fetchDados = async () => {
     try {
-      const cursosRes = await axios.get("http://localhost:3000/api/cursos/todos");
+      const cursosRes = await axios.get("https://backend-8pyn.onrender.com/api/cursos/todos");
       setCursos(cursosRes.data);
       
-      const categoriasRes = await axios.get('http://localhost:3000/api/categorias');
+      const categoriasRes = await axios.get('https://backend-8pyn.onrender.com/api/categorias');
       setCategorias(categoriasRes.data.categorias || []);
       
-      const areasRes = await axios.get('http://localhost:3000/api/areas-formacao');
+      const areasRes = await axios.get('https://backend-8pyn.onrender.com/api/areas-formacao');
       setAreas(areasRes.data.areas || []);
       
       try {
-        const formadoresRes = await axios.get('http://localhost:3000/api/utilizadores/formadores');
+        const formadoresRes = await axios.get('https://backend-8pyn.onrender.com/api/utilizadores/formadores');
         setFormadores(formadoresRes.data.formadores || []);
       } catch (error) {
         console.error("Erro ao buscar formadores:", error);
@@ -65,7 +65,7 @@ useEffect(() => {
 
   const fetchCursos = async () => {
     try {
-      const { data } = await axios.get("http://localhost:3000/api/cursos/todos");
+      const { data } = await axios.get("https://backend-8pyn.onrender.com/api/cursos/todos");
       setCursos(data);
     } catch (error) {
       console.error("Erro ao buscar cursos:", error);
@@ -128,7 +128,7 @@ useEffect(() => {
     };
 
     // 2. Enviar dados do curso
-    const response = await axios.post("http://localhost:3000/api/cursos/criar", dadosCurso);
+    const response = await axios.post("https://backend-8pyn.onrender.com/api/cursos/criar", dadosCurso);
     const idCursoCriado = response.data.curso.id_curso;
 
     // 3. Se houver arquivo, enviar separadamente
@@ -139,7 +139,7 @@ useEffect(() => {
       formDataArquivo.append("tipo_conteudo", "material");
       formDataArquivo.append("descricao", "Material do curso");
 
-      await axios.post("http://localhost:3000/api/conteudo/adicionar", formDataArquivo, {
+      await axios.post("https://backend-8pyn.onrender.com/api/conteudo/adicionar", formDataArquivo, {
         headers: { "Content-Type": "multipart/form-data" }
       });
     }
@@ -194,7 +194,7 @@ useEffect(() => {
     };
 
     await axios.put(
-      `http://localhost:3000/api/cursos/editar/${cursoParaEditar.id_curso}`,
+      `https://backend-8pyn.onrender.com/api/cursos/editar/${cursoParaEditar.id_curso}`,
       dadosAtualizados
     );
 
@@ -206,7 +206,7 @@ useEffect(() => {
       formDataArquivo.append("tipo_conteudo", "material");
       formDataArquivo.append("descricao", "Material do curso");
 
-      await axios.post("http://localhost:3000/api/conteudo/adicionar", formDataArquivo, {
+      await axios.post("https://backend-8pyn.onrender.com/api/conteudo/adicionar", formDataArquivo, {
         headers: { "Content-Type": "multipart/form-data" }
       });
     }
@@ -228,7 +228,7 @@ useEffect(() => {
       return;
     }
     try {
-      await axios.delete(`http://localhost:3000/api/cursos/eliminar/${id}`);
+      await axios.delete(`https://backend-8pyn.onrender.com/api/cursos/eliminar/${id}`);
       setMessage("Curso eliminado com sucesso!");
       setMessageType("success");
       fetchCursos();
