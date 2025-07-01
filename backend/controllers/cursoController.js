@@ -2,6 +2,9 @@ const Curso = require("../models/Curso");
 const Utilizador = require("../models/Utilizador");
 const ConteudoCurso = require("../models/ConteudoCurso");
 
+const Inscricao = require("../models/Inscricoes");
+const Notificacao = require("../models/Notificacoes");
+
 // cursoController.js (criarCurso)
 const listarCategoriasParaCurso = async (req, res) => {
   try {
@@ -163,7 +166,6 @@ const editarCurso = async (req, res) => {
       return res.status(404).json({ message: "Curso não encontrado!" });
     }
 
-    // Verifica se já passou da data de início
     const hoje = new Date();
     const dataInicio = new Date(curso.data_inicio);
     if (hoje > dataInicio) {
@@ -182,7 +184,6 @@ const editarCurso = async (req, res) => {
       });
     }
 
-    // Validação das datas
     if (!req.body.data_inicio || isNaN(new Date(req.body.data_inicio).getTime())) {
       return res.status(400).json({ message: "Data de início inválida" });
     }
@@ -191,7 +192,6 @@ const editarCurso = async (req, res) => {
       return res.status(400).json({ message: "Data de fim inválida" });
     }
 
-    // Formata as datas corretamente
     const dataInicioFormatada = new Date(req.body.data_inicio).toISOString();
     const dataFimFormatada = new Date(req.body.data_fim).toISOString();
 
@@ -211,7 +211,24 @@ const editarCurso = async (req, res) => {
     // Atualiza o estado após edição
     await atualizarEstadoCurso(curso);
 
-    return res.status(200).json({ message: "Curso atualizado com sucesso!", curso });
+    // 🔔 Buscar inscritos e criar notificações
+    const inscritos = await Inscricao.findAll({
+      where: { id_curso }
+    });
+
+    const mensagem = `O curso "${curso.titulo}" que estás inscrito foi atualizado. Por favor verifica as alterações.`;
+
+    const notificacoes = inscritos.map(inscrito => ({
+      id_utilizador: inscrito.id_utilizador,
+      mensagem: mensagem,
+      data_criacao: new Date(),
+      tipo: "interna",
+      lida: false
+    }));
+
+    await Notificacao.bulkCreate(notificacoes);
+
+    return res.status(200).json({ message: "Curso atualizado com sucesso e notificações enviadas!", curso });
   } catch (error) {
     console.error("Erro ao atualizar curso:", error);
     return res.status(500).json({ message: "Erro ao atualizar curso." });
