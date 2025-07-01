@@ -285,4 +285,26 @@ const listarTodosCursos = async (req, res) => {
     res.status(500).json({ error: "Erro ao listar cursos" });
   }
 };
-module.exports = { criarCurso, listarCursos, eliminarCurso, editarCurso,listarCategoriasParaCurso, atualizarEstadoCurso, listarTodosCursos };
+
+const obterPrimeiraImagemCurso = async (req, res) => {
+  const { id_curso } = req.params;
+  try {
+    const primeiraImagem = await ConteudoCurso.findOne({
+      where: {
+        id_curso,
+        tipo_conteudo: 'imagem'
+      },
+      order: [['createdAt', 'ASC']] 
+    });
+
+    if (!primeiraImagem) {
+      return res.status(404).json({ message: "Nenhuma imagem encontrada para este curso." });
+    }
+
+    res.json(primeiraImagem);
+  } catch (error) {
+    console.error("Erro ao buscar imagem:", error);
+    res.status(500).json({ message: "Erro ao buscar imagem." });
+  }
+};
+module.exports = { criarCurso, listarCursos, eliminarCurso, editarCurso,listarCategoriasParaCurso, atualizarEstadoCurso, listarTodosCursos, obterPrimeiraImagemCurso };

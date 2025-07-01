@@ -3,6 +3,7 @@ const router = express.Router();
 const upload = require('../firebase/upload');
 const conteudoCursoController = require('../controllers/conteudoCursoController');
 const ConteudoCurso = require('../models/ConteudoCurso');
+const cursoController = require('../controllers/cursoController');
 
 // conteudoCursoRoutes.js
 router.post('/adicionar', (req, res, next) => {
@@ -31,4 +32,8 @@ router.get('/curso/:id_curso', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+router.get('/curso/:id_curso/imagem', conteudoCursoController.obterPrimeiraImagemCurso);
+
+
   module.exports = router;

@@ -31,15 +31,21 @@ const CourseCard = ({ curso, areas, categorias }) => {
   return (
     <Card className="h-100 shadow-sm">
       <div className="position-relative">
-        <img
-          src={imagemCurso}
-          alt={`Capa do curso ${curso.titulo}`}
-          style={{ height: '150px', width: '100%', objectFit: 'cover' }}
-          onError={(e) => {
-            e.target.onerror = null;
-            // e.target.src = 'https://via.placeholder.com/300x150?text=Sem+Imagem';
-          }}
-        />
+        {imagemCurso ? (
+          <img
+            src={imagemCurso}
+            alt={`Capa do curso ${curso.titulo}`}
+            style={{ height: '150px', width: '100%', objectFit: 'cover' }}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.style.display = 'none'; 
+            }}
+          />
+        ) : (
+          <div style={{ height: '150px', backgroundColor: '#f0f0f0' }}></div>
+        )}
+
+
         <div className="position-absolute top-0 end-0 m-2">
           <span className={`badge ${isSincrono ? 'bg-primary' : 'bg-success'}`}>
             {isSincrono ? 'Síncrono' : 'Assíncrono'}
@@ -74,7 +80,7 @@ const CourseCard = ({ curso, areas, categorias }) => {
           <div>
             <small className="text-muted">Início: {dataInicio}</small>
           </div>
-          <Link to={`/curso/${curso.id_curso}`} className="btn btn-sm btn-primary">
+          <Link to={`/cursod/${curso.id_curso}`} className="btn btn-sm btn-primary">
             Ver detalhes
           </Link>
         </div>
@@ -87,6 +93,7 @@ const DashboardFormando = () => {
   // Estado para user e perfil
   const [user, setUser] = useState(null);
   const [perfil, setPerfil] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Buscar user e perfil do localStorage quando componente monta
   useEffect(() => {
@@ -180,22 +187,26 @@ const DashboardFormando = () => {
     fetchData();
   }, []);
 
-  // Aplicar filtros
   useEffect(() => {
-    let filtrados = [...cursosAgendados];
+  let filtrados = [...cursosAgendados];
 
-    if (areaFiltro) {
-      filtrados = filtrados.filter(curso => curso.id_area === areaFiltro);
+  if (areaFiltro) {
+    filtrados = filtrados.filter(curso => curso.id_area.toString() === areaFiltro);
+  }
+
+  if (categoriaFiltro) {
+    filtrados = filtrados.filter(curso => curso.id_categoria.toString() === categoriaFiltro);
+  }
+
+  if (searchTerm.trim() !== '') {
+      const termoLower = searchTerm.toLowerCase();
+      filtrados = filtrados.filter(curso =>
+        curso.titulo.toLowerCase().includes(termoLower)
+      );
     }
+  setCursosFiltrados(filtrados);
+}, [cursosAgendados, areaFiltro, categoriaFiltro , searchTerm]);
 
-    if (categoriaFiltro) {
-      filtrados = filtrados.filter(curso => curso.id_categoria === categoriaFiltro);
-    }
-
-    setCursosFiltrados(filtrados);
-  }, [cursosAgendados, areaFiltro, categoriaFiltro]);
-
-  // Se não tiver user, mostra mensagem de erro
   if (!user) {
     return (
       <div className="container mt-4">
@@ -208,18 +219,20 @@ const DashboardFormando = () => {
     <div className="container-fluid">
       <div className="row">
         {/* Passa user e perfil para o Sidebar */}
-        <SidebarFormando/>
+        <SidebarFormando user={user} perfil={perfil} />
         <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h1 className="h3 mb-0">Bem-vindo de volta, {user.nome}</h1>
             <div className="d-flex">
               <div className="input-group" style={{ width: '300px' }}>
-                <input
+                 <input
                   type="text"
                   className="form-control"
                   placeholder="Pesquisar cursos..."
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
                 />
-                <button className="btn btn-primary" type="button">
+                 <button className="btn btn-primary" type="button">
                   <FaSearch />
                 </button>
               </div>

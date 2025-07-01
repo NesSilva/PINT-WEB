@@ -16,6 +16,8 @@
   import PublicacaoDetalhes from "./views/PublicacaoDetalhes";
   import NovaPublicacao from "./views/NovaPublicacao";
   import DetalhesCurso from './views/DetalheCurso';
+  import DetalhesCursoTodos from './views/CursosDestalhesdetodos';
+
   import Inscricoes from './views/Inscricoes'
   import MeusCursos from './views/MeusCursos';
   import './App.css';
@@ -43,6 +45,8 @@
           <Route path="/forum/publicacao/:id_publicacao" element={<PublicacaoDetalhes />} />
           <Route path="/forum/nova-publicacao" element={<NovaPublicacao />} />
           <Route path="/curso/:id_curso" element={<DetalhesCurso />} />
+          <Route path="/cursod/:id_curso" element={<DetalhesCursoTodos />} />
+
           <Route path="/inscricoes" element={<Inscricoes />} /> // adiciona no Routes
           <Route path="/meus-cursos" element={<MeusCursos />} />
 
