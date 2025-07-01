@@ -40,7 +40,7 @@ const [showProgressoModal, setShowProgressoModal] = useState(false);
   useEffect(() => {
     const fetchUtilizadores = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/utilizadores/utilizadores");
+        const response = await fetch("https://backend-8pyn.onrender.com/api/utilizadores/utilizadores");
         const data = await response.json();
         if (Array.isArray(data)) {
           setUtilizadores(data);
@@ -64,7 +64,7 @@ const [showProgressoModal, setShowProgressoModal] = useState(false);
   };
     const fetchPerfis = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/perfis");
+        const response = await fetch("https://backend-8pyn.onrender.com/api/perfis");
         const data = await response.json();
         if (Array.isArray(data)) {
           setPerfisDisponiveis(data);
@@ -100,7 +100,7 @@ const getDataFim = (id_curso) => {
     const confirmDelete = window.confirm("Tem certeza que deseja eliminar este utilizador?");
     if (confirmDelete) {
       try {
-        const response = await fetch(`http://localhost:3000/api/utilizadores/utilizadores/${id_utilizador}`, {
+        const response = await fetch(`https://backend-8pyn.onrender.com/api/utilizadores/utilizadores/${id_utilizador}`, {
           method: "DELETE",
         });
 
@@ -159,7 +159,7 @@ const getDataFim = (id_curso) => {
       corpo.senha = senha.trim();
     }
 
-    const response = await fetch(`http://localhost:3000/api/utilizadores/utilizadores/${utilizadorAtual.id_utilizador}`, {
+    const response = await fetch(`https://backend-8pyn.onrender.com/api/utilizadores/utilizadores/${utilizadorAtual.id_utilizador}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -189,7 +189,7 @@ const getDataFim = (id_curso) => {
   e.preventDefault();
 
   try {
-    const response = await fetch("http://localhost:3000/api/utilizadores/utilizadores", {
+    const response = await fetch("https://backend-8pyn.onrender.com/api/utilizadores/utilizadores", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -208,7 +208,7 @@ const getDataFim = (id_curso) => {
     if (response.ok) {
       setShowCreateModal(false);
       setNovoUtilizador({ nome: "", email: "", morada: "", senha: "", perfis: [] });
-      const refreshResponse = await fetch("http://localhost:3000/api/utilizadores/utilizadores");
+      const refreshResponse = await fetch("https://backend-8pyn.onrender.com/api/utilizadores/utilizadores");
       const refreshData = await refreshResponse.json();
       if (Array.isArray(refreshData)) {
         setUtilizadores(refreshData);
@@ -231,7 +231,7 @@ const getDataFim = (id_curso) => {
 
  const handlePedido = async (id, valor) => {
   try {
-    const response = await fetch(`http://localhost:3000/api/utilizadores/pedido/${id}`, {
+    const response = await fetch(`https://backend-8pyn.onrender.com/api/utilizadores/pedido/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -256,7 +256,7 @@ const getDataFim = (id_curso) => {
 
 const aceitarPedido = async (idUtilizador, senha) => {
   try {
-    const response = await fetch("http://localhost:3000/api/utilizadores/admin/aceitar-pedido", {
+    const response = await fetch("https://backend-8pyn.onrender.com/api/utilizadores/admin/aceitar-pedido", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

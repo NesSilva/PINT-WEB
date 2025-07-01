@@ -23,7 +23,7 @@ const GerenciarCategorias = () => {
     const carregarCategorias = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('http://localhost:3000/api/categorias');
+            const response = await axios.get('https://backend-8pyn.onrender.com/api/categorias');
             setCategorias(response.data.categorias);
         } catch (error) {
             console.error("Erro ao carregar categorias:", error);
@@ -47,11 +47,11 @@ const GerenciarCategorias = () => {
         try {
             if (categoriaAtual) {
                 // Atualizar categoria existente
-                await axios.put(`http://localhost:3000/api/categorias/${categoriaAtual.id_categoria}`, formData);
+                await axios.put(`https://backend-8pyn.onrender.com/api/categorias/${categoriaAtual.id_categoria}`, formData);
                 setMessage("Categoria atualizada com sucesso!");
             } else {
                 // Criar nova categoria
-                await axios.post('http://localhost:3000/api/categorias', formData);
+                await axios.post('https://backend-8pyn.onrender.com/api/categorias', formData);
                 setMessage("Categoria criada com sucesso!");
             }
             setMessageType("success");
@@ -75,7 +75,7 @@ const GerenciarCategorias = () => {
 
     const handleDelete = async () => {
         try {
-            await axios.delete(`http://localhost:3000/api/categorias/${categoriaAtual.id_categoria}`);
+            await axios.delete(`https://backend-8pyn.onrender.com/api/categorias/${categoriaAtual.id_categoria}`);
             setMessage("Categoria deletada com sucesso!");
             setMessageType("success");
             setShowDeleteModal(false);
