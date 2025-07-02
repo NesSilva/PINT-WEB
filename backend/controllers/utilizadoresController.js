@@ -272,7 +272,7 @@ const listarFormadores = async (req, res) => {
     console.log("Buscando formadores...");
     
     const formadoresIds = await UtilizadorPerfil.findAll({
-      where: { id_perfil: 4 },
+      where: { id_perfil: 3 },
       attributes: ['id_utilizador'],
       raw: true
     });

@@ -14,6 +14,8 @@ const SelecionarPerfil = () => {
         navigate('/dashboard/formando', { state: { user, perfil } });
     } else if (perfil.nome.toLowerCase() === 'administrador') {
         navigate('/dashboard/administrador', { state: { user, perfil } });
+    }else if (perfil.nome.toLowerCase() === 'formador') {
+      navigate('/dashboard/formador', { state: { user, perfil } });
     }
     // Adicione outros perfis conforme necessário
 };

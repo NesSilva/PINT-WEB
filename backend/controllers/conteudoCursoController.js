@@ -133,4 +133,16 @@ const obterPrimeiraImagemCurso = async (req, res) => {
     res.status(500).json({ message: "Erro ao buscar imagem." });
   }
 };
-module.exports = { adicionarConteudo , adicionarConteudosMultiplos , obterPrimeiraImagemCurso};
+
+const listarConteudosPorCurso = async (req, res) => {
+  const { id_curso } = req.params;
+
+  try {
+    const conteudos = await ConteudoCurso.findAll({ where: { id_curso } });
+    res.status(200).json(conteudos);
+  } catch (error) {
+    console.error("Erro ao buscar conteúdos:", error);
+    res.status(500).json({ message: "Erro ao buscar conteúdos do curso." });
+  }
+};
+module.exports = { adicionarConteudo , adicionarConteudosMultiplos , obterPrimeiraImagemCurso , listarConteudosPorCurso};

@@ -20,6 +20,12 @@
 
   import Inscricoes from './views/Inscricoes'
   import MeusCursos from './views/MeusCursos';
+  import DashboardFormador from "./views/DashboardFormador";
+import FormadorCursos from "./views/FormadorCursos";
+import ConteudoCursoFormador from "./views/ConteudoCursoFormador";
+import AvaliacaoCursoFormador from "./views/GerirAvaliações";
+import AvaliarAlunos from "./views/AlunosInscritos";
+
   import './App.css';
   import 'bootstrap';
   import 'bootstrap/dist/css/bootstrap.min.css';
@@ -47,8 +53,16 @@
           <Route path="/curso/:id_curso" element={<DetalhesCurso />} />
           <Route path="/cursod/:id_curso" element={<DetalhesCursoTodos />} />
 
-          <Route path="/inscricoes" element={<Inscricoes />} /> // adiciona no Routes
+          <Route path="/inscricoes" element={<Inscricoes />} /> 
           <Route path="/meus-cursos" element={<MeusCursos />} />
+          <Route path="/dashboard/formador" element={<DashboardFormador />} />
+        <Route path="/formador/cursos" element={<FormadorCursos />} />
+        <Route path="/formador/cursos/ava" element={<AvaliacaoCursoFormador />} />
+
+        <Route path="/formador/curso/:id_curso/conteudos" element={<ConteudoCursoFormador />} />
+        <Route path="/formador/curso/:id_curso/avaliar-alunos" element={<AvaliarAlunos />} />
+
+
 
           
 

@@ -35,5 +35,8 @@ router.get('/curso/:id_curso', async (req, res) => {
 
 router.get('/curso/:id_curso/imagem', conteudoCursoController.obterPrimeiraImagemCurso);
 
+router.get("/curso/:id_curso", conteudoCursoController.listarConteudosPorCurso);
+
+
 
   module.exports = router;
