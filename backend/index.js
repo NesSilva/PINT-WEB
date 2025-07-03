@@ -3,6 +3,7 @@ const app = express();
 const sequelize = require("./models/basededados");
 const authRoutes = require("./routes/auth");
 const passwordRoutes = require("./routes/passwordRoutes");
+const documentosAvaliacaoRoutes = require("./models/documentos_avaliação");
 
 // Configurações básicas
 app.set("port", process.env.PORT || 3000);

@@ -101,7 +101,6 @@ const AvaliarAlunos = () => {
               <th>Email</th>
               <th>Morada</th>
               <th>Nota</th>
-              <th>Ação</th> 
             </tr>
           </thead>
           <tbody>
@@ -112,26 +111,23 @@ const AvaliarAlunos = () => {
                 <td>{utilizador?.email}</td>
                 <td>{utilizador?.morada}</td>
                 <td>
-                {progresso ? (
-                    <div>
-                    <span className="badge bg-success">{progresso.nota_curso}%</span>
-                    <small className="text-muted">(Curso: {progresso.id_curso})</small>
-                    </div>
-                ) : (
-                    <span className="badge bg-secondary">Sem nota</span>
-                )}
-                </td>
-                                <td>
-                  {progresso == null || progresso.nota_curso == null ? (
-  <button
-    className="btn btn-sm btn-primary"
-    onClick={() => abrirModal({ utilizador })}
-  >
-    Avaliar
-  </button>
-) : null}
+  {progresso && progresso.nota_curso != null ? (
+    <div>
+      <span className="badge bg-success">{progresso.nota_curso}%</span>
+      <small className="text-muted" style={{ marginLeft: "8px" }}>
+         {progresso.id_curso}
+      </small>
+    </div>
+  ) : (
+    <button
+      className="btn btn-sm btn-primary"
+      onClick={() => abrirModal({ utilizador })}
+    >
+      Avaliar
+    </button>
+  )}
+</td>
 
-                </td>
               </tr>
             ))}
           </tbody>

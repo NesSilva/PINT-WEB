@@ -1,0 +1,196 @@
+/* Container principal */
+.gerenciar-categorias-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    margin-left: 220px;
+}
+
+/* Cabeçalho */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.page-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 24px;
+}
+
+.new-category-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+/* Mensagens */
+.status-message {
+    margin-bottom: 20px;
+}
+
+.loading-message {
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+/* Tabela */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.categorias-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.categorias-table thead {
+    background-color: #343a40;
+    color: white;
+}
+
+.categorias-table th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 500;
+}
+
+.categorias-table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+.categorias-table tr:last-child td {
+    border-bottom: none;
+}
+
+.categorias-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.actions-cell {
+    white-space: nowrap;
+}
+
+.action-btn {
+    margin-right: 8px;
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+.edit-btn {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+/* Modais */
+.category-modal, .delete-modal {
+    color: #212529;
+}
+
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 15px;
+}
+
+.modal-title {
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.modal-body {
+    padding: 15px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.form-control {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.modal-footer-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+}
+
+.submit-btn {
+    padding: 8px 16px;
+}
+
+.modal-footer {
+    padding: 15px;
+    border-top: 1px solid #dee2e6;
+}
+
+.cancel-btn {
+    padding: 8px 16px;
+}
+
+.confirm-delete-btn {
+    padding: 8px 16px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding-top: 60px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .new-category-btn {
+        width: 100%;
+    }
+    
+    .actions-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .action-btn {
+        margin-right: 0;
+        width: 100%;
+    }
+}
