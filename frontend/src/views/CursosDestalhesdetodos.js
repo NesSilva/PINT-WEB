@@ -124,7 +124,7 @@ const getTituloArea = (idArea) => {
         <button onClick={() => navigate(-1)} className="btn btn-outline-secondary mb-4">
           &larr; Voltar
         </button>
-
+        
         <div className="card shadow-sm">
           <div className="card-body">
             <h2 className="card-title mb-3">{curso.titulo}</h2>

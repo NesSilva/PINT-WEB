@@ -20,6 +20,7 @@ const SidebarFormador = () => {
          <button className="nav-link btn btn-link text-start" onClick={() => navigate('/formador/cursos/ava', { state: { user } })}>
           Gerir Avaliações
         </button>
+
         {/* Adicione outros menus específicos do formador aqui */}
       </nav>
     </div>

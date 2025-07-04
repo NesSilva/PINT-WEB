@@ -1,41 +1,41 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { 
+  FiGrid, 
+  FiBookOpen, 
+  FiAward, 
+  FiUsers,
+  FiBell,
+  FiChevronLeft, 
+  FiChevronRight
+} from "react-icons/fi";
+import "../css/SidebarFormando.css";
 
-const SidebarFormando = () => {
+const SidebarFormando = ({ children }) => {
   const navigate = useNavigate();
   const popupRef = useRef(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [activeItem, setActiveItem] = useState(null);
 
   const getCurrentUser = () => {
     try {
       const id_user = localStorage.getItem('usuarioId');
-
-      console.log('ID do usuário no localStorage:', id_user);
       if (!id_user) {
         console.warn('Nenhum usuário encontrado no localStorage');
         return null;
       }
-
-
       return { id_utilizador: id_user };
-
     } catch (error) {
       console.error("Erro ao obter usuário:", error);
       return null;
     }
   };
 
-  const [user, setUser] = useState(() => {
-    const userData = getCurrentUser();
-    console.log('Usuário inicial:', userData);
-    return userData;
-  });
-
+  const [user, setUser] = useState(() => getCurrentUser());
   const [perfil, setPerfil] = useState(() => {
     try {
-      const perfilData = JSON.parse(localStorage.getItem('perfil')) || null;
-      console.log('Perfil inicial:', perfilData);
-      return perfilData;
+      return JSON.parse(localStorage.getItem('perfil')) || null;
     } catch (error) {
       console.error("Erro ao obter perfil:", error);
       return null;
@@ -46,45 +46,33 @@ const SidebarFormando = () => {
   const [loadingNotificacoes, setLoadingNotificacoes] = useState(true);
   const [showPopup, setShowPopup] = useState(false);
 
-  // Busca notificações com tratamento robusto
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
         if (!user?.id_utilizador) {
-          console.warn('ID do usuário não disponível para buscar notificações');
           setLoadingNotificacoes(false);
           return;
         }
 
-        console.log(`Buscando notificações para usuário ${user.id_utilizador}`);
         const response = await axios.get(
           `http://localhost:3000/api/notificacoes/${user.id_utilizador}`,
           { timeout: 5000 }
         );
 
         if (response.data?.success) {
-          console.log('Notificações recebidas:', response.data.notificacoes);
           setNotificacoes(response.data.notificacoes || []);
-        } else {
-          console.warn('API não retornou sucesso:', response.data);
         }
       } catch (error) {
-        console.error('Erro ao buscar notificações:', {
-          message: error.message,
-          url: error.config?.url,
-          status: error.response?.status
-        });
+        console.error('Erro ao buscar notificações:', error);
       } finally {
         setLoadingNotificacoes(false);
       }
     };
 
-    // Delay para garantir que o user esteja disponível
     const timer = setTimeout(fetchNotifications, 100);
     return () => clearTimeout(timer);
-  }, [user?.id_utilizador]); // Só recarrega quando o ID muda
+  }, [user?.id_utilizador]);
 
-  // Fechar popup ao clicar fora
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (popupRef.current && !popupRef.current.contains(event.target)) {
@@ -109,7 +97,13 @@ const SidebarFormando = () => {
     }
   };
 
+  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
   const togglePopup = () => setShowPopup(!showPopup);
+
+  const handleItemHover = (index) => setActiveItem(index);
+  const handleItemLeave = () => setActiveItem(null);
+
+  const highlightPosition = activeItem !== null ? 16 + (activeItem * 54) : -70;
 
   const marcarComoLida = async (id_notificacao) => {
     try {
@@ -120,165 +114,146 @@ const SidebarFormando = () => {
       );
       setNotificacoes(prev => prev.filter(n => n.id_notificacao !== id_notificacao));
     } catch (error) {
-      console.error("Erro ao marcar como lida:", {
-        message: error.message,
-        status: error.response?.status
-      });
+      console.error("Erro ao marcar como lida:", error);
     }
   };
 
+  const menuItems = [
+    { path: "/dashboard/formando", icon: <FiGrid size={20} />, label: "Dashboard" },
+    { path: "/meus-cursos", icon: <FiBookOpen size={20} />, label: "Meus Cursos" },
+    { path: "/certificados", icon: <FiAward size={20} />, label: "Certificados" },
+    { path: "/forum", icon: <FiUsers size={20} />, label: "Fórum" }
+  ];
+
   return (
-    <div className="bg-white text-black p-3 sidebar-container">
-      <a href="#" onClick={handleLogoClick} className="logo-link">
-        <img 
-          src="/logotipo-softinsa.png" 
-          alt="Logotipo Softinsa" 
-          className="logo-img"
-        />
-      </a>
+    <>
+      <div className={`sidebar-container ${isCollapsed ? 'collapsed' : ''}`}>
+        <div className="sidebar-header">
+          <a href="#" onClick={handleLogoClick} className="sidebar-logo-link">
+            <img 
+              src="/logotipo-softinsa.png" 
+              alt="Logotipo Softinsa" 
+              className="sidebar-logo-img"
+            />
+          </a>
 
-      <ul className="nav flex-column">
-        <li className="nav-item">
-          <Link to="/dashboard/formando" className="nav-link">
-            <i className="bi bi-speedometer2 me-2"></i>
-            Dashboard
-          </Link>
-        </li>
-
-        <li className="nav-item">
-          <Link to="/meus-cursos" className="nav-link">
-            <i className="bi bi-book me-2"></i>
-            Meus Cursos
-          </Link>
-        </li>
-
-        <li className="nav-item">
-          <Link to="/certificados" className="nav-link">
-            <i className="bi bi-award me-2"></i>
-            Certificados
-          </Link>
-        </li>
-
-        <li className="nav-item">
-          <Link to="/forum" className="nav-link">
-            <i className="bi bi-people me-2"></i>
-            Fórum
-          </Link>
-        </li>
-
-        {/* Notifications */}
-        <li className="nav-item position-relative mt-3 notification-item">
-          <div 
-            className="nav-link d-flex align-items-center" 
-            onClick={togglePopup}
-            style={{ cursor: 'pointer' }}
+          <button 
+            onClick={toggleSidebar}
+            className="sidebar-toggle-btn"
           >
-            <i className="bi bi-bell me-2"></i>
-            Notificações
-            {!loadingNotificacoes && notificacoes.length > 0 && (
-              <span className="badge bg-danger rounded-pill ms-2">
-                {notificacoes.length}
-              </span>
-            )}
+            {isCollapsed ? <FiChevronRight size={20} /> : <FiChevronLeft size={20} />}
+          </button>
+        </div>
+
+        <hr className="sidebar-divider" />
+
+        <div className="sidebar-content">
+          <div 
+            className="sidebar-highlight" 
+            style={{ top: `${highlightPosition}px` }}
+          >
+            <div className="highlight-top-circle" />
+            <div className="highlight-bottom-circle" />
           </div>
 
-          {showPopup && (
-            <div ref={popupRef} className="notification-popup">
-              {loadingNotificacoes ? (
-                <div className="notification-loading">
-                  <div className="spinner-border spinner-border-sm me-2"></div>
-                  Carregando...
+          <div className="sidebar-menu">
+            {menuItems.map((item, index) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                state={{ user, perfil }}
+                className={`sidebar-menu-item ${activeItem === index ? 'active' : ''}`}
+                onMouseEnter={() => handleItemHover(index)}
+                onMouseLeave={handleItemLeave}
+              >
+                <div className="sidebar-menu-icon">
+                  {item.icon}
                 </div>
-              ) : notificacoes.length > 0 ? (
-                notificacoes.map(notif => (
-                  <div key={notif.id_notificacao} className="notification-entry">
-                    <div className="notification-header">
-                      <strong>{notif.titulo || 'Nova notificação'}</strong>
-                      <small className="text-muted ms-2">
-                        {new Date(notif.data_criacao).toLocaleDateString('pt-PT')}
-                      </small>
-                    </div>
-                    <div className="notification-body">
-                      {notif.mensagem}
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        marcarComoLida(notif.id_notificacao);
-                      }}
-                      className="btn btn-sm btn-outline-primary mt-2"
-                    >
-                      <i className="bi bi-check2-circle me-1"></i>
-                      Visualizar
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <div className="notification-empty">
-                  Sem notificações no momento
-                </div>
-              )}
+                <span className="sidebar-menu-label">
+                  {item.label}
+                </span>
+              </Link>
+            ))}
+
+            {/* Notifications Item */}
+            <div 
+              className={`sidebar-menu-item notification-item ${activeItem === menuItems.length ? 'active' : ''}`}
+              onMouseEnter={() => handleItemHover(menuItems.length)}
+              onMouseLeave={handleItemLeave}
+              onClick={togglePopup}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="sidebar-menu-icon">
+                <FiBell size={20} />
+                {!loadingNotificacoes && notificacoes.length > 0 && (
+                  <span className="notification-badge">
+                    {notificacoes.length}
+                  </span>
+                )}
+              </div>
+              <span className="sidebar-menu-label">
+                Notificações
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="sidebar-footer">
+          <div className="footer-avatar" />
+          
+          {!isCollapsed && (
+            <div className="footer-user-info">
+              <div className="footer-user-name">
+                {user?.nome || 'Formando'}
+              </div>
             </div>
           )}
-        </li>
-      </ul>
+        </div>
 
-      {/* Adicione isto no seu arquivo CSS */}
-      <style jsx>{`
-        .sidebar-container {
-          width: 220px;
-          border-right: 1px solid #ddd;
-          min-height: 100vh;
-          position: relative;
-        }
-        .logo-link {
-          display: block;
-          margin-bottom: 1rem;
-        }
-        .logo-img {
-          width: 150px;
-          height: auto;
-        }
-        .notification-popup {
-          position: absolute;
-          top: 100%;
-          left: 0;
-          z-index: 1000;
-          width: 280px;
-          max-height: 400px;
-          overflow-y: auto;
-          background-color: white;
-          border: 1px solid #ddd;
-          border-radius: 5px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-          padding: 10px;
-        }
-        .notification-entry {
-          padding: 8px 0;
-          border-bottom: 1px solid #eee;
-        }
-        .notification-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .notification-body {
-          font-size: 0.85rem;
-          color: #555;
-          margin-top: 4px;
-        }
-        .notification-loading {
-          display: flex;
-          align-items: center;
-          padding: 8px;
-        }
-        .notification-empty {
-          padding: 8px;
-          color: #666;
-          text-align: center;
-        }
-      `}</style>
-    </div>
+        {showPopup && (
+          <div ref={popupRef} className="notification-popup">
+            {loadingNotificacoes ? (
+              <div className="notification-loading">
+                <div className="spinner-border spinner-border-sm me-2"></div>
+                Carregando...
+              </div>
+            ) : notificacoes.length > 0 ? (
+              notificacoes.map(notif => (
+                <div key={notif.id_notificacao} className="notification-entry">
+                  <div className="notification-header">
+                    <strong>{notif.titulo || 'Nova notificação'}</strong>
+                    <small className="text-muted ms-2">
+                      {new Date(notif.data_criacao).toLocaleDateString('pt-PT')}
+                    </small>
+                  </div>
+                  <div className="notification-body">
+                    {notif.mensagem}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      marcarComoLida(notif.id_notificacao);
+                    }}
+                    className="btn btn-sm btn-outline-primary mt-2"
+                  >
+                    <i className="bi bi-check2-circle me-1"></i>
+                    Visualizar
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="notification-empty">
+                Sem notificações no momento
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className={`main-content ${isCollapsed ? 'collapsed' : ''}`}>
+        {children}
+      </div>
+    </>
   );
 };
 

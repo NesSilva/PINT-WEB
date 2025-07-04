@@ -67,6 +67,10 @@ const Curso = sequelize.define("Curso", {
         validate: { 
             isIn: [["agendado", "em_curso", "terminado"]] 
         } 
+    },
+    conteudo_upload: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
     }
 }, { tableName: "Curso", timestamps: false });
 

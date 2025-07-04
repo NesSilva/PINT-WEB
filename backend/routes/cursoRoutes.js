@@ -34,6 +34,10 @@ router.get('/:id_curso', async (req, res) => {
 
 router.get('/formador/:id', cursoControllerFormador.listarCursosPorFormador);
 
+// Adicione esta rota no seu cursoRoutes.js
+router.put('/:id_curso/toggle-upload', cursoController.toggleUploadPermissao);
+
+router.put('/:id_curso/toggle-upload-documentos', cursoController.toggleUploadDocumentos);
 
 
 module.exports = router;

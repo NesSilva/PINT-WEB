@@ -32,6 +32,6 @@ const documento_avaliacao = sequelize.define("documento_avaliacao", {
     url: DataTypes.STRING(255),
     caminho_arquivo: DataTypes.STRING(255),
     descricao: DataTypes.TEXT
-}, { tableName: "ConteudoCurso", timestamps: false });
+}, { tableName: "documento_avaliacao", timestamps: false });
 
 module.exports = documento_avaliacao;

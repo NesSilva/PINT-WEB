@@ -41,11 +41,11 @@ const ListarUtilizadores = () => {
   // Estados para pedidos
   const [utilizadorParaAceitar, setUtilizadorParaAceitar] = useState(null);
   
-  // Estados para progresso
   const [progressoCursos, setProgressoCursos] = useState([]);
   const [utilizadorSelecionado, setUtilizadorSelecionado] = useState(null);
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
+  const [filtroCursoNome, setFiltroCursoNome] = useState("");
 
   // Efeitos para carregar dados iniciais
   useEffect(() => {
@@ -574,33 +574,48 @@ const ListarUtilizadores = () => {
                 </div>
                 <div className="modal-body">
                   <div className="row mb-4 g-3">
-                    <div className="col-md-4">
-                      <label className="form-label">Data Início</label>
-                      <input 
-                        type="date" 
-                        className="form-control" 
-                        value={dataInicio} 
-                        onChange={(e) => setDataInicio(e.target.value)} 
-                      />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label">Data Fim</label>
-                      <input 
-                        type="date" 
-                        className="form-control" 
-                        value={dataFim} 
-                        onChange={(e) => setDataFim(e.target.value)} 
-                      />
-                    </div>
-                    <div className="col-md-4 d-flex align-items-end">
-                      <button 
-                        className="btn btn-primary w-100" 
-                        onClick={() => buscarProgresso(utilizadorSelecionado.id_utilizador)}
-                      >
-                        <i className="bi bi-funnel me-2"></i>Filtrar
-                      </button>
-                    </div>
-                  </div>
+  {/* Novo campo de filtro por nome do curso */}
+  <div className="col-md-3">
+    <label className="form-label">Nome do Curso</label>
+    <input 
+      type="text" 
+      className="form-control" 
+      placeholder="Filtrar por nome"
+      value={filtroCursoNome}
+      onChange={(e) => setFiltroCursoNome(e.target.value)}
+    />
+  </div>
+  
+  {/* Campos de data existentes */}
+  <div className="col-md-3">
+    <label className="form-label">Data Início</label>
+    <input 
+      type="date" 
+      className="form-control" 
+      value={dataInicio} 
+      onChange={(e) => setDataInicio(e.target.value)} 
+    />
+  </div>
+  
+  <div className="col-md-3">
+    <label className="form-label">Data Fim</label>
+    <input 
+      type="date" 
+      className="form-control" 
+      value={dataFim} 
+      onChange={(e) => setDataFim(e.target.value)} 
+    />
+  </div>
+  
+  <div className="col-md-3 d-flex align-items-end">
+    <button 
+      className="btn btn-primary w-100" 
+      onClick={() => buscarProgresso(utilizadorSelecionado.id_utilizador)}
+    >
+      <i className="bi bi-funnel me-2"></i>Filtrar
+    </button>
+  </div>
+</div>
 
                   <div className="table-responsive">
                     <table className="progresso-table">
@@ -616,43 +631,53 @@ const ListarUtilizadores = () => {
                         {progressoCursos.length > 0 ? (
                           progressoCursos
                             .filter((item) => {
-                              const dataInicioCurso = new Date(getDataInicio(item.id_curso));
-                              const dataFimCurso = new Date(getDataFim(item.id_curso));
+  // Filtro por nome do curso (novo)
+  const cursoNome = getTituloCurso(item.id_curso).toLowerCase();
+  const filtroNomeCurso = filtroCursoNome.toLowerCase();
+  
+  // Se houver filtro por nome e o curso não corresponder, retorna false
+  if (filtroCursoNome && !cursoNome.includes(filtroNomeCurso)) {
+    return false;
+  }
 
-                              if (dataInicio && !dataFim) {
-                                const filtro = new Date(dataInicio);
-                                return (
-                                  dataInicioCurso.getFullYear() === filtro.getFullYear() &&
-                                  dataInicioCurso.getMonth() === filtro.getMonth() &&
-                                  dataInicioCurso.getDate() === filtro.getDate()
-                                );
-                              }
+  // Seu filtro original de datas (mantido)
+  const dataInicioCurso = new Date(getDataInicio(item.id_curso));
+  const dataFimCurso = new Date(getDataFim(item.id_curso));
 
-                              if (!dataInicio && dataFim) {
-                                const filtro = new Date(dataFim);
-                                return (
-                                  dataFimCurso.getFullYear() === filtro.getFullYear() &&
-                                  dataFimCurso.getMonth() === filtro.getMonth() &&
-                                  dataFimCurso.getDate() === filtro.getDate()
-                                );
-                              }
+  if (dataInicio && !dataFim) {
+    const filtro = new Date(dataInicio);
+    return (
+      dataInicioCurso.getFullYear() === filtro.getFullYear() &&
+      dataInicioCurso.getMonth() === filtro.getMonth() &&
+      dataInicioCurso.getDate() === filtro.getDate()
+    );
+  }
 
-                              if (dataInicio && dataFim) {
-                                const inicioFiltro = new Date(dataInicio);
-                                const fimFiltro = new Date(dataFim);
+  if (!dataInicio && dataFim) {
+    const filtro = new Date(dataFim);
+    return (
+      dataFimCurso.getFullYear() === filtro.getFullYear() &&
+      dataFimCurso.getMonth() === filtro.getMonth() &&
+      dataFimCurso.getDate() === filtro.getDate()
+    );
+  }
 
-                                return (
-                                  dataInicioCurso.getFullYear() === inicioFiltro.getFullYear() &&
-                                  dataInicioCurso.getMonth() === inicioFiltro.getMonth() &&
-                                  dataInicioCurso.getDate() === inicioFiltro.getDate() &&
-                                  dataFimCurso.getFullYear() === fimFiltro.getFullYear() &&
-                                  dataFimCurso.getMonth() === fimFiltro.getMonth() &&
-                                  dataFimCurso.getDate() === fimFiltro.getDate()
-                                );
-                              }
+  if (dataInicio && dataFim) {
+    const inicioFiltro = new Date(dataInicio);
+    const fimFiltro = new Date(dataFim);
 
-                              return true;
-                            })
+    return (
+      dataInicioCurso.getFullYear() === inicioFiltro.getFullYear() &&
+      dataInicioCurso.getMonth() === inicioFiltro.getMonth() &&
+      dataInicioCurso.getDate() === inicioFiltro.getDate() &&
+      dataFimCurso.getFullYear() === fimFiltro.getFullYear() &&
+      dataFimCurso.getMonth() === fimFiltro.getMonth() &&
+      dataFimCurso.getDate() === fimFiltro.getDate()
+    );
+  }
+
+  return true;
+})
                             .map((item) => (
                               <tr key={item.id_progresso}>
                                 <td>{getTituloCurso(item.id_curso)}</td>

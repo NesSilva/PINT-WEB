@@ -17,6 +17,8 @@ const ConteudoCursoFormador = () => {
   const [descricaoFicheiro, setDescricaoFicheiro] = useState("");
   const [tipoFicheiro, setTipoFicheiro] = useState("material");
   const [uploadStatus, setUploadStatus] = useState("");
+  const [uploadPermitido, setUploadPermitido] = useState(curso?.conteudo_upload || false);
+
   
   // Modal control
   const [showModal, setShowModal] = useState(false);
@@ -41,6 +43,18 @@ const ConteudoCursoFormador = () => {
   const abrirEmNovaAba = (url) => {
     window.open(url, "_blank");
   };
+  const toggleUploadDocumentos = async () => {
+  try {
+    const res = await axios.put(
+      `http://localhost:3000/api/cursos/${id_curso}/toggle-upload-documentos`
+    );
+    setUploadPermitido(res.data.conteudo_upload);
+    alert(res.data.message);
+  } catch (error) {
+    console.error("Erro ao alternar permissão:", error);
+    alert("Erro ao atualizar permissão de upload");
+  }
+};
 
   const isVideo = (url) => /\.(mp4|webm|ogg)$/i.test(url);
   const isImage = (url) => /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(url);
@@ -105,11 +119,18 @@ const ConteudoCursoFormador = () => {
     <div className="d-flex">
       <SidebarFormador user={user} />
       <div className="container mt-4">
+        <button 
+  className={`btn btn-${uploadPermitido ? 'success' : 'secondary'} mb-3 ms-2`}
+  onClick={toggleUploadDocumentos}
+>
+  <i className={`bi bi-${uploadPermitido ? 'check-circle' : 'x-circle'}`}></i>
+  {uploadPermitido ? ' Upload Ativo' : ' Upload Inativo'}
+</button>
         <button className="btn btn-secondary mb-3 me-2" onClick={() => navigate(-1)}>Voltar</button>
         <button className="btn btn-primary mb-3" onClick={handleShow}>Adicionar Conteúdo</button>
 
         <h2 className="mb-4">Conteúdos do Curso: {curso?.titulo}</h2>
-
+        
         {/* Modal do Formulário */}
         <Modal show={showModal} onHide={handleClose} centered>
           <Modal.Header closeButton>

@@ -4,8 +4,10 @@ const ConteudoCurso = require("../models/ConteudoCurso");
 
 const Inscricao = require("../models/Inscricoes");
 const Notificacao = require("../models/Notificacoes");
+const Categoria = require("../models/Categoria");
+const { Op } = require('sequelize');
 
-// cursoController.js (criarCurso)
+//Listagem dos id_categorias para um dado curso 
 const listarCategoriasParaCurso = async (req, res) => {
   try {
     const categorias = await Categoria.findAll({
@@ -20,6 +22,7 @@ const listarCategoriasParaCurso = async (req, res) => {
   }
 };
 
+//Controller para a criação de um curso 
 const criarCurso = async (req, res) => {
   try {
     // Determina o tipo automaticamente
@@ -43,12 +46,11 @@ const criarCurso = async (req, res) => {
       data_fim: new Date(req.body.data_fim),
       vagas: tipo === "sincrono" ? Number(req.body.vagas) : null, 
       tipo: tipo,
-      estado: "agendado" // Estado inicial
+      estado: "agendado" 
     };
 
     const novoCurso = await Curso.create(dadosCurso);
     
-    // Verifica se já precisa atualizar o estado
     await atualizarEstadoCurso(novoCurso);
     
     res.status(201).json({ 
@@ -66,8 +68,8 @@ const criarCurso = async (req, res) => {
   }
 };
 
-const { Op } = require('sequelize');
 
+//Listagem do curso incluindo o conteudo associado a ele 
 const listarCursos = async (req, res) => {
   try {
     const cursos = await Curso.findAll();
@@ -132,6 +134,7 @@ const listarCursos = async (req, res) => {
   }
 };
 
+//Controller para a eleminação de um dado curso e os seus cursos associados
 const eliminarCurso = async (req, res) => {
   const { id_curso } = req.params;
 
@@ -157,6 +160,7 @@ const eliminarCurso = async (req, res) => {
   }
 };
 
+//Controller para a edição de um dado curso
 const editarCurso = async (req, res) => {
   const { id_curso } = req.params;
   
@@ -208,10 +212,8 @@ const editarCurso = async (req, res) => {
       tipo: tipo
     });
 
-    // Atualiza o estado após edição
     await atualizarEstadoCurso(curso);
 
-    // 🔔 Buscar inscritos e criar notificações
     const inscritos = await Inscricao.findAll({
       where: { id_curso }
     });
@@ -259,7 +261,7 @@ const atualizarEstadoCurso = async (curso) => {
   return novoEstado;
 };
 
-
+  //Listagem dos cursos com base no formador
 const listarTodosCursos = async (req, res) => {
   try {
     const cursos = await Curso.findAll();
@@ -286,25 +288,62 @@ const listarTodosCursos = async (req, res) => {
   }
 };
 
-const obterPrimeiraImagemCurso = async (req, res) => {
-  const { id_curso } = req.params;
-  try {
-    const primeiraImagem = await ConteudoCurso.findOne({
-      where: {
-        id_curso,
-        tipo_conteudo: 'imagem'
-      },
-      order: [['createdAt', 'ASC']] 
-    });
 
-    if (!primeiraImagem) {
-      return res.status(404).json({ message: "Nenhuma imagem encontrada para este curso." });
+const toggleUploadPermissao = async (req, res) => {
+  try {
+    const { id_curso } = req.params;
+    const { conteudo_upload } = req.body;
+    
+    const curso = await Curso.findByPk(id_curso);
+    if (!curso) {
+      return res.status(404).json({ success: false, message: "Curso não encontrado." });
     }
 
-    res.json(primeiraImagem);
+    curso.conteudo_upload = conteudo_upload;
+    await curso.save();
+    
+    res.status(200).json({ 
+      success: true, 
+      message: "Permissão de upload atualizada!",
+      conteudo_upload: curso.conteudo_upload
+    });
   } catch (error) {
-    console.error("Erro ao buscar imagem:", error);
-    res.status(500).json({ message: "Erro ao buscar imagem." });
+    console.error("Erro ao alternar permissão:", error);
+    res.status(500).json({ success: false, message: "Erro no servidor." });
   }
 };
-module.exports = { criarCurso, listarCursos, eliminarCurso, editarCurso,listarCategoriasParaCurso, atualizarEstadoCurso, listarTodosCursos, obterPrimeiraImagemCurso };
+
+const toggleUploadDocumentos = async (req, res) => {
+  try {
+    const { id_curso } = req.params;
+    
+    const curso = await Curso.findByPk(id_curso);
+    if (!curso) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Curso não encontrado." 
+      });
+    }
+
+    // Alterna o estado atual (true -> false, false -> true)
+    const novoEstado = !curso.conteudo_upload;
+    
+    await curso.update({ conteudo_upload: novoEstado });
+    
+    res.status(200).json({ 
+      success: true, 
+      message: "Status de upload de documentos atualizado!",
+      conteudo_upload: novoEstado
+    });
+  } catch (error) {
+    console.error("Erro ao alternar permissão de upload:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Erro ao atualizar permissão de upload.",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+
+module.exports = { criarCurso, listarCursos, eliminarCurso, editarCurso,listarCategoriasParaCurso, atualizarEstadoCurso, listarTodosCursos ,toggleUploadPermissao , toggleUploadDocumentos};
