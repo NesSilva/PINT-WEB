@@ -3,14 +3,17 @@
   display: flex;
   min-height: 100vh;
   background-color: #f8f9fa;
+  width: 100%; 
+  overflow-x: hidden;
 }
 
 .main-content {
   flex: 1;
   padding: 2rem;
-  margin-left: 50px;
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  transition: margin-left 0.3s;
 }
-
 /* Cabeçalho */
 .page-header {
   display: flex;
@@ -43,12 +46,12 @@
   align-items: end;
 }
 
-/* Tabela de cursos */
 .table-responsive {
   background-color: white;
   border-radius: 0.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   overflow-x: auto;
+  max-width: 100%; 
 }
 
 .cursos-table {

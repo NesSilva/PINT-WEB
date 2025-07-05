@@ -4,11 +4,13 @@ import axios from "axios";
 import { 
   FiGrid, 
   FiBookOpen, 
-  FiAward, 
   FiUsers,
   FiBell,
   FiChevronLeft, 
-  FiChevronRight
+  FiChevronRight,
+  FiFolder,
+  FiChevronDown,
+  FiChevronUp
 } from "react-icons/fi";
 import "../css/SidebarFormando.css";
 
@@ -17,9 +19,23 @@ const SidebarFormando = ({ children }) => {
   const popupRef = useRef(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
+  const [expandedCategories, setExpandedCategories] = useState({});
+  const [categoriesWithAreas, setCategoriesWithAreas] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [showCategories, setShowCategories] = useState(false);
 
+  // Obter usuário
   const getCurrentUser = () => {
     try {
+      const userData = localStorage.getItem('usuario');
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        return { 
+          id_utilizador: parsedUser.id_utilizador || localStorage.getItem('usuarioId'),
+          nome: parsedUser.nome 
+        };
+      }
+      
       const id_user = localStorage.getItem('usuarioId');
       if (!id_user) {
         console.warn('Nenhum usuário encontrado no localStorage');
@@ -46,6 +62,36 @@ const SidebarFormando = ({ children }) => {
   const [loadingNotificacoes, setLoadingNotificacoes] = useState(true);
   const [showPopup, setShowPopup] = useState(false);
 
+  // Buscar categorias e áreas
+  useEffect(() => {
+    const fetchCategoriesAndAreas = async () => {
+      try {
+        const [categoriesRes, areasRes] = await Promise.all([
+          axios.get('http://localhost:3000/api/categorias'),
+          axios.get('http://localhost:3000/api/areas-formacao')
+        ]);
+
+        const categories = categoriesRes.data?.categorias || [];
+        const areas = areasRes.data?.areas || [];
+
+        // Agrupar áreas por categoria
+        const categoriesWithAreasData = categories.map(category => ({
+          ...category,
+          areas: areas.filter(area => area.id_categoria === category.id_categoria)
+        }));
+
+        setCategoriesWithAreas(categoriesWithAreasData);
+      } catch (error) {
+        console.error('Erro ao buscar categorias e áreas:', error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategoriesAndAreas();
+  }, []);
+
+  // Buscar notificações
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
@@ -99,9 +145,17 @@ const SidebarFormando = ({ children }) => {
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
   const togglePopup = () => setShowPopup(!showPopup);
+  const toggleCategoriesDropdown = () => setShowCategories(!showCategories);
 
   const handleItemHover = (index) => setActiveItem(index);
   const handleItemLeave = () => setActiveItem(null);
+
+  const toggleCategory = (categoryId) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [categoryId]: !prev[categoryId]
+    }));
+  };
 
   const highlightPosition = activeItem !== null ? 16 + (activeItem * 54) : -70;
 
@@ -121,7 +175,6 @@ const SidebarFormando = ({ children }) => {
   const menuItems = [
     { path: "/dashboard/formando", icon: <FiGrid size={20} />, label: "Dashboard" },
     { path: "/meus-cursos", icon: <FiBookOpen size={20} />, label: "Meus Cursos" },
-    { path: "/certificados", icon: <FiAward size={20} />, label: "Certificados" },
     { path: "/forum", icon: <FiUsers size={20} />, label: "Fórum" }
   ];
 
@@ -175,10 +228,67 @@ const SidebarFormando = ({ children }) => {
               </Link>
             ))}
 
-            {/* Notifications Item */}
+            {/* Dropdown de Categorias */}
+            <div className="categories-dropdown">
+              <div 
+                className={`sidebar-menu-item ${showCategories ? 'active' : ''}`}
+                onClick={toggleCategoriesDropdown}
+              >
+                <div className="sidebar-menu-icon">
+                  <FiFolder size={20} />
+                </div>
+                <span className="sidebar-menu-label">
+                  Categorias
+                </span>
+                <div className="dropdown-arrow">
+                  {showCategories ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
+                </div>
+              </div>
+
+              {showCategories && (
+                <div className="categories-dropdown-content">
+                  {loadingCategories ? (
+                    <div className="categories-loading">
+                      <div className="spinner-border" role="status">
+                        <span className="visually-hidden">Carregando...</span>
+                      </div>
+                    </div>
+                  ) : (
+                    categoriesWithAreas.map(category => (
+                      <div key={category.id_categoria} className="category-item">
+                        <div 
+                          className="category-header"
+                          onClick={() => toggleCategory(category.id_categoria)}
+                        >
+                          <span>{category.nome}</span>
+                          {expandedCategories[category.id_categoria] ? 
+                            <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
+                        </div>
+                        
+                        {expandedCategories[category.id_categoria] && (
+                          <div className="areas-list">
+                            {category.areas.map(area => (
+                              <Link
+                                key={area.id_area}
+                                to={`/cursos/area/${area.id_area}`}
+                                className="area-item"
+                              >
+                                {area.nome}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Notificações */}
             <div 
-              className={`sidebar-menu-item notification-item ${activeItem === menuItems.length ? 'active' : ''}`}
-              onMouseEnter={() => handleItemHover(menuItems.length)}
+              className={`sidebar-menu-item notification-item ${activeItem === menuItems.length + 1 ? 'active' : ''}`}
+              onMouseEnter={() => handleItemHover(menuItems.length + 1)}
               onMouseLeave={handleItemLeave}
               onClick={togglePopup}
               style={{ cursor: 'pointer' }}
@@ -210,6 +320,7 @@ const SidebarFormando = ({ children }) => {
           )}
         </div>
 
+        {/* Popup de notificações */}
         {showPopup && (
           <div ref={popupRef} className="notification-popup">
             {loadingNotificacoes ? (

@@ -39,5 +39,6 @@ router.put('/:id_curso/toggle-upload', cursoController.toggleUploadPermissao);
 
 router.put('/:id_curso/toggle-upload-documentos', cursoController.toggleUploadDocumentos);
 
+router.put('/reativar/:id_curso', cursoController.reativarCurso);
 
 module.exports = router;

@@ -25,7 +25,7 @@ import FormadorCursos from "./views/FormadorCursos";
 import ConteudoCursoFormador from "./views/ConteudoCursoFormador";
 import AvaliacaoCursoFormador from "./views/GerirAvaliações";
 import AvaliarAlunos from "./views/AlunosInscritos";
-
+import CursosPorArea from "./views/CursosPorArea";
   import './App.css';
   import 'bootstrap';
   import 'bootstrap/dist/css/bootstrap.min.css';
@@ -61,6 +61,8 @@ import AvaliarAlunos from "./views/AlunosInscritos";
 
         <Route path="/formador/curso/:id_curso/conteudos" element={<ConteudoCursoFormador />} />
         <Route path="/formador/curso/:id_curso/avaliar-alunos" element={<AvaliarAlunos />} />
+        <Route path="/cursos/area/:id_area" element={<CursosPorArea />} />
+
 
 
 

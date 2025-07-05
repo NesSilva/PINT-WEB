@@ -118,27 +118,31 @@ const MeusCursos = () => {
 };
 
   const gerarCertificado = async (id_curso) => {
-    const userId = user?.id_utilizador || localStorage.getItem("usuarioId");
+  const userId = user?.id_utilizador || localStorage.getItem("usuarioId");
 
-    try {
-      const res = await axios.post("http://localhost:3000/api/certificados", {
-        id_utilizador: userId,
-        id_curso,
-      });
+  try {
+    const res = await axios.post("http://localhost:3000/api/certificados", {
+      id_utilizador: userId,
+      id_curso,
+    });
 
-      if (res.data.success) {
-        alert("Certificado gerado com sucesso!");
-        const url = `http://localhost:3000/api/certificados/pdf?user=${userId}&curso=${id_curso}`;
-        window.open(url, "_blank");
-      }
-    } catch (error) {
-      if (error.response?.status === 409) {
-        alert("Você já tem um certificado para este curso.");
+    // Independente de ser novo ou existente, abre o PDF
+    if (res.data.success) {
+      const url = `http://localhost:3000/api/certificados/pdf?user=${userId}&curso=${id_curso}`;
+      window.open(url, "_blank");
+      
+      // Mostra mensagem apropriada
+      if (res.data.message && res.data.message.includes("já existe")) {
+        alert("Certificado disponível para download!");
       } else {
-        alert("Erro ao gerar certificado.");
+        alert("Certificado gerado com sucesso!");
       }
     }
-  };
+  } catch (error) {
+    console.error("Erro ao gerar certificado:", error);
+    alert("Erro ao acessar o certificado.");
+  }
+};
 
   const handleVerDetalhes = (idCurso) => {
     navigate(`/curso/${idCurso}`, { 
@@ -276,47 +280,45 @@ const MeusCursos = () => {
                     </div>
                   )}
                       
-                  {/* Botões */}
+                {/* Botões */}
 <div style={{ 
   display: "flex", 
   gap: "1rem",
   justifyContent: 'center'
 }}>
-  {/* Botão Ver Detalhes (apenas se a data de início já passou) */}
-  {new Date(getDataInicioCurso(inscricao.id_curso)) <= new Date() && (
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        handleVerDetalhes(inscricao.id_curso);
-      }}
-      style={{
-        padding: "0.8rem 1.5rem",
-        borderRadius: "8px",
-        backgroundColor: "#3498db",
-        color: "white",
-        border: "none",
-        cursor: "pointer",
-        fontSize: "1rem",
-        fontWeight: "600",
-        transition: "all 0.2s ease",
-        minWidth: "150px",
-        boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-        ':hover': {
-          backgroundColor: "#2980b9",
-          transform: "translateY(-2px)",
-          boxShadow: '0 4px 8px rgba(0,0,0,0.15)'
-        },
-        ':active': {
-          transform: "translateY(0)",
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }
-      }}
-    >
-      Ver Detalhes
-    </button>
-  )}
+  {/* Botão Ver Detalhes - SEMPRE VISÍVEL */}
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      handleVerDetalhes(inscricao.id_curso);
+    }}
+    style={{
+      padding: "0.8rem 1.5rem",
+      borderRadius: "8px",
+      backgroundColor: "#3498db",
+      color: "white",
+      border: "none",
+      cursor: "pointer",
+      fontSize: "1rem",
+      fontWeight: "600",
+      transition: "all 0.2s ease",
+      minWidth: "150px",
+      boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+      ':hover': {
+        backgroundColor: "#2980b9",
+        transform: "translateY(-2px)",
+        boxShadow: '0 4px 8px rgba(0,0,0,0.15)'
+      },
+      ':active': {
+        transform: "translateY(0)",
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }
+    }}
+  >
+    Ver Detalhes
+  </button>
   
-  {/* Botão Gerar Certificado (apenas com nota) */}
+  {/* Botão Gerar Certificado - APENAS COM NOTA */}
   {nota !== null && (
     <button
       onClick={(e) => {

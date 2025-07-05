@@ -120,7 +120,7 @@ const obterPrimeiraImagemCurso = async (req, res) => {
         id_curso,
         tipo_conteudo: 'imagem'
       },
-      order: [['createdAt', 'ASC']] // primeira imagem pela ordem de upload
+      order: [['createdAt', 'ASC']]
     });
 
     if (!primeiraImagem) {
@@ -145,4 +145,34 @@ const listarConteudosPorCurso = async (req, res) => {
     res.status(500).json({ message: "Erro ao buscar conteúdos do curso." });
   }
 };
-module.exports = { adicionarConteudo , adicionarConteudosMultiplos , obterPrimeiraImagemCurso , listarConteudosPorCurso};
+
+const adicionarLink = async (req, res) => {
+  try {
+    const { id_curso, descricao, url, tipo_conteudo } = req.body;
+
+    if (!url) {
+      return res.status(400).json({ success: false, message: "URL é obrigatória." });
+    }
+
+    const conteudo = await ConteudoCurso.create({
+      id_curso,
+      tipo_conteudo: tipo_conteudo || "link",
+      url,
+      descricao: descricao || "Link do curso",
+    });
+
+    res.status(201).json({ 
+      success: true, 
+      message: "Link adicionado com sucesso!", 
+      conteudo 
+    });
+  } catch (error) {
+    console.error("Erro ao adicionar link:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Erro no servidor.",
+      error: error.message 
+    });
+  }
+};
+module.exports = { adicionarConteudo , adicionarConteudosMultiplos , obterPrimeiraImagemCurso , listarConteudosPorCurso , adicionarLink};

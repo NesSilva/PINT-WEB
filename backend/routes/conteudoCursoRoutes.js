@@ -37,6 +37,6 @@ router.get('/curso/:id_curso/imagem', conteudoCursoController.obterPrimeiraImage
 
 router.get("/curso/:id_curso", conteudoCursoController.listarConteudosPorCurso);
 
-
+router.post('/adicionar-link', conteudoCursoController.adicionarLink);
 
   module.exports = router;

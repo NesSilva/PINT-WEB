@@ -67,5 +67,35 @@ router.get("/curso/:id_curso", async (req, res) => {
   }
 });
 
+// No seu backend (rota de detalhes do curso)
+router.get("/:id_curso", async (req, res) => {
+  try {
+    const curso = await Curso.findByPk(req.params.id_curso, {
+      include: [
+        {
+          model: Inscricao,
+          attributes: [],
+          where: { status: ['pendente', 'confirmada'] },
+          required: false
+        }
+      ],
+      attributes: {
+        include: [
+          [sequelize.fn('COUNT', sequelize.col('Inscricaos.id_inscricao')), 'totalInscritos']
+        ]
+      },
+      group: ['Curso.id_curso']
+    });
+
+    if (!curso) {
+      return res.status(404).json({ success: false, message: "Curso não encontrado" });
+    }
+
+    res.json({ success: true, curso });
+  } catch (error) {
+    console.error("Erro ao buscar curso:", error);
+    res.status(500).json({ success: false, message: "Erro ao buscar curso" });
+  }
+});
 
 module.exports = router;

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import { Modal, Button, Form , Alert } from 'react-bootstrap';
+import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
 import '../css/GerirCategorias.css';
 
 const GerenciarCategorias = () => {
@@ -154,21 +155,24 @@ const GerenciarCategorias = () => {
                                                 size="sm"
                                                 onClick={() => handleEdit(categoria)}
                                                 className="action-btn edit-btn"
+                                                title="Editar"
                                             >
-                                                Editar
+                                                <FaEdit /> 
                                             </Button>
+                                            
                                             <Button 
                                                 variant="danger" 
                                                 size="sm"
                                                 onClick={() => {
-                                                    setCategoriaAtual(categoria);
-                                                    setShowDeleteModal(true);
+                                                setCategoriaAtual(categoria);
+                                                setShowDeleteModal(true);
                                                 }}
                                                 className="action-btn delete-btn"
+                                                title="Excluir"
                                             >
-                                                Excluir
+                                                <FaTrash /> 
                                             </Button>
-                                        </td>
+                                            </td>
                                     </tr>
                                 ))}
                             </tbody>

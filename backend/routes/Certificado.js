@@ -13,10 +13,14 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    // Verifica se já existe certificado para evitar duplicação
     const existente = await Certificado.findOne({ where: { id_utilizador, id_curso } });
+    
     if (existente) {
-      return res.status(409).json({ error: "Certificado já existe." });
+      return res.json({ 
+        success: true, 
+        certificado: existente,
+        message: "Certificado já existe e pode ser baixado novamente."
+      });
     }
 
     const certificado = await Certificado.create({
@@ -36,21 +40,41 @@ router.post("/", async (req, res) => {
 router.get("/pdf", async (req, res) => {
   const { user, curso } = req.query;
 
-  // Aqui podes buscar os dados reais do utilizador e do curso para personalizar o PDF, exemplo:
-  // const utilizador = await Utilizador.findByPk(user);
-  // const cursoDados = await Curso.findByPk(curso);
+  // Criar novo documento PDF
+  const doc = new PDFDocument({
+    size: 'A4',
+    margins: { top: 50, bottom: 50, left: 50, right: 50 }
+  });
 
-  const doc = new PDFDocument();
-
+  // Configurar headers da resposta
   res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", `attachment; filename=certificado_${curso}.pdf`);
+  res.setHeader(
+    "Content-Disposition", 
+    `attachment; filename=certificado_${curso.replace(/\s+/g, '_')}.pdf`
+  );
 
-  doc.fontSize(25).text("Certificado de Conclusão", { align: "center" });
-  doc.moveDown();
-  doc.fontSize(16).text(`Certificamos que o utilizador ${user} concluiu o curso ${curso}.`, { align: "center" });
-  doc.moveDown();
-  doc.text(`Data: ${new Date().toLocaleDateString()}`, { align: "center" });
+  // Conteúdo do certificado
+  doc.fontSize(25)
+     .font('Helvetica-Bold')
+     .text("Certificado de Conclusão", { align: "center" });
+  
+  doc.moveDown(1.5);
+  
+  doc.fontSize(16)
+     .font('Helvetica')
+     .text(`Certificamos que ${user} concluiu com sucesso o curso "${curso}".`, { 
+       align: "center",
+       lineGap: 5
+     });
+  
+  doc.moveDown(2);
+  
+  doc.fontSize(12)
+     .text(`Data de emissão: ${new Date().toLocaleDateString('pt-PT')}`, { 
+       align: "center"
+     });
 
+  // Finalizar e enviar o PDF
   doc.end();
   doc.pipe(res);
 });

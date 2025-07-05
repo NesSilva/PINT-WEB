@@ -13,7 +13,8 @@ const DetalhesCurso = () => {
   const [loading, setLoading] = useState(true);
   const [inscricaoStatus, setInscricaoStatus] = useState(null);
   const [categorias, setCategorias] = useState([]);
-    const [areas, setAreas] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [vagasDisponiveis, setVagasDisponiveis] = useState(null);
 
   const calcularDataInscricao = (dataInicio) => {
     const dt = new Date(dataInicio);
@@ -28,18 +29,30 @@ const DetalhesCurso = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Busca os detalhes do curso incluindo o total de inscritos
         const cursoRes = await axios.get(`http://localhost:3000/api/cursos/${id_curso}`);
-        setCurso(cursoRes.data);
+        const cursoData = cursoRes.data;
+        
+        // Calcula vagas disponíveis para cursos síncronos
+        if (cursoData.tipo === 'sincrono') {
+          const vagasDisponiveis = cursoData.vagas - (cursoData.totalInscritos || 0);
+          setVagasDisponiveis(vagasDisponiveis);
+        }
 
+        setCurso(cursoData);
 
-
+        // Verifica se o usuário já está inscrito
         const userLocal = localStorage.getItem('usuarioId');
         if (userLocal) {
-          const inscricaoRes = await axios.get(`http://localhost:3000/api/inscricoes/usuario/${userLocal}/curso/${id_curso}`);
-          if (inscricaoRes.data && inscricaoRes.data.id_utilizador) {
-            setInscricaoStatus("Já inscrito neste curso.");
-          } else {
-            setInscricaoStatus(null);
+          try {
+            const inscricaoRes = await axios.get(`http://localhost:3000/api/inscricoes/usuario/${userLocal}/curso/${id_curso}`);
+            if (inscricaoRes.data && inscricaoRes.data.id_utilizador) {
+              setInscricaoStatus("Já inscrito neste curso.");
+            }
+          } catch (error) {
+            if (error.response && error.response.status !== 404) {
+              console.error("Erro ao verificar inscrição:", error);
+            }
           }
         }
 
@@ -53,26 +66,24 @@ const DetalhesCurso = () => {
     fetchData();
   }, [id_curso]);
 
-   useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const [categoriasRes, areasRes, cursosRes] = await Promise.all([
-            axios.get('http://localhost:3000/api/categorias'),
-            axios.get('http://localhost:3000/api/areas-formacao'),
-          ]);
-  
-          setCategorias(categoriasRes.data?.categorias || []);
-          setAreas(areasRes.data?.areas || []);
-  
-        } catch (error) {
-          console.error('Erro ao buscar dados:', error);
-        } finally {
-          setLoading(false);
-        }
-      };
-  
-      fetchData();
-    }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [categoriasRes, areasRes] = await Promise.all([
+          axios.get('http://localhost:3000/api/categorias'),
+          axios.get('http://localhost:3000/api/areas-formacao'),
+        ]);
+
+        setCategorias(categoriasRes.data?.categorias || []);
+        setAreas(areasRes.data?.areas || []);
+
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   if (loading) return <div className="text-center mt-5">Carregando detalhes do curso...</div>;
   if (!curso) return <div className="alert alert-warning mt-5 text-center">Curso não encontrado.</div>;
@@ -84,37 +95,74 @@ const DetalhesCurso = () => {
     try {
       const userLocal = localStorage.getItem('usuarioId');
       if (!userLocal) {
-        alert("Utilizador não autenticado.");
+        setInscricaoStatus("Utilizador não autenticado.");
         return;
       }
 
-      await axios.post("http://localhost:3000/api/inscricoes", {
+      // Verifica se há vagas disponíveis (para cursos síncronos)
+      if (curso.tipo === 'sincrono' && vagasDisponiveis <= 0) {
+        setInscricaoStatus("Não há vagas disponíveis para este curso.");
+        return;
+      }
+
+      const response = await axios.post("http://localhost:3000/api/inscricoes", {
         id_utilizador: userLocal,
         id_curso: curso.id_curso
       });
 
-      setInscricaoStatus("Inscrição realizada com sucesso!");
-    } catch (error) {
-      if (error.response && error.response.status === 409) {
-        setInscricaoStatus(error.response.data.mensagem);
+      if (response.data.success) {
+        setInscricaoStatus("Inscrição realizada com sucesso!");
+        // Atualiza o contador de vagas disponíveis
+        if (curso.tipo === 'sincrono') {
+          setVagasDisponiveis(prev => prev - 1);
+        }
       } else {
-        setInscricaoStatus("Erro ao realizar inscrição.");
+        setInscricaoStatus(response.data.message || "Erro ao realizar inscrição.");
+      }
+    } catch (error) {
+      if (error.response) {
+        // Mensagens específicas do backend
+        const errorMessage = error.response.data.message || 
+                           error.response.data.mensagem || 
+                           "Erro ao realizar inscrição.";
+        setInscricaoStatus(errorMessage);
+        
+        // Se for erro de conflito (já inscrito), atualiza o status
+        if (error.response.status === 409) {
+          setInscricaoStatus("Já inscrito neste curso.");
+        }
+      } else {
+        setInscricaoStatus("Erro ao conectar ao servidor.");
       }
       console.error("Erro ao inscrever:", error);
     }
   };
 
-const getTituloCategoria = (idCategoria) => {
-  const categoria = categorias.find(cat => cat.id_categoria === idCategoria);
-  return categoria ? categoria.nome : 'Categoria não encontrada';
-};
+  const getTituloCategoria = (idCategoria) => {
+    const categoria = categorias.find(cat => cat.id_categoria === idCategoria);
+    return categoria ? categoria.nome : 'Categoria não encontrada';
+  };
 
-const getTituloArea = (idArea) => {
-  const area = areas.find(a => a.id_area === idArea);
-  return area ? area.nome : 'Área não encontrada';
-};
+  const getTituloArea = (idArea) => {
+    const area = areas.find(a => a.id_area === idArea);
+    return area ? area.nome : 'Área não encontrada';
+  };
 
-
+  // Verifica se o botão de inscrição deve estar desabilitado
+  const isInscricaoDisabled = () => {
+    // Se já está inscrito
+    if (inscricaoStatus === "Inscrição realizada com sucesso!" || 
+        inscricaoStatus === "Já inscrito neste curso.") {
+      return true;
+    }
+    
+    // Se não há vagas disponíveis (para cursos síncronos)
+    if (curso.tipo === 'sincrono' && vagasDisponiveis <= 0) {
+      return true;
+    }
+    
+    return false;
+  };
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
@@ -131,10 +179,19 @@ const getTituloArea = (idArea) => {
             <p className="card-text"><strong>Descrição:</strong> {curso.descricao}</p>
             <p><strong>Categoria:</strong> {getTituloCategoria(curso.id_categoria)}</p>
             <p><strong>Área de Formação:</strong> {getTituloArea(curso.id_area)}</p>
+            <p><strong>Tipo:</strong> {curso.tipo === 'sincrono' ? 'Síncrono' : 'Assíncrono'}</p>
+            
+            {curso.tipo === 'sincrono' && (
+              <p>
+                <strong>Vagas disponíveis:</strong> {vagasDisponiveis} de {curso.vagas}
+              </p>
+            )}
 
             <p className="card-text">
-              <strong>Data de Inscrição:</strong>{' '}
-              {dataInscricao ? dataInscricao.toLocaleDateString('pt-PT') : '-'}
+              <strong>Data de Início:</strong> {new Date(curso.data_inicio).toLocaleDateString('pt-PT')}
+            </p>
+            <p className="card-text">
+              <strong>Data de Fim:</strong> {new Date(curso.data_fim).toLocaleDateString('pt-PT')}
             </p>
 
             <hr />
@@ -144,15 +201,20 @@ const getTituloArea = (idArea) => {
               <button
                 className="btn btn-primary me-3"
                 onClick={inscreverNoCurso}
-                disabled={inscricaoStatus === "Inscrição realizada com sucesso!"}
+                disabled={isInscricaoDisabled()}
               >
-                {inscricaoStatus === "Inscrição realizada com sucesso!" ? 'Inscrito' : 'Inscrever-se'}
+                {inscricaoStatus === "Inscrição realizada com sucesso!" || 
+                 inscricaoStatus === "Já inscrito neste curso." 
+                  ? 'Inscrito' 
+                  : 'Inscrever-se'}
               </button>
 
               {inscricaoStatus && (
                 <p
                   className={`mb-0 ${
-                    inscricaoStatus.toLowerCase().includes("erro") || inscricaoStatus.toLowerCase().includes("não")
+                    inscricaoStatus.toLowerCase().includes("erro") || 
+                    inscricaoStatus.toLowerCase().includes("não") ||
+                    inscricaoStatus.toLowerCase().includes("indisponível")
                       ? "text-danger"
                       : "text-success"
                   }`}
@@ -163,7 +225,7 @@ const getTituloArea = (idArea) => {
               )}
             </div>
 
-            {/* Exemplo de conteúdo para abrir modal (adicione os itens que desejar) */}
+            {/* Materiais do curso */}
             {curso.material && curso.material.length > 0 && (
               <>
                 <h5>Materiais do curso:</h5>
@@ -195,7 +257,9 @@ const getTituloArea = (idArea) => {
                       ) : (
                         <div>Arquivo</div>
                       )}
-                      <small className="d-block mt-1 text-truncate" title={item.descricao}>{item.descricao || 'Sem descrição'}</small>
+                      <small className="d-block mt-1 text-truncate" title={item.descricao}>
+                        {item.descricao || 'Sem descrição'}
+                      </small>
                     </div>
                   ))}
                 </div>

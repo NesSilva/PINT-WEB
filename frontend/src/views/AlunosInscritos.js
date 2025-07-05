@@ -169,9 +169,11 @@ const AvaliarAlunos = () => {
                       <button
                         className="btn btn-sm btn-primary me-2"
                         onClick={() => abrirModalAvaliacao({ utilizador })}
-                      >
+                        disabled={progresso?.nota_curso != null} // Desativa se já tiver nota
+                        title={progresso?.nota_curso != null ? "Aluno já avaliado" : "Avaliar aluno"}
+                        >
                         <i className="bi bi-pencil"></i> Avaliar
-                      </button>
+                        </button>
                     </td>
                   </tr>
                 ))}

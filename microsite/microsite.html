@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href=""imagens\logo.png"" type="image/png">
+    <title>SOFTSHARES</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        header {
+            background-color: #4C91ED; /* Azul de fundo do cabeçalho */
+            padding: 20px;
+            text-align: center;
+            color: white;
+            animation: fadeIn 2s ease; /* Animação de entrada */
+        }
+
+        /* Estilo da imagem do logo, agora maior */
+        header img {
+            max-width: 300px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        section {
+            padding: 40px;
+            text-align: center;
+            background-color: white;
+            margin: 20px auto;
+            width: 80%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            animation: fadeInUp 1.5s ease; /* Animação de desvanecimento de baixo para cima */
+        }
+
+        section h2 {
+            color: #4C91ED;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        section p {
+            font-size: 1.2em;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .app-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px;
+            background-color: #ffffff;
+            margin: 20px auto;
+            width: 80%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            animation: fadeInUp 1.5s ease; /* Animação de desvanecimento */
+        }
+
+        .app-section img {
+            max-width: 45%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-section .text {
+            width: 50%;
+            padding-left: 20px;
+            text-align: justify; /* Justifica o texto */
+        }
+
+        .button-container {
+            text-align: center; /* Centraliza o botão */
+            margin-top: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            background-color: #4C91ED;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            text-align: center;
+            transition: background-color 0.3s ease, transform 0.3s ease; /* Transição suave para hover */
+        }
+
+        .button:hover {
+            background-color: #357ABD; /* Muda a cor no hover */
+            transform: scale(1.05); /* Aumenta ligeiramente o botão */
+        }
+
+        .creators-section {
+            padding: 40px;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 20px auto;
+            width: 80%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            animation: fadeInUp 1.5s ease; /* Animação de desvanecimento */
+        }
+
+        .creators-section h2 {
+            color: #4C91ED;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        .creators-list {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .creator-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            width: 150px;
+            text-align: center;
+            margin: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1.5s ease; /* Animação de desvanecimento */
+        }
+
+        .creator-card h3 {
+            margin: 10px 0;
+            font-size: 1.2em;
+            color: #4C91ED;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: relative;
+            width: 100%;
+            bottom: 0;
+            animation: fadeIn 2s ease; /* Animação de entrada */
+        }
+
+        /* Animações */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px); /* Sobe de baixo para cima */
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .video-container {
+            width: 100%;
+            max-width: 560px; /* Mantém o tamanho fixo no web */
+            height: auto;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            height: 315px; /* Mantém altura proporcional ao desktop */
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="imagens\logo.png" alt="Logo SoftShare">
+</header>
+
+<!-- Seção de introdução -->
+<section>
+    <h2>Bem-vindo ao SOFTSHARES!</h2>
+    <p>O SoftShares é uma plataforma web e mobile criada para facilitar a integração dos novos colaboradores da Softinsa, especialmente para aqueles que precisam de se adaptar a novas cidades devido à diversidade de localizações dos escritórios. A aplicação promove a partilha de informações úteis, como recomendações de restaurantes, habitação, desporto, comércio e lazer, criando um ambiente colaborativo e acolhedor.</p>
+
+    <p>Organizada em sete áreas principais – Saúde, Desporto, Formação, Gastronomia, Habitação/Alojamento, Transportes e Lazer – a plataforma oferece fóruns de discussão, álbuns de partilha de momentos e listagens de atividades.</p>
+    
+    <p>Além disso, o SoftShares conta com um backoffice para a gestão de conteúdos, garantindo uma administração eficiente das informações e interações entre os utilizadores.</p>
+    
+    <p><br>
+        <span style="color: #4C91ED; font-weight: bold;">Explore e faça parte desta comunidade que conecta e apoia os colaboradores da Softinsa!</span>
+    </p>
+</section>
+
+
+<!-- Seção de Mobile -->
+<section class="app-section">
+    <img src="imagens/image-removebg-preview.png" alt="App Mobile">
+    <div class="text">
+        <h2>Aplicação Mobile</h2>
+        <p>Na aplicação mobile do SoftShares, os colaboradores podem explorar e partilhar recomendações de restaurantes, habitação, lazer, desporto e saúde. Através da app, também é possível participar em fóruns, criar eventos, partilhar fotos, inscrever-se em atividades e consultar recomendações de colegas e ainda oferece um sistema de notificações mantendo os utilizadores atualizados sobre novos eventos e interações.</p>
+        <div class="button-container">
+            <a href="SoftShares.apk" download="SoftShares.apk" class="button">Download da Aplicação</a> <!-- Botão de download -->
+        </div>
+    </div>
+</section>
+
+<!-- Seção de Web -->
+<section class="app-section">
+    <div class="text">
+        <h2>Aplicação Web</h2>
+        <p>A versão web do SoftShares oferece funcionalidades da aplicação mobile, com a vantagem de incluir um backoffice para administradores. Através da aplicação web, os gestores podem gerir utilizadores, moderar conteúdos, validar publicações e controlar fóruns de discussão. A plataforma permite ainda a criação e organização de eventos, além de oferecer uma visão detalhada das atividades da comunidade.</p>
+        <div class="button-container">
+            <a href="https://frontend-self-xi.vercel.app/" class="button">Aceder ao Site Web</a> <!-- Botão para acessar o site -->
+        </div>
+    </div>
+    <img src="imagens/pc-removebg-preview.png" alt="App Web">
+</section>
+
+<!-- Seção de Vídeo -->
+<section>
+    <h2>Veja o vídeo para ver a aplicação:</h2>
+    <div class="video-container">
+        <iframe src="https://www.youtube.com/embed/WMxdRwQhKU0" 
+            title="YouTube video player" frameborder="0" 
+            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+        </iframe>
+    </div>
+</section>
+
+
+
+<!-- Seção dos criadores da aplicação -->
+<section class="creators-section">
+    <h2>Criadores da Aplicação</h2>
+    <div class="creators-list">
+        <div class="creator-card">
+            <h3>Leonardo  pv25184</h3>
+            <p>Desenvolvedor mobile</p>
+        </div>
+        <div class="creator-card">
+            <h3>Rafael  pv19682</h3>
+            <p>Desenvolvedor mobile</p>
+        </div>
+        <div class="creator-card">
+            <h3>Francisco  pv19656</h3>
+            <p>Desenvolvedor mobile</p>
+        </div>
+        <div class="creator-card">
+            <h3>Claudio  pv20226</h3>
+            <p>Desenvolvedor web</p>
+        </div>
+        <div class="creator-card">
+            <h3>Afonso  pv25211</h3>
+            <p>Desenvolvedor API</p>
+        </div>
+    </div>
+</section>
+
+<footer>
+    &copy; 2024 SOFTSHARES - PINT
+</footer>
+
+</body>
+</html>
