@@ -170,28 +170,28 @@ const GerirAreasFormacao = () => {
                                         <td>{area.descricao || '-'}</td>
                                         <td>{area.Categoria?.nome || 'N/A'}</td>
                                         <td className="actions-cell">
-  <Button 
-    variant="warning" 
-    size="sm"
-    onClick={() => handleEdit(area)}
-    className="action-btn edit-btn"
-    title="Editar"
-  >
-    <FaEdit />
-  </Button>
-  <Button 
-    variant="danger" 
-    size="sm"
-    onClick={() => {
-      setAreaAtual(area);
-      setShowDeleteModal(true);
-    }}
-    className="action-btn delete-btn"
-    title="Excluir"
-  >
-    <FaTrash />
-  </Button>
-</td>
+                                            <Button 
+                                                variant="warning" 
+                                                size="sm"
+                                                onClick={() => handleEdit(area)}
+                                                className="action-btn edit-btn"
+                                                title="Editar"
+                                            >
+                                                <FaEdit />
+                                            </Button>
+                                            <Button 
+                                                variant="danger" 
+                                                size="sm"
+                                                onClick={() => {
+                                                setAreaAtual(area);
+                                                setShowDeleteModal(true);
+                                                }}
+                                                className="action-btn delete-btn"
+                                                title="Excluir"
+                                            >
+                                                <FaTrash />
+                                            </Button>
+                                            </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -225,7 +225,6 @@ const GerirAreasFormacao = () => {
                             <Form.Group className="form-group">
                                 <Form.Label>Descrição</Form.Label>
                                 <Form.Control
-                                    as="textarea"
                                     rows={3}
                                     name="descricao"
                                     value={formData.descricao}

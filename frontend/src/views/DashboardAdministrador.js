@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import { Bar } from "react-chartjs-2";
 import Sidebar from "../components/Sidebar";
 import '../css/DashboardAdministrador.css';
@@ -17,39 +18,67 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const DashboardAdministrador = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+
   const { user } = location.state || {};
 
   const [numCursos, setNumCursos] = useState(null);
   const [numFormandos, setNumFormandos] = useState(null);
   const [cursosPorMes, setCursosPorMes] = useState([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [responseCursos, responseFormandos, responseGrafico] = await Promise.all([
-          fetch("http://localhost:3000/api/dashboard/admin"),
-          fetch("http://localhost:3000/api/dashboard/formandos"),
-          fetch("http://localhost:3000/api/dashboard/cursos/por-mes")
-        ]);
+  const userId = localStorage.getItem('usuarioId');
 
-        const [dataCursos, dataFormandos, dataGrafico] = await Promise.all([
-          responseCursos.json(),
-          responseFormandos.json(),
-          responseGrafico.json()
-        ]);
+  if (!userId) {
+    setIsAuthenticated(false); // mostra mensagem
+    setTimeout(() => {
+      navigate('/', { replace: true });
+    }, 2000); // redireciona após 2 segundos
+    return;
+  }
 
-        setNumCursos(dataCursos.totalCursos);
-        setNumFormandos(dataFormandos.totalFormandos);
+  const fetchData = async () => {
+    try {
+      const [responseCursos, responseFormandos, responseGrafico] = await Promise.all([
+        fetch("http://localhost:3000/api/dashboard/admin"),
+        fetch("http://localhost:3000/api/dashboard/formandos"),
+        fetch("http://localhost:3000/api/dashboard/cursos/por-mes")
+      ]);
 
-        const processedData = processChartData(dataGrafico.data);
-        setCursosPorMes(processedData);
-      } catch (error) {
-        console.error("Erro ao buscar dados:", error);
-      }
-    };
+      const [dataCursos, dataFormandos, dataGrafico] = await Promise.all([
+        responseCursos.json(),
+        responseFormandos.json(),
+        responseGrafico.json()
+      ]);
 
-    fetchData();
-  }, []);
+      setNumCursos(dataCursos.totalCursos);
+      setNumFormandos(dataFormandos.totalFormandos);
+
+      const processedData = processChartData(dataGrafico.data);
+      setCursosPorMes(processedData);
+    } catch (error) {
+      console.error("Erro ao buscar dados:", error);
+    }
+  };
+
+  fetchData();
+}, [navigate]);
+
+
+if (!isAuthenticated) {
+  return (
+    <div className="dashboard-container">
+      <Sidebar />
+      <div className="unauthenticated-message">
+        <p>Utilizador não autenticado. A redirecionar para o login...</p>
+      </div>
+    </div>
+  );
+}
+
+
 
   const processChartData = (apiData) => {
     return apiData.map(item => {

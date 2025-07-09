@@ -16,9 +16,6 @@ const ListarCursos = () => {
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [cursoParaEditar, setCursoParaEditar] = useState(null);
-
-
-   // Estados para modais
   const [showReativarModal, setShowReativarModal] = useState(false); 
   const [cursoParaReativar, setCursoParaReativar] = useState(null); 
 
@@ -119,6 +116,7 @@ const ListarCursos = () => {
       dataFim: ""
     });
   };
+
   const handleReativarCurso = async () => {
     try {
         const response = await axios.put(
@@ -140,7 +138,7 @@ const ListarCursos = () => {
         console.error("Erro ao reativar curso:", error);
         mostrarMensagem(error.response?.data?.message || "Erro ao reativar curso", "error");
     }
-};
+  };
 
   // Operações CRUD
   const criarCurso = async (e) => {
@@ -220,6 +218,19 @@ const ListarCursos = () => {
 
   const deletarCurso = async (id) => {
     try {
+      // Verificar o estado do curso antes de deletar
+      const curso = cursos.find(c => c.id_curso === id);
+      
+      if (!curso) {
+        mostrarMensagem("Curso não encontrado", "error");
+        return;
+      }
+
+      if (curso.estado === 'em_curso' || curso.estado === 'terminado') {
+        mostrarMensagem("Não é possível eliminar cursos em andamento ou terminados", "error");
+        return;
+      }
+
       await axios.delete(`http://localhost:3000/api/cursos/eliminar/${id}`);
       mostrarMensagem("Curso eliminado com sucesso!", "success");
       setCursos(prev => prev.filter(c => c.id_curso !== id));
@@ -248,6 +259,67 @@ const ListarCursos = () => {
     const dataFimMatch = filtros.dataFim ? curso.data_fim?.startsWith(filtros.dataFim) : true;
     return nomeMatch && dataInicioMatch && dataFimMatch;
   });
+
+  // Função para renderizar as ações da tabela
+  const renderAcoesCell = (curso) => {
+    const podeEditar = curso.estado === 'agendado';
+    const podeExcluir = curso.estado === 'agendado';
+    const podeReativar = curso.estado === 'terminado';
+
+    return (
+      <>
+        {/* Botão Excluir - só aparece se podeExcluir */}
+        {podeExcluir && (
+          <Button 
+            variant="outline-danger" 
+            size="sm" 
+            onClick={() => deletarCurso(curso.id_curso)}
+            className="acao-btn"
+            title="Excluir"
+          >
+            <FaTrash />
+          </Button>
+        )}
+        
+        {/* Botão Editar */}
+        <Button 
+          variant="outline-warning" 
+          size="sm" 
+          onClick={() => {
+            setCursoParaEditar({
+              ...curso,
+              data_inicio: formatarDataParaInput(curso.data_inicio),
+              data_fim: formatarDataParaInput(curso.data_fim)
+            });
+            setShowEditModal(true);
+          }}
+          disabled={!podeEditar}
+          className="acao-btn"
+          title={!podeEditar ? "Edição bloqueada após início" : "Editar"}
+        >
+          <FaEdit />
+        </Button>
+        
+        {/* Botão Reativar - só aparece se podeReativar */}
+        {podeReativar && (
+          <Button 
+            variant="outline-success" 
+            size="sm"
+            onClick={() => {
+              setCursoParaReativar(curso);
+              setNovaDataInicio("");
+              setNovaDataFim("");
+              setShowReativarModal(true);
+            }}
+            className="acao-btn"
+            title="Reativar"
+          >
+            <FaSync />
+          </Button>
+        )}
+      </>
+    );
+  };
 
   // Renderização
   return (
@@ -333,51 +405,8 @@ const ListarCursos = () => {
                     <td>{curso.vagas ?? "Ilimitado"}</td>
                     <td>{curso.tipo === 'sincrono' ? 'Síncrono' : 'Assíncrono'}</td>
                     <td className="acoes-cell">
-  <Button 
-    variant="outline-danger" 
-    size="sm" 
-    onClick={() => deletarCurso(curso.id_curso)}
-    className="acao-btn"
-    title="Excluir"
-  >
-    <FaTrash />
-  </Button>
-  
-  <Button 
-    variant="outline-warning" 
-    size="sm" 
-    onClick={() => {
-      setCursoParaEditar({
-        ...curso,
-        data_inicio: formatarDataParaInput(curso.data_inicio),
-        data_fim: formatarDataParaInput(curso.data_fim)
-      });
-      setShowEditModal(true);
-    }}
-    disabled={new Date() > new Date(curso.data_inicio)}
-    className="acao-btn"
-    title={new Date() > new Date(curso.data_inicio) ? "Edição bloqueada após início" : "Editar"}
-  >
-    <FaEdit />
-  </Button>
-  
-  {curso.estado === 'terminado' && (
-    <Button 
-      variant="outline-success" 
-      size="sm"
-      onClick={() => {
-        setCursoParaReativar(curso);
-        setNovaDataInicio("");
-        setNovaDataFim("");
-        setShowReativarModal(true);
-      }}
-      className="acao-btn"
-      title="Reativar"
-    >
-      <FaSync />
-    </Button>
-  )}
-</td>
+                      {renderAcoesCell(curso)}
+                    </td>
                   </tr>
                 ))
               ) : (
@@ -557,49 +586,51 @@ const ListarCursos = () => {
             </Form>
           </Modal.Body>
         </Modal>
+
+        {/* Modal de Reativação */}
         <Modal show={showReativarModal} onHide={() => setShowReativarModal(false)}>
-    <Modal.Header closeButton>
-        <Modal.Title>Reativar Curso</Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
-        <Form>
-            <Form.Group>
-                <Form.Label>Nova Data de Início *</Form.Label>
-                <Form.Control
-                    type="date"
-                    name="nova_data_inicio"
-                    value={novaDataInicio}
-                    onChange={(e) => setNovaDataInicio(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
-                    required
-                />
-            </Form.Group>
-            <Form.Group>
-                <Form.Label>Nova Data de Fim *</Form.Label>
-                <Form.Control
-                    type="date"
-                    name="nova_data_fim"
-                    value={novaDataFim}
-                    onChange={(e) => setNovaDataFim(e.target.value)}
-                    min={novaDataInicio || new Date().toISOString().split('T')[0]}
-                    required
-                />
-            </Form.Group>
-        </Form>
-    </Modal.Body>
-    <Modal.Footer>
-        <Button variant="secondary" onClick={() => setShowReativarModal(false)}>
-            Cancelar
-        </Button>
-        <Button 
-            variant="primary" 
-            onClick={handleReativarCurso}
-            disabled={!novaDataInicio || !novaDataFim}
-        >
-            Reativar Curso
-        </Button>
-    </Modal.Footer>
-</Modal>
+          <Modal.Header closeButton>
+              <Modal.Title>Reativar Curso</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+              <Form>
+                  <Form.Group>
+                      <Form.Label>Nova Data de Início *</Form.Label>
+                      <Form.Control
+                          type="date"
+                          name="nova_data_inicio"
+                          value={novaDataInicio}
+                          onChange={(e) => setNovaDataInicio(e.target.value)}
+                          min={new Date().toISOString().split('T')[0]}
+                          required
+                      />
+                  </Form.Group>
+                  <Form.Group>
+                      <Form.Label>Nova Data de Fim *</Form.Label>
+                      <Form.Control
+                          type="date"
+                          name="nova_data_fim"
+                          value={novaDataFim}
+                          onChange={(e) => setNovaDataFim(e.target.value)}
+                          min={novaDataInicio || new Date().toISOString().split('T')[0]}
+                          required
+                      />
+                  </Form.Group>
+              </Form>
+          </Modal.Body>
+          <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowReativarModal(false)}>
+                  Cancelar
+              </Button>
+              <Button 
+                  variant="primary" 
+                  onClick={handleReativarCurso}
+                  disabled={!novaDataInicio || !novaDataFim}
+              >
+                  Reativar Curso
+              </Button>
+          </Modal.Footer>
+        </Modal>
 
         {/* Modal de Edição */}
         {cursoParaEditar && (

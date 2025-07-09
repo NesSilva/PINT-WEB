@@ -12,17 +12,27 @@ const ForumTopico = sequelize.define('ForumTopico', {
     type: DataTypes.INTEGER,
     allowNull: false
   },
+  id_categoria: {
+              type: DataTypes.INTEGER, 
+              references: { 
+                  model: Categoria, 
+                  key: "id_categoria" 
+              } 
+          },
   id_utilizador: {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  data_criacao: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+  data_criacao: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+  valido: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  }
 }, {
   tableName: 'forum_topicos',
   timestamps: false
 });
 
-// ASSOCIAÇÕES PARA O SEQUELIZE FUNCIONAR COM INCLUDE (detalhe do autor e categoria)
 ForumTopico.belongsTo(Utilizador, { foreignKey: 'id_utilizador', as: 'autor' });
 ForumTopico.belongsTo(Categoria, { foreignKey: 'id_categoria', as: 'categoria' });
 

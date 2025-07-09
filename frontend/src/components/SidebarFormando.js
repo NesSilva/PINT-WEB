@@ -229,61 +229,61 @@ const SidebarFormando = ({ children }) => {
             ))}
 
             {/* Dropdown de Categorias */}
-            <div className="categories-dropdown">
-              <div 
-                className={`sidebar-menu-item ${showCategories ? 'active' : ''}`}
-                onClick={toggleCategoriesDropdown}
-              >
-                <div className="sidebar-menu-icon">
-                  <FiFolder size={20} />
-                </div>
-                <span className="sidebar-menu-label">
-                  Categorias
-                </span>
-                <div className="dropdown-arrow">
-                  {showCategories ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
-                </div>
-              </div>
+<div className="categories-dropdown">
+  <div 
+    className={`sidebar-menu-item ${showCategories ? 'active' : ''}`}
+    onClick={toggleCategoriesDropdown}
+  >
+    <div className="sidebar-menu-icon">
+      <FiFolder size={20} />
+    </div>
+    <span className="sidebar-menu-label">
+      Categorias
+    </span>
+    <div className="dropdown-arrow">
+      {showCategories ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
+    </div>
+  </div>
 
-              {showCategories && (
-                <div className="categories-dropdown-content">
-                  {loadingCategories ? (
-                    <div className="categories-loading">
-                      <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Carregando...</span>
-                      </div>
-                    </div>
-                  ) : (
-                    categoriesWithAreas.map(category => (
-                      <div key={category.id_categoria} className="category-item">
-                        <div 
-                          className="category-header"
-                          onClick={() => toggleCategory(category.id_categoria)}
-                        >
-                          <span>{category.nome}</span>
-                          {expandedCategories[category.id_categoria] ? 
-                            <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
-                        </div>
-                        
-                        {expandedCategories[category.id_categoria] && (
-                          <div className="areas-list">
-                            {category.areas.map(area => (
-                              <Link
-                                key={area.id_area}
-                                to={`/cursos/area/${area.id_area}`}
-                                className="area-item"
-                              >
-                                {area.nome}
-                              </Link>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              )}
+  {showCategories && (
+  <div className={`categories-dropdown-content ${showCategories ? 'show' : ''}`}>
+      {loadingCategories ? (
+        <div className="categories-loading">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Carregando...</span>
+          </div>
+        </div>
+      ) : (
+        categoriesWithAreas.map(category => (
+          <div key={category.id_categoria} className="category-item">
+            <div 
+              className="category-header"
+              onClick={() => toggleCategory(category.id_categoria)}
+            >
+              <span>{category.nome}</span>
+              {expandedCategories[category.id_categoria] ? 
+                <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
             </div>
+            
+            {expandedCategories[category.id_categoria] && (
+              <div className="areas-list">
+                {category.areas.map(area => (
+                  <Link
+                    key={area.id_area}
+                    to={`/cursos/area/${area.id_area}`}
+                    className="area-item"
+                  >
+                    {area.nome}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        ))
+      )}
+    </div>
+  )}
+</div>
 
             {/* Notificações */}
             <div 

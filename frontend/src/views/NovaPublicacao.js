@@ -48,53 +48,87 @@ const NovaPublicacao = () => {
         carregarCategorias();
     }, []);
 
-    const handleSubmit = async (values) => {
-        try {
-            setLoading(true);
-            const usuarioId = localStorage.getItem('usuarioId');
+const handleSubmit = async (values) => {
+  try {
+    setLoading(true);
+    const usuarioId = localStorage.getItem('usuarioId');
 
-            if (!usuarioId) {
-                message.error('Utilizador não autenticado! Faça login novamente.');
-                setLoading(false);
-                return;
-            }
+    if (!usuarioId) {
+      message.error('Usuário não autenticado!');
+      setLoading(false);
+      return;
+    }
 
-            const formData = new FormData();
-            formData.append('id_autor', usuarioId);
-            formData.append('id_categoria', values.categoria);
-            formData.append('titulo', values.titulo);
-            formData.append('conteudo', values.conteudo);
+    // 1. Criar o tópico primeiro (sem imagem)
+    const response = await axios.post('http://localhost:3000/api/forum/topico/criar', {
+      id_autor: usuarioId,
+      id_categoria: values.categoria,
+      titulo: values.titulo,
+      conteudo: values.conteudo
+    });
 
-            // Apenas o primeiro arquivo será enviado como imagem (ajuste se backend aceitar múltiplos)
-            if (fileList.length > 0 && fileList[0].originFileObj) {
-                formData.append('imagem', fileList[0].originFileObj);
-            }
+    console.log('Tamanho :--------------', fileList.length);
+    console.log('Ficheiros::-------------', fileList[0].originFileObj);
+    console.log('FileList atualizado:', fileList);
+    
+    // 2. Se houver imagem, enviar em requisição separada
+    if (fileList.length > 0 && fileList[0].originFileObj) {
+      try {
+        const formData = new FormData();
+        formData.append('file', fileList[0].originFileObj);
+        formData.append('id_topico', response.data.topico.id_topico);
+        
+        // Adicione headers para autenticação se necessário
+        const config = {
+          headers: { 
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${localStorage.getItem('token')}` 
+          }
+        };
+        
+        await axios.post(
+          'http://localhost:3000/api/forum/anexo/topico/anexo', 
+          formData, 
+          config
+        );
+        console.log('Imagem enviada com sucesso');
+        message.success('Imagem adicionada com sucesso!');
+      } catch (uploadError) {
+        console.log('Erro ao enviar imagem:', uploadError);
+        console.error('Erro no upload da imagem:', uploadError);
+        message.warning('Publicação criada, mas houve um erro ao enviar a imagem');
+      }
+    }
 
-            const response = await axios.post('http://localhost:3000/api/forum/topico/criar', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
+    message.success('Publicação criada com sucesso!');
+    console.log('Publicação criada:', response.data.topico.id_topico);
+    navigate(`/forum/publicacao/${response.data.topico.id_topico}`);
+  } catch (error) {
+    console.error('Erro ao criar publicação:', error);
+    const errorMsg = error.response?.data?.message || 
+                    error.response?.data?.error || 
+                    'Erro ao criar publicação';
+    message.error(errorMsg);
+  } finally {
+    setLoading(false);
+  }
+};
+   const beforeUpload = (file) => {
+    console.log('Arquivo recebido no beforeUpload:', file); // <-- LOG AQUI
+    // Mantém a estrutura esperada pelo Ant Design
+    const newFileList = [{
+        uid: file.uid,
+        name: file.name,
+        status: 'done',
+        originFileObj: file
+    }];
+    console.log('Novo fileList definido:', newFileList); // <-- LOG AQUI
+    setFileList(newFileList);
+    return false;
+};
 
-            message.success('Publicação criada com sucesso!');
-            // Use o nome correto da propriedade retornada pelo backend: response.data.topico.id_topico
-            navigate(`/forum/publicacao/${response.data.topico.id_topico}`);
-        } catch (error) {
-            console.error('Erro detalhado:', error.response?.data || error.message);
-            message.error(error.response?.data?.message || 'Erro ao criar publicação');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Configuração do upload antes de enviar
-    const beforeUpload = (file) => {
-        setFileList(prev => [...prev, file]);
-        return false; // Impede o upload automático
-    };
-
-    const onRemove = (file) => {
-        setFileList(prev => prev.filter(f => f.uid !== file.uid));
+    const onRemove = () => {
+        setFileList([]);
     };
 
     return (
@@ -154,14 +188,15 @@ const NovaPublicacao = () => {
                                 <TextArea rows={8} placeholder="Escreva seu conteúdo aqui..." />
                             </Form.Item>
                             
-                            <Form.Item label="Anexos">
+                            <Form.Item label="Imagem Principal">
                                 <Upload
                                     fileList={fileList}
                                     beforeUpload={beforeUpload}
                                     onRemove={onRemove}
-                                    multiple={false} // Apenas um arquivo por vez
+                                    multiple={false}
+                                    accept="image/*"
                                 >
-                                    <Button icon={<UploadOutlined />}>Selecionar Arquivo</Button>
+                                    <Button icon={<UploadOutlined />}>Selecionar Imagem</Button>
                                 </Upload>
                             </Form.Item>
                             

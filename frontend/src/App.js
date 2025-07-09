@@ -26,6 +26,8 @@ import ConteudoCursoFormador from "./views/ConteudoCursoFormador";
 import AvaliacaoCursoFormador from "./views/GerirAvaliações";
 import AvaliarAlunos from "./views/AlunosInscritos";
 import CursosPorArea from "./views/CursosPorArea";
+import AdminForum from "./views/AdminForum";
+import AdminEditarTopico from "./views/AdminEditarTopico";
   import './App.css';
   import 'bootstrap';
   import 'bootstrap/dist/css/bootstrap.min.css';
@@ -62,6 +64,10 @@ import CursosPorArea from "./views/CursosPorArea";
         <Route path="/formador/curso/:id_curso/conteudos" element={<ConteudoCursoFormador />} />
         <Route path="/formador/curso/:id_curso/avaliar-alunos" element={<AvaliarAlunos />} />
         <Route path="/cursos/area/:id_area" element={<CursosPorArea />} />
+        // No seu arquivo de rotas principal (App.js)
+<Route path="/admin/forum" element={<AdminForum />} />
+<Route path="/admin/forum/editar/:id_topico" element={<AdminEditarTopico />} />
+
 
 
 

@@ -1,31 +1,33 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../middleware/upload');
+const upload = require('../firebase/upload');
 const forumTopicoController = require('../controllers/forumTopicoController');
 const { isGestor } = require('../middleware/auth');
 
-// Criar tópico (só gestor)
-router.post('/criar', isGestor, upload.single('imagem'), forumTopicoController.criarTopico);
 
-// Editar tópico (só autor ou admin)
+const uploadFields = upload.fields([
+  { name: 'imagem', maxCount: 1 },
+  { name: 'anexos', maxCount: 5 } 
+]);
+
+router.post('/criar', upload.single('file'), forumTopicoController.criarTopico);
 router.put('/editar/:id_topico', forumTopicoController.editarTopico);
 
-// Remover tópico (só autor ou admin)
+
 router.delete('/remover/:id_topico', forumTopicoController.removerTopico);
 
-// Listar todos os tópicos do fórum
 router.get('/todos', forumTopicoController.listarTodosTopicos);
+router.get('/todos/validos', forumTopicoController.listarTopicosValidos);
 
-// Listar tópicos por categoria
 router.get('/categoria/:id_categoria', forumTopicoController.listarTopicosPorCategoria);
 
-// Buscar tópico por ID
 router.get('/:id_topico', forumTopicoController.getTopicoById);
 
-// Denunciar tópico
 router.post('/denunciar', forumTopicoController.denunciarTopico);
 
-// Avaliar tópico
 router.post('/avaliar', forumTopicoController.avaliarTopico);
+
+// routes/forumTopico.js
+router.patch('/:id_topico/validar', forumTopicoController.validarTopico);
 
 module.exports = router;

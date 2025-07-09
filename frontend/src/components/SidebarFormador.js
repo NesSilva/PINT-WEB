@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FiGrid, FiBookOpen, FiLayers, FiFileText, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiGrid, FiBookOpen, FiLayers, FiFileText, FiChevronLeft, FiChevronRight , FiUsers} from "react-icons/fi";
 import '../css/Sidebar.css';
 
 const SidebarFormador = ({ children }) => {
@@ -39,7 +39,9 @@ const SidebarFormador = ({ children }) => {
   const menuItems = [
     { path: "/dashboard/formador", icon: <FiGrid size={20} />, label: "Dashboard" },
     { path: "/formador/cursos", icon: <FiBookOpen size={20} />, label: "Gerir Conteúdos" },
-    { path: "/formador/cursos/ava", icon: <FiLayers size={20} />, label: "Gerir Avaliações" }
+    { path: "/formador/cursos/ava", icon: <FiLayers size={20} />, label: "Gerir Avaliações" },
+    { path: "/forum", icon: <FiUsers size={20} />, label: "Fórum" }
+    
   ];
 
   return (

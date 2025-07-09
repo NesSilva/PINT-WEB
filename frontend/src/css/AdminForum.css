@@ -1,0 +1,242 @@
+/* Container principal */
+.admin-forum-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.admin-forum-content {
+    flex: 1;
+    padding: 20px;
+    margin-right: 180px;
+    transition: margin-left 0.3s;
+}
+
+.admin-forum-content.collapsed {
+    margin-left: 80px;
+}
+
+.admin-forum-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    padding: 20px;
+}
+
+.admin-forum-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.admin-forum-title {
+    margin: 0;
+    color: #333;
+    font-size: 24px;
+}
+
+.create-topic-button {
+    padding: 8px 16px;
+    font-size: 14px;
+    background-color: #1890ff;
+    border-color: #1890ff;
+}
+
+/* Mensagens */
+.status-message {
+    margin-bottom: 20px;
+}
+
+.loading-message {
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+/* Tabela */
+.forum-table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.forum-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.forum-table thead {
+    background-color: #343a40;
+    color: white;
+}
+
+.forum-table th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 500;
+}
+
+.forum-table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+.forum-table tr:last-child td {
+    border-bottom: none;
+}
+
+.forum-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-badge.valid {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-badge.pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.actions-cell {
+    white-space: nowrap;
+}
+
+.action-btn {
+    margin-right: 8px;
+    padding: 5px 10px;
+    font-size: 12px;
+    min-width: 32px;
+}
+
+.validate-btn {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.invalidate-btn {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.edit-btn {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+/* Barra de pesquisa */
+.search-container {
+    margin-bottom: 20px;
+}
+
+.forum-search-input {
+    max-width: 400px;
+}
+
+.forum-search-input .ant-input-group-addon button {
+    background-color: #1890ff;
+    border-color: #1890ff;
+    color: white;
+}
+
+/* Modal */
+.forum-modal .ant-modal-header {
+    border-bottom: 1px solid #dee2e6;
+    padding: 15px;
+}
+
+.forum-modal .ant-modal-title {
+    font-weight: 600;
+    font-size: 18px;
+    color: #212529;
+}
+
+.forum-modal .ant-modal-body {
+    padding: 20px;
+}
+
+/* Responsividade */
+@media (max-width: 992px) {
+    .admin-forum-content {
+        margin-left: 80px;
+    }
+    
+    .admin-forum-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .search-container {
+        width: 100%;
+    }
+    
+    .forum-search-input {
+        width: 100%;
+        max-width: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-forum-content {
+        margin-left: 0;
+        padding-top: 60px;
+    }
+    
+    .actions-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .action-btn {
+        margin-right: 0;
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-forum-content {
+        padding: 16px;
+    }
+    
+    .admin-forum-card {
+        border-radius: 0;
+    }
+    
+    .forum-modal {
+        width: 100% !important;
+        max-width: 100%;
+        margin: 0;
+        top: 0;
+        padding: 0;
+    }
+    
+    .forum-modal .ant-modal-content {
+        height: 100vh;
+        border-radius: 0;
+    }
+}

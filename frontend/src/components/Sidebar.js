@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FiUsers, FiBookOpen, FiGrid, FiLayers, FiFileText, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiUsers, FiBookOpen, FiGrid, FiLayers, FiFileText, FiChevronLeft, FiChevronRight, FiMessageSquare, FiLogOut } from "react-icons/fi";
 import '../css/Sidebar.css';
 
 const Sidebar = ({ children }) => {
@@ -10,6 +10,7 @@ const Sidebar = ({ children }) => {
 
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [activeItem, setActiveItem] = React.useState(null);
+  const [showLogout, setShowLogout] = React.useState(false);
 
   const handleLogoClick = (e) => {
     e.preventDefault();
@@ -18,7 +19,7 @@ const Sidebar = ({ children }) => {
     } else if (user) {
       navigate("/selecionar-perfil", { state: { user } });
     } else {
-      navigate("/login");
+      navigate("/dashboard/administrador");
     }
   };
 
@@ -34,6 +35,11 @@ const Sidebar = ({ children }) => {
     setActiveItem(null);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('userId'); // Remove o userId do localStorage
+    navigate("/n"); // Redireciona para a página de login
+  };
+
   const highlightPosition = activeItem !== null ? 16 + (activeItem * 54) : -70;
 
   const menuItems = [
@@ -41,14 +47,14 @@ const Sidebar = ({ children }) => {
     { path: "/cursos", icon: <FiBookOpen size={20} />, label: "Cursos" },
     { path: "/gerenciar-categorias", icon: <FiGrid size={20} />, label: "Categorias" },
     { path: "/gerir-areas-formacao", icon: <FiLayers size={20} />, label: "Áreas de Formação" },
-    { path: "/inscricoes", icon: <FiFileText size={20} />, label: "Inscrições" }
+    { path: "/admin/forum", icon: <FiMessageSquare size={20} />, label: "Moderar Fórum" }
   ];
 
   return (
     <>
       <div className={`sidebar-container ${isCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
-          <a href="#" onClick={handleLogoClick} className="sidebar-logo-link">
+          <a href="/dashboard/administrador" onClick={handleLogoClick} className="sidebar-logo-link">
             <img 
               src="/logotipo-softinsa.png" 
               alt="Logotipo Softinsa" 
@@ -101,8 +107,35 @@ const Sidebar = ({ children }) => {
           
           {!isCollapsed && (
             <div className="footer-user-info">
-              <div className="footer-user-name">
+              <div 
+                className="footer-user-name"
+                onClick={() => setShowLogout(!showLogout)}
+                style={{ cursor: 'pointer', position: 'relative' }}
+              >
                 {user?.nome || 'Utilizador'}
+                {showLogout && (
+                  <div 
+                    className="logout-option"
+                    style={{
+                      position: 'absolute',
+                      bottom: '-40px',
+                      left: '0',
+                      background: '#2c3e50',
+                      padding: '8px 16px',
+                      borderRadius: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      cursor: 'pointer',
+                      zIndex: 100,
+                      boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+                    }}
+                    onClick={handleLogout}
+                  >
+                    <FiLogOut size={16} />
+                    <span>Logout</span>
+                  </div>
+                )}
               </div>
             </div>
           )}
