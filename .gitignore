@@ -7,6 +7,8 @@ logs/
 npm-debug.log*
 yarn-debug.log*
 lerna-debug.log*
+backend/firebase/*.json
+
 
 # Pasta de cobertura de testes
 coverage/
