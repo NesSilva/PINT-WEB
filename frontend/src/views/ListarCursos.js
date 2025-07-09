@@ -197,7 +197,7 @@ useEffect(() => {
 
     const response = await axios.put(
       `http://localhost:3000/api/cursos/editar/${cursoParaEditar.id_curso}`,
-      dadosAtualizados
+      dadosAtualizados,
       formDataToSend,
       {
         headers: {
