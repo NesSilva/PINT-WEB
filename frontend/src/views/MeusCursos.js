@@ -67,15 +67,6 @@ const MeusCursos = () => {
     }
   };
 
-/*************  ✨ Windsurf Command ⭐  *************/
-/**
- * Retrieves the title of a course given its ID.
- * 
- * @param {number} id_curso - The ID of the course to find the title for.
- * @returns {string} - The title of the course if found, otherwise "Desconhecido".
- */
-
-/*******  6c6ac23c-0967-4269-9f59-84fc8fb8a3ce  *******/
   const getTituloCurso = (id_curso) => {
     const curso = cursos.find((c) => c.id_curso === id_curso);
     return curso ? curso.titulo : "Desconhecido";
@@ -85,6 +76,10 @@ const MeusCursos = () => {
     const curso = cursos.find((c) => c.id_curso === id_curso);
     return curso ? curso.data_inicio : "Desconhecido";
   };
+    const getDataFimCurso = (id_curso) => {
+    const curso = cursos.find((c) => c.id_curso === id_curso);
+    return curso ? curso.data_fim : "Desconhecido";
+  };
   
   
 
@@ -92,6 +87,11 @@ const MeusCursos = () => {
     const progresso = progressoCursos.find(p => p.id_curso === id_curso);
     return progresso ? progresso.nota_curso : null;
   };
+
+ const getTipoCurso = (id_curso) => {
+  const curso = cursos.find((c) => c.id_curso === id_curso);
+  return curso ? (curso.tipo || curso.tipo_curso || "Desconhecido") : "Desconhecido";
+};
 
   const formatNota = (nota) => {
     const n = Number(nota);
@@ -106,7 +106,6 @@ const MeusCursos = () => {
     const date = new Date(dataString);
     if (isNaN(date.getTime())) return "Data inválida";
     
-    // Formato YYYY-MM-DD
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -165,16 +164,15 @@ const MeusCursos = () => {
    return (
     <div style={{ 
       display: 'flex', 
-      minHeight: '100vh', 
       backgroundColor: "#f7f9fc",
       position: 'relative'
     }}>
       <SidebarFormando />
       <div style={{ 
+        marginRight:'140px',
         flex: 1, 
         padding: "2rem", 
-        maxWidth: "900px", 
-        margin: "0 auto",
+        margin: "5 auto",
         position: 'relative',
         zIndex: 1
       }}>
@@ -253,6 +251,15 @@ const MeusCursos = () => {
                       <strong style={{color: '#5d6d7e'}}>Data de Início:</strong>{" "}
                       {formatarData(getDataInicioCurso(inscricao.id_curso))}
                     </p>
+                    <p style={{ margin: 0, color: "#7f8c8d" }}>
+                      <strong style={{color: '#5d6d7e'}}>Data de Fim:</strong>{" "}
+                      {formatarData(getDataFimCurso(inscricao.id_curso))}
+                    </p>
+
+                    <p style={{ margin: 0, color: "#7f8c8d" }}>
+  <strong style={{color: '#5d6d7e'}}>Tipo Curso:</strong>{" "}
+  {getTipoCurso(inscricao.id_curso)}
+</p>
                     
                     <p style={{ margin: 0, color: "#7f8c8d" }}>
                       <strong style={{color: '#5d6d7e'}}>Horas de trabalho:</strong> {inscricao.horas_curso}h

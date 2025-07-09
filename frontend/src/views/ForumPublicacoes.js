@@ -39,6 +39,7 @@ const { Title, Text } = Typography;
 
 const ForumPublicacoes = () => {
     const [publicacoes, setPublicacoes] = useState([]);
+    const [todasPublicacoes, setTodasPublicacoes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [categorias, setCategorias] = useState([]);
     const [categoriaSelecionada, setCategoriaSelecionada] = useState(null);
@@ -57,96 +58,88 @@ const ForumPublicacoes = () => {
     }, [categoriaSelecionada, pagination.current]);
 
     const carregarDados = async () => {
-    try {
-        setLoading(true);
-        const params = {
-            pagina: pagination.current,
-            limite: pagination.pageSize,
-            id_categoria: categoriaSelecionada || undefined
-        };
-
-        const [responsePublicacoes, responseCategorias] = await Promise.all([
-            axios.get('/api/forum/topico/todos/validos', { params }),
-            axios.get('/api/categorias')
-        ]);
-        
-        // Buscar contagem de comentários para cada tópico
-        const publicacoesComContagem = await Promise.all(
-    responsePublicacoes.data.topicos.map(async (topico) => {
         try {
-            const response = await axios.get(`/api/forum/comentario/contar/${topico.id_topico}`);
-            return {
-                ...topico,
-                total_respostas: response.data.total_respostas || 0
+            setLoading(true);
+            const params = {
+                pagina: pagination.current,
+                limite: pagination.pageSize,
+                id_categoria: categoriaSelecionada || undefined 
             };
+
+            const [responsePublicacoes, responseCategorias] = await Promise.all([
+                axios.get('/api/forum/topico/todos/validos', { params }),
+                axios.get('/api/categorias')
+            ]);
+            
+            const publicacoesComContagem = await Promise.all(
+                responsePublicacoes.data.topicos.map(async (topico) => {
+                    try {
+                        const response = await axios.get(`/api/forum/comentario/contar/${topico.id_topico}`);
+                        return {
+                            ...topico,
+                            total_respostas: response.data.total_respostas || 0
+                        };
+                    } catch (error) {
+                        return {
+                            ...topico,
+                            total_respostas: 0
+                        };
+                    }
+                })
+            );
+            
+            if (!categoriaSelecionada) {
+                setTodasPublicacoes(publicacoesComContagem);
+            }
+            
+            setPublicacoes(publicacoesComContagem);
+            setTotalTopicos(responsePublicacoes.data.total || 0);
+            setCategorias(responseCategorias.data.categorias);
+            setPagination(prev => ({
+                ...prev,
+                total: responsePublicacoes.data.total || 0
+            }));
         } catch (error) {
-            return {
-                ...topico,
-                total_respostas: 0
-            };
+            console.error("Erro ao carregar dados:", error);
+            message.error("Erro ao carregar publicações");
+        } finally {
+            setLoading(false);
         }
-    })
-);
-        
-        setPublicacoes(publicacoesComContagem);
-        setTotalTopicos(responsePublicacoes.data.total || 0);
-        setCategorias(responseCategorias.data.categorias);
-        setPagination(prev => ({
-            ...prev,
-            total: responsePublicacoes.data.total || 0
-        }));
-    } catch (error) {
-        console.error("Erro ao carregar dados:", error);
-        message.error("Erro ao carregar publicações");
-    } finally {
-        setLoading(false);
-    }
+    };
+
+const filtrarPorCategoria = (idCategoria) => {
+    setCategoriaSelecionada(idCategoria);
+    setPagination(prev => ({ ...prev, current: 1 })); 
 };
 
-    const filtrarPorCategoria = (idCategoria) => {
-        setCategoriaSelecionada(idCategoria);
-        setPagination(prev => ({ ...prev, current: 1 }));
+    const getContagemPorCategoria = (idCategoria) => {
+        if (!idCategoria) return todasPublicacoes.length;
+        return todasPublicacoes.filter(p => p.id_categoria === idCategoria).length;
     };
 
-    const removerTopico = async (id_topico) => {
-        try {
-            await axios.delete(`/api/forum/topico/remover/${id_topico}`);
-            message.success("Tópico removido com sucesso!");
-            carregarDados(); // Recarrega a lista
-        } catch (error) {
-            console.error("Erro ao remover tópico:", error);
-            message.error(error.response?.data?.message || "Erro ao remover tópico");
-        }
-    };
-
-    const editarTopico = (id_topico) => {
-        navigate(`/forum/publicacao/${id_topico}/editar`);
-    };
 
     const handleTableChange = (pagination) => {
-      setPagination(pagination);
+        setPagination(pagination);
     };
 
     const getCategoriaNome = (idCategoria) => {
-      const categoria = categorias.find(c => c.id_categoria === idCategoria);
-      return categoria ? categoria.nome : 'Sem categoria';
+        const categoria = categorias.find(c => c.id_categoria === idCategoria);
+        return categoria ? categoria.nome : 'Sem categoria';
     };
+
+     const publicacoesFiltradas = categoriaSelecionada 
+        ? publicacoes.filter(p => p.id_categoria === categoriaSelecionada)
+        : publicacoes;
 
     return (
         <Layout>
             <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-              <Breadcrumb
-                items={[
-                  { title: <Link to="/"><HomeOutlined /></Link> },
-                  { title: <><FolderOutlined /> Fórum</> }
-                ]}
-              />
+              
 
               <Row gutter={[16, 16]}>
                   <Col span={24}>
                       <Title level={2} style={{ marginBottom: 0 }}>Fórum de Discussão</Title>
-                      <Text type="secondary">{totalTopicos} {totalTopicos === 1 ? 'tópico' : 'tópicos'}</Text>
-                      
+<Text type="secondary">{totalTopicos} {totalTopicos === 1 ? 'tópico' : 'tópicos'}</Text>                      
                       <Button 
                           type="primary" 
                           icon={<PlusOutlined />}
@@ -181,7 +174,7 @@ const ForumPublicacoes = () => {
                                         <Text>{categoria.nome}</Text>
                                         {categoria.id_categoria && (
                                           <Tag style={{ marginLeft: 'auto' }}>
-                                            {publicacoes.filter(p => p.id_categoria === categoria.id_categoria).length}
+                                            {getContagemPorCategoria(categoria.id_categoria)}
                                           </Tag>
                                         )}
                                       </Space>
@@ -196,7 +189,7 @@ const ForumPublicacoes = () => {
                           itemLayout="vertical"
                           size="large"
                           loading={loading}
-                          dataSource={publicacoes}
+                          dataSource={publicacoesFiltradas}
                           pagination={{
                             ...pagination,
                             showSizeChanger: true,
@@ -230,7 +223,6 @@ const ForumPublicacoes = () => {
                                                         </span>
                                                       </Tooltip>
                                                   )}
-                                                 
                                               </Space>
                                           }
                                       >
@@ -278,8 +270,6 @@ const ForumPublicacoes = () => {
                                                 <Tag icon={<FolderOutlined />}>
                                                   {getCategoriaNome(publicacao.id_categoria)}
                                                 </Tag>
-                                                
-                                                
                                                 
                                                 <Space size="small">
                                                     <MessageOutlined />

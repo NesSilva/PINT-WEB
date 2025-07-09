@@ -124,21 +124,31 @@ const listarTodosTopicos = async (req, res) => {
 };
 
 const listarTopicosValidos = async (req, res) => {
-  try {
-    const topicos = await ForumTopico.findAll({
-      include: [
-        { model: Utilizador, as: 'autor', attributes: ['nome'] },
-        { model: Categoria, as: 'categoria', attributes: ['nome'] }
-        
-      ],
+    try {
+    const { pagina = 1, limite = 10, id_categoria } = req.query;
+    const where = { valido: true };
+
+    if (id_categoria) {
+      where.id_categoria = id_categoria;
+    }
+
+    const { count, rows } = await ForumTopico.findAndCountAll({
+      where,
+      offset: (pagina - 1) * limite,
+      limit: parseInt(limite),
       order: [['data_criacao', 'DESC']],
-      where: {
-        valido: true // Apenas tópicos válidos
-      }
+      include: [
+        { model: Categoria, as: 'categoria' },
+        { model: Utilizador, as: 'autor' }
+      ]
     });
-    res.json({ success: true, topicos });
+
+    res.json({
+      topicos: rows,
+      total: count
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Erro ao listar tópicos" });
+    res.status(500).json({ error: 'Erro ao buscar tópicos' });
   }
 };
 

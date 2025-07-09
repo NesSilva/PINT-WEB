@@ -89,7 +89,6 @@ const listarAnexosPorTopico = async (req, res) => {
             where: { id_topico },
             order: [['data_upload', 'DESC']]
         });
-        console.log('Anexos encontrados no banco:-----------------', anexos); // <-- LOG 2
 
         
         res.status(200).json({

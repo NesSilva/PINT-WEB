@@ -20,7 +20,7 @@ import {
     ArrowLeftOutlined
 } from '@ant-design/icons';
 import axios from 'axios';
-import Layout from "../components/Layout"; 
+import SidebarFormador from "../components/SidebarFormador";
 import { Link } from 'react-router-dom';
 import { Space } from 'antd';
 
@@ -132,7 +132,8 @@ const handleSubmit = async (values) => {
     };
 
     return (
-        <Layout>
+        <div>
+        <SidebarFormador />
             <Breadcrumb style={{ marginBottom: 16 }}>
                 <Breadcrumb.Item>
                     <Link to="/"><HomeOutlined /></Link>
@@ -214,7 +215,7 @@ const handleSubmit = async (values) => {
                     </Card>
                 </Col>
             </Row>
-        </Layout>
+        </div>
     );
 };
 

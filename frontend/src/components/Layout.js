@@ -9,7 +9,7 @@ const Layout = ({ children }) => {
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       {!['/login', '/reset-password', '/primeiro-login'].includes(location.pathname) && (
-        <SidebarFormando user={user} perfil={perfil} />
+        <SidebarFormando />
       )}
       
       <div style={{ flex: 1, padding: '20px' }}>

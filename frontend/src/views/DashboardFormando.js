@@ -217,7 +217,7 @@ const DashboardFormando = () => {
     <div className="container-fluid">
       <div className="row">
         <SidebarFormando user={user} perfil={perfil} />
-        <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+        <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 " style={{ backgroundColor: '#f8f9fa' }}>
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h1 className="h3 mb-0">Bem-vindo de volta, {user.nome}</h1>
             <div className="d-flex">
