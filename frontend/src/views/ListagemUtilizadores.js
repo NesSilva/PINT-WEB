@@ -5,6 +5,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import axios from "axios";
 import "../css/ListarUtilizadores.css";
 
+
 const ListarUtilizadores = () => {
   // Estados
   const [utilizadores, setUtilizadores] = useState([]);
