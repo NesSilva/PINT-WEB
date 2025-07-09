@@ -149,7 +149,6 @@ const DashboardFormando = () => {
   const [categoriaFiltro, setCategoriaFiltro] = useState('');
   const [cursosFiltrados, setCursosFiltrados] = useState([]);
 
-  // Debug: verificar estado atual
   useEffect(() => {
   if (user?.id_utilizador) {
     axios.get(`http://localhost:3000/api/notificacoes/${user.id_utilizador}`)
@@ -162,7 +161,6 @@ const DashboardFormando = () => {
   }
 }, [user]);
 
-  // Buscar dados da API
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -218,7 +216,6 @@ const DashboardFormando = () => {
   return (
     <div className="container-fluid">
       <div className="row">
-        {/* Passa user e perfil para o Sidebar */}
         <SidebarFormando user={user} perfil={perfil} />
         <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
           <div className="d-flex justify-content-between align-items-center mb-4">
@@ -239,7 +236,6 @@ const DashboardFormando = () => {
             </div>
           </div>
 
-          {/* Filtros */}
           <div className="row mb-4">
             <div className="col-md-4">
               <select
@@ -271,7 +267,6 @@ const DashboardFormando = () => {
             </div>
           </div>
 
-          {/* Cursos em Destaque */}
           <div className="mb-5">
             <h2 className="h4 mb-4">Cursos em Destaque</h2>
             <Row xs={1} md={2} lg={3} className="g-4">
@@ -283,7 +278,6 @@ const DashboardFormando = () => {
             </Row>
           </div>
 
-          {/* Todos os Cursos */}
           <div>
             <div className="d-flex justify-content-between align-items-center mb-4">
               <h2 className="h4 mb-0">Todos os Cursos</h2>

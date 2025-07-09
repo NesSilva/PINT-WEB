@@ -10,26 +10,19 @@ const login = async (req, res) => {
     if (!email || !senha) {
       return res.status(400).json({ success: false, message: "Email e palavra-passe são obrigatórios." });
     }
-
     const utilizador = await Utilizador.findOne({ where: { email } });
-
     if (!utilizador) {
       return res.status(404).json({ success: false, message: "Utilizador não encontrado." });
     }
-
     const senhaCorreta = await bcrypt.compare(senha, utilizador.senha);
-
 
     if (!senhaCorreta) {
       return res.status(401).json({ success: false, message: "Palavra-passe incorreta." });
     }
-
     const associacoes = await UtilizadorPerfil.findAll({
       where: { id_utilizador: utilizador.id_utilizador }
     });
-
     const perfilIds = associacoes.map((assoc) => assoc.id_perfil);
-
     let perfis = [];
     if (perfilIds.length > 0) {
       perfis = await Perfil.findAll({

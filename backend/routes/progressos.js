@@ -61,7 +61,6 @@ router.get("/curso/:id_curso", async (req, res) => {
   }
 });
 
-// **AQUI: rota POST para salvar avaliação**
 router.post("/", async (req, res) => {
   const { id_utilizador, id_curso, nota_curso } = req.body;
 

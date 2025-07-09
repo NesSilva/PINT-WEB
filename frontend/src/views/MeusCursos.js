@@ -125,6 +125,7 @@ const MeusCursos = () => {
       id_utilizador: userId,
       id_curso,
     });
+    
 
     // Independente de ser novo ou existente, abre o PDF
     if (res.data.success) {

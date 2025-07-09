@@ -11,7 +11,6 @@ router.delete('/:id', documentoAvaliacaoController.deletarDocumento);
 
 router.get('/utilizador/:id_utilizador', documentoAvaliacaoController.listarDocumentosUtilizador);
 
-// Adicione esta nova rota
 router.get('/utilizador/:id_utilizador/curso/:id_curso', documentoAvaliacaoController.listarDocumentosUtilizadorCurso);
 
 module.exports = router;

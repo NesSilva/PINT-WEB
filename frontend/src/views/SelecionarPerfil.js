@@ -38,7 +38,7 @@ const SelecionarPerfil = () => {
 
         <div className="d-flex flex-wrap justify-content-center gap-3">
           {user.perfis.map((perfil) => (
-            <button
+            <button   
               key={perfil.id}
               className="btn btn-outline-light"
               onClick={() => handleSelecionar(perfil)}
