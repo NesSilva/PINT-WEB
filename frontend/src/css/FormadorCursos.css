@@ -1,0 +1,148 @@
+/* Container principal */
+.formador-cursos-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    margin-left: 220px;
+}
+
+/* Cabeçalho */
+.page-header {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.page-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 24px;
+}
+
+/* Mensagens */
+.status-message {
+    margin-bottom: 20px;
+}
+
+.loading-message, .no-results {
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+/* Tabela */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+.cursos-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cursos-table thead {
+    background-color: #343a40;
+    color: white;
+}
+
+.cursos-table th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 500;
+}
+
+.cursos-table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+.cursos-table tr:last-child td {
+    border-bottom: none;
+}
+
+.cursos-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.actions-cell {
+    white-space: nowrap;
+}
+
+.action-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+/* Status badges */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.status-badge.agendado {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-badge.em_curso {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-badge.terminado {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding-top: 60px;
+    }
+    
+    .cursos-table {
+        display: block;
+    }
+    
+    .cursos-table thead {
+        display: none;
+    }
+    
+    .cursos-table tr {
+        display: block;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .cursos-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 10px;
+        border-bottom: 1px dotted #dee2e6;
+    }
+    
+    .cursos-table td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        margin-right: 10px;
+    }
+    
+    .actions-cell {
+        justify-content: center !important;
+    }
+}

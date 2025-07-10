@@ -29,6 +29,7 @@
                 model: AreaFormacao, 
                 key: "id_area" 
             } 
+            
         },
         id_formador: { 
             type: DataTypes.INTEGER,

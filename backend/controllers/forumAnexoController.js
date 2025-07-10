@@ -89,7 +89,6 @@ const listarAnexosPorTopico = async (req, res) => {
             where: { id_topico },
             order: [['data_upload', 'DESC']]
         });
-
         
         res.status(200).json({
             success: true,

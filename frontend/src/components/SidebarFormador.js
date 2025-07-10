@@ -1,6 +1,15 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FiGrid, FiBookOpen, FiLayers, FiFileText, FiChevronLeft, FiChevronRight , FiUsers} from "react-icons/fi";
+import { 
+  FiGrid, 
+  FiBookOpen, 
+  FiLayers, 
+  FiFileText, 
+  FiChevronLeft, 
+  FiChevronRight, 
+  FiUsers 
+} from "react-icons/fi";
+import axios from "axios";
 import '../css/Sidebar.css';
 
 const SidebarFormador = ({ children }) => {
@@ -8,8 +17,31 @@ const SidebarFormador = ({ children }) => {
   const navigate = useNavigate();
   const { user, perfil } = location.state || {};
 
-  const [isCollapsed, setIsCollapsed] = React.useState(false);
-  const [activeItem, setActiveItem] = React.useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [activeItem, setActiveItem] = useState(null);
+  const [nomeUtilizador, setNomeUtilizador] = useState('');
+
+  // Buscar nome do utilizador pelo ID
+  const fetchNomeUtilizador = async () => {
+    try {
+      const usuarioId = localStorage.getItem('usuarioId');
+      if (!usuarioId) return;
+
+      const response = await axios.get(
+        `http://localhost:3000/api/utilizadores/utilizador/nome/${usuarioId}`
+      );
+
+      if (response.data.success) {
+        setNomeUtilizador(response.data.nome);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar nome do utilizador:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNomeUtilizador();
+  }, []);
 
   const handleLogoClick = (e) => {
     e.preventDefault();
@@ -40,8 +72,7 @@ const SidebarFormador = ({ children }) => {
     { path: "/dashboard/formador", icon: <FiGrid size={20} />, label: "Dashboard" },
     { path: "/formador/cursos", icon: <FiBookOpen size={20} />, label: "Gerir Conteúdos" },
     { path: "/formador/cursos/ava", icon: <FiLayers size={20} />, label: "Gerir Avaliações" },
-    { path: "/forum", icon: <FiUsers size={20} />, label: "Fórum" }
-    
+    { path: "/forumFormador", icon: <FiUsers size={20} />, label: "Fórum" }
   ];
 
   return (
@@ -102,7 +133,7 @@ const SidebarFormador = ({ children }) => {
           {!isCollapsed && (
             <div className="footer-user-info">
               <div className="footer-user-name">
-                {user?.nome || 'Formador'}
+                {nomeUtilizador || user?.nome || 'Formador'}
               </div>
             </div>
           )}

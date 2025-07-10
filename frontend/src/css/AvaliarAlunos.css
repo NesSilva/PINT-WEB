@@ -1,0 +1,235 @@
+/* Container principal */
+.avaliar-alunos-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    margin-left: 220px;
+}
+
+/* Cabeçalho */
+.page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-title h2 {
+    margin: 0;
+    color: #333;
+    font-size: 1.8rem;
+}
+
+.header-icon {
+    font-size: 1.5rem;
+    color: #4e73df;
+}
+
+.back-button {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.button-icon {
+    margin-right: 5px;
+}
+
+/* Mensagens */
+.status-message {
+    margin-bottom: 20px;
+}
+
+/* Loading */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    gap: 15px;
+}
+
+/* Quando não há resultados */
+.no-results-card, .no-docs-card {
+    text-align: center;
+    padding: 30px;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.no-results-icon, .no-docs-icon {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+/* Tabela */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.alunos-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.alunos-table thead {
+    background-color: #333;
+    color: white;
+}
+
+.alunos-table th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 500;
+}
+
+.alunos-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: middle;
+}
+
+.alunos-table tr:last-child td {
+    border-bottom: none;
+}
+
+.alunos-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Badges */
+.nota-badge {
+    font-size: 0.85rem;
+    padding: 5px 10px;
+    min-width: 80px;
+    display: inline-block;
+    text-align: center;
+}
+
+/* Botões de ação */
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+/* Modais */
+.avaliacao-modal .modal-header,
+.documentos-modal .modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-icon {
+    margin-right: 10px;
+    color: #4e73df;
+}
+
+.aluno-info {
+    margin-bottom: 20px;
+}
+
+.nota-input {
+    max-width: 200px;
+}
+
+/* Lista de documentos */
+.documentos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.documento-card {
+    border: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.documento-header {
+    margin-bottom: 10px;
+}
+
+.documento-header h6 {
+    margin-bottom: 5px;
+}
+
+.documento-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding-top: 60px;
+    }
+    
+    .alunos-table {
+        display: block;
+    }
+    
+    .alunos-table thead {
+        display: none;
+    }
+    
+    .alunos-table tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+    }
+    
+    .alunos-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .alunos-table td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        margin-right: 10px;
+        color: #4e73df;
+    }
+    
+    .alunos-table td:last-child {
+        border-bottom: none;
+    }
+    
+    .action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .documento-actions {
+        flex-direction: column;
+    }
+    
+    .documento-actions .btn {
+        width: 100%;
+    }
+}

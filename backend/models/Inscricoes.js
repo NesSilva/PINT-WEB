@@ -14,7 +14,9 @@ const Inscricao = sequelize.define("Inscricao", {
         references: { 
             model: Utilizador, 
             key: "id_utilizador" 
-        } 
+        } ,
+            onDelete: 'CASCADE' 
+
     },
     id_curso: { 
         type: DataTypes.INTEGER, 

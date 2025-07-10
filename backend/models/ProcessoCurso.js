@@ -15,7 +15,9 @@ const ProgressoCurso = sequelize.define("ProgressoCurso", {
         references: { 
             model: Utilizador, 
             key: "id_utilizador" 
-        } 
+        } ,
+        onDelete: 'CASCADE' 
+
     },
     id_curso: { 
         type: DataTypes.INTEGER, 

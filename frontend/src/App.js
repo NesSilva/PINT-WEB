@@ -13,8 +13,15 @@
   import GerirAreasFormacao from "./views/GerirAreasFormacao";
   import DashboardFormando from "./views/DashboardFormando";
   import ForumPublicacoes from "./views/ForumPublicacoes";
+  import ForumPublicacoesFormador from "./views/ForumPublicacoesFormador";
+
   import PublicacaoDetalhes from "./views/PublicacaoDetalhes";
+    import PublicacaoDetalhesFormador from "./views/PublicacaoDetalhesFormador";
+
+
   import NovaPublicacao from "./views/NovaPublicacao";
+    import NovaPublicacaoFormador from "./views/NovaPublicacaoFormador";
+
   import DetalhesCurso from './views/DetalheCurso';
   import DetalhesCursoTodos from './views/CursosDestalhesdetodos';
 
@@ -50,8 +57,13 @@ import AdminEditarTopico from "./views/AdminEditarTopico";
           <Route path="/gerir-areas-formacao" element={<GerirAreasFormacao />} />
           <Route path="/dashboard/formando" element={<DashboardFormando />} />
           <Route path="/forum" element={<ForumPublicacoes />} />
+          <Route path="/forumFormador" element={<ForumPublicacoesFormador />} />
+          <Route path="/forumFormador/publicacao/:id_publicacao" element={<PublicacaoDetalhesFormador />} />
+
           <Route path="/forum/publicacao/:id_publicacao" element={<PublicacaoDetalhes />} />
           <Route path="/forum/nova-publicacao" element={<NovaPublicacao />} />
+          <Route path="/forumFormador/nova-publicacao" element={<NovaPublicacaoFormador />} />
+
           <Route path="/curso/:id_curso" element={<DetalhesCurso />} />
           <Route path="/cursod/:id_curso" element={<DetalhesCursoTodos />} />
 
@@ -67,6 +79,7 @@ import AdminEditarTopico from "./views/AdminEditarTopico";
         // No seu arquivo de rotas principal (App.js)
 <Route path="/admin/forum" element={<AdminForum />} />
 <Route path="/admin/forum/editar/:id_topico" element={<AdminEditarTopico />} />
+
 
 
 

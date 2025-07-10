@@ -223,7 +223,7 @@ Senha temporária: ${password}
 
 Ao entrar pela primeira vez, será solicitado que altere sua senha.
 
-Acesse: https://seu-sistema.com/login
+Acesse: https://frontend-z8p8.onrender.com/
         
 Obrigado,
 Equipe de suporte`
@@ -304,4 +304,33 @@ const listarFormadores = async (req, res) => {
     });
   }
 };
-module.exports = { listarUtilizadores, eliminarUtilizador, editarUtilizador , criarUtilizador , solicitarConta , atualizarPedidoAceite , sendAccountAcceptedEmail , aceitarPedidoConta, listarFormadores};
+
+const obterNomeUtilizador = async (req, res) => {
+  const { id_utilizador } = req.params;
+
+  try {
+    const utilizador = await Utilizador.findOne({
+      where: { id_utilizador },
+      attributes: ['nome'] // Seleciona apenas o campo nome
+    });
+
+    if (!utilizador) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Utilizador não encontrado." 
+      });
+    }
+
+    res.status(200).json({ 
+      success: true, 
+      nome: utilizador.nome 
+    });
+  } catch (error) {
+    console.error("Erro ao buscar nome do utilizador:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Erro ao buscar nome do utilizador." 
+    });
+  }
+};
+module.exports = { listarUtilizadores, eliminarUtilizador, editarUtilizador , criarUtilizador , solicitarConta , atualizarPedidoAceite , sendAccountAcceptedEmail , aceitarPedidoConta, listarFormadores, obterNomeUtilizador};

@@ -35,10 +35,7 @@ const Sidebar = ({ children }) => {
     setActiveItem(null);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('userId'); // Remove o userId do localStorage
-    navigate("/n"); // Redireciona para a página de login
-  };
+
 
   const highlightPosition = activeItem !== null ? 16 + (activeItem * 54) : -70;
 
@@ -113,29 +110,7 @@ const Sidebar = ({ children }) => {
                 style={{ cursor: 'pointer', position: 'relative' }}
               >
                 {user?.nome || 'Utilizador'}
-                {showLogout && (
-                  <div 
-                    className="logout-option"
-                    style={{
-                      position: 'absolute',
-                      bottom: '-40px',
-                      left: '0',
-                      background: '#2c3e50',
-                      padding: '8px 16px',
-                      borderRadius: '4px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      cursor: 'pointer',
-                      zIndex: 100,
-                      boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
-                    }}
-                    onClick={handleLogout}
-                  >
-                    <FiLogOut size={16} />
-                    <span>Logout</span>
-                  </div>
-                )}
+                
               </div>
             </div>
           )}

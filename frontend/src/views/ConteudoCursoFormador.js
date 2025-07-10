@@ -2,7 +2,9 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SidebarFormador from '../components/SidebarFormador';
-import { Modal, Button, Form } from 'react-bootstrap';  
+import { Modal, Button, Form, Alert, Badge, Card } from 'react-bootstrap';
+import { FiUpload, FiLink, FiFile, FiVideo, FiImage, FiExternalLink, FiArrowLeft } from 'react-icons/fi';
+import '../css/ConteudoCursoFormador.css';
 
 const ConteudoCursoFormador = () => {
   const { id_curso } = useParams();
@@ -15,22 +17,27 @@ const ConteudoCursoFormador = () => {
   const [novoFicheiro, setNovoFicheiro] = useState(null);
   const [descricaoFicheiro, setDescricaoFicheiro] = useState("");
   const [tipoFicheiro, setTipoFicheiro] = useState("material");
-  const [uploadStatus, setUploadStatus] = useState("");
+  const [uploadStatus, setUploadStatus] = useState({ text: '', variant: '' });
   const [uploadPermitido, setUploadPermitido] = useState(curso?.conteudo_upload || false);
-  const [tipoUpload, setTipoUpload] = useState("arquivo"); // 'arquivo' ou 'link'
+  const [tipoUpload, setTipoUpload] = useState("arquivo");
   const [urlLink, setUrlLink] = useState("");
 
   // Modal control
   const [showModal, setShowModal] = useState(false);
-  const handleClose = () => setShowModal(false);
+  const handleClose = () => {
+    setShowModal(false);
+    setUploadStatus({ text: '', variant: '' });
+  };
   const handleShow = () => setShowModal(true);
 
   const fetchConteudos = useCallback(async () => {
     try {
+      setLoading(true);
       const res = await axios.get(`http://localhost:3000/api/conteudo/curso/${id_curso}`);
       setConteudos(res.data);
     } catch (error) {
       console.error("Erro ao buscar conteúdos:", error);
+      setUploadStatus({ text: "Erro ao carregar conteúdos", variant: "danger" });
     } finally {
       setLoading(false);
     }
@@ -50,10 +57,16 @@ const ConteudoCursoFormador = () => {
         `http://localhost:3000/api/cursos/${id_curso}/toggle-upload-documentos`
       );
       setUploadPermitido(res.data.conteudo_upload);
-      alert(res.data.message);
+      setUploadStatus({ 
+        text: res.data.message, 
+        variant: "success" 
+      });
     } catch (error) {
       console.error("Erro ao alternar permissão:", error);
-      alert("Erro ao atualizar permissão de upload");
+      setUploadStatus({ 
+        text: "Erro ao atualizar permissão de upload", 
+        variant: "danger" 
+      });
     }
   };
 
@@ -75,7 +88,10 @@ const ConteudoCursoFormador = () => {
     e.preventDefault();
 
     if (!novoFicheiro || !descricaoFicheiro) {
-      setUploadStatus("Por favor, selecione um ficheiro e insira a descrição.");
+      setUploadStatus({ 
+        text: "Por favor, selecione um ficheiro e insira a descrição.", 
+        variant: "warning" 
+      });
       return;
     }
 
@@ -91,15 +107,21 @@ const ConteudoCursoFormador = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-      setUploadStatus("Ficheiro enviado com sucesso!");
+      setUploadStatus({ 
+        text: "Ficheiro enviado com sucesso!", 
+        variant: "success" 
+      });
       setNovoFicheiro(null);
       setDescricaoFicheiro("");
       setTipoFicheiro("material");
       await fetchConteudos();
-      handleClose();
+      setTimeout(handleClose, 1500);
     } catch (error) {
       console.error("Erro ao enviar ficheiro:", error);
-      setUploadStatus("Erro ao enviar ficheiro.");
+      setUploadStatus({ 
+        text: "Erro ao enviar ficheiro.", 
+        variant: "danger" 
+      });
     }
   };
 
@@ -107,7 +129,10 @@ const ConteudoCursoFormador = () => {
     e.preventDefault();
 
     if (!urlLink || !descricaoFicheiro) {
-      setUploadStatus("Por favor, preencha a URL e a descrição.");
+      setUploadStatus({ 
+        text: "Por favor, preencha a URL e a descrição.", 
+        variant: "warning" 
+      });
       return;
     }
 
@@ -119,14 +144,20 @@ const ConteudoCursoFormador = () => {
         tipo_conteudo: "link"
       });
 
-      setUploadStatus("Link adicionado com sucesso!");
+      setUploadStatus({ 
+        text: "Link adicionado com sucesso!", 
+        variant: "success" 
+      });
       setUrlLink("");
       setDescricaoFicheiro("");
       await fetchConteudos();
-      handleClose();
+      setTimeout(handleClose, 1500);
     } catch (error) {
       console.error("Erro ao adicionar link:", error);
-      setUploadStatus("Erro ao adicionar link.");
+      setUploadStatus({ 
+        text: "Erro ao adicionar link.", 
+        variant: "danger" 
+      });
     }
   };
 
@@ -139,38 +170,96 @@ const ConteudoCursoFormador = () => {
     }
   };
 
-  const Section = ({ title, children }) => (
-    <>
-      <h4 className="mt-5 mb-3 border-bottom pb-1">{title}</h4>
-      <div className="row">{children}</div>
-    </>
-  );
-
-  const CardWrapper = ({ children }) => (
-    <div className="col-md-4 mb-4">
-      <div className="card shadow-sm rounded h-100">{children}</div>
+  const SectionHeader = ({ title, icon: Icon, count }) => (
+    <div className="section-header mb-4">
+      <h4 className="section-title">
+        {Icon && <Icon className="section-icon" />}
+        {title}
+        {count > 0 && <Badge bg="secondary" className="ms-2">{count}</Badge>}
+      </h4>
+      <div className="section-divider"></div>
     </div>
   );
 
-  return (
-    <div className="d-flex">
-      <SidebarFormador user={user} />
-      <div className="container mt-4">
-        <button 
-          className={`btn btn-${uploadPermitido ? 'success' : 'secondary'} mb-3 ms-2`}
-          onClick={toggleUploadDocumentos}
-        >
-          <i className={`bi bi-${uploadPermitido ? 'check-circle' : 'x-circle'}`}></i>
-          {uploadPermitido ? ' Upload Ativo' : ' Upload Inativo'}
-        </button>
-        <button className="btn btn-secondary mb-3 me-2" onClick={() => navigate(-1)}>Voltar</button>
-        <button className="btn btn-primary mb-3" onClick={handleShow}>Adicionar Conteúdo</button>
-
-        <h2 className="mb-4">Conteúdos do Curso: {curso?.titulo}</h2>
+  const ContentCard = ({ conteudo, children }) => (
+    <Card className="content-card h-100">
+      <Card.Body className="d-flex flex-column">
+        <Card.Title className="content-title">
+          {conteudo.descricao || getFileNameFromUrl(conteudo.url)}
+        </Card.Title>
+        <div className="content-preview mb-3">
+          {children}
+        </div>
         
-        <Modal show={showModal} onHide={handleClose} centered>
+        <div className="mt-auto">
+          <Button 
+            variant="outline-primary" 
+            size="sm" 
+            onClick={() => abrirEmNovaAba(conteudo.url)}
+            className="w-100"
+          >
+            <FiExternalLink className="me-1" /> Abrir
+          </Button>
+        </div>
+      </Card.Body>
+    </Card>
+  );
+
+  return (
+    <div className="conteudo-curso-container">
+      <SidebarFormador user={user} />
+      
+      <main className="main-content">
+       <div className="page-header">
+  <div className="header-top-row">
+    <Button 
+      variant="link" 
+      onClick={() => navigate(-1)}
+      className="back-button"
+    >
+      <FiArrowLeft className="me-1" /> Voltar
+    </Button>
+    
+    <h2 className="page-title">
+      Conteúdos do Curso: <span className="course-title">{curso?.titulo}</span>
+    </h2>
+  </div>
+  
+  <div className="header-actions">
+    <Button 
+      variant={uploadPermitido ? "success" : "secondary"} 
+      onClick={toggleUploadDocumentos}
+      className="upload-toggle"
+    >
+      <FiUpload className="me-1" />
+      {uploadPermitido ? 'Upload Ativo' : 'Upload Inativo'}
+    </Button>
+    
+    <Button 
+      variant="primary" 
+      onClick={handleShow}
+      className="add-content-button"
+    >
+      <FiUpload className="me-1" /> Adicionar Conteúdo
+    </Button>
+  </div>
+</div>
+
+        {uploadStatus.text && (
+          <Alert variant={uploadStatus.variant} className="status-alert">
+            {uploadStatus.text}
+          </Alert>
+        )}
+
+        <Modal show={showModal} onHide={handleClose} centered className="content-modal">
           <Modal.Header closeButton>
-            <Modal.Title>Adicionar Novo Conteúdo</Modal.Title>
+            <Modal.Title>
+              {tipoUpload === 'arquivo' ? (
+                <><FiUpload className="me-2" /> Adicionar Arquivo</>
+              ) : (
+                <><FiLink className="me-2" /> Adicionar Link</>
+              )}
+            </Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form onSubmit={tipoUpload === 'arquivo' ? handleUploadFicheiro : handleAdicionarLink}>
@@ -179,9 +268,14 @@ const ConteudoCursoFormador = () => {
                 <Form.Select
                   value={tipoUpload}
                   onChange={(e) => setTipoUpload(e.target.value)}
+                  className="form-select-custom"
                 >
-                  <option value="arquivo">Upload de Arquivo</option>
-                  <option value="link">Adicionar Link</option>
+                  <option value="arquivo">
+                    <FiFile className="me-2" /> Upload de Arquivo
+                  </option>
+                  <option value="link">
+                    <FiLink className="me-2" /> Adicionar Link
+                  </option>
                 </Form.Select>
               </Form.Group>
 
@@ -191,8 +285,9 @@ const ConteudoCursoFormador = () => {
                   type="text"
                   value={descricaoFicheiro}
                   onChange={(e) => setDescricaoFicheiro(e.target.value)}
-                  placeholder="Descrição"
+                  placeholder="Insira uma descrição para o conteúdo"
                   required
+                  className="form-control-custom"
                 />
               </Form.Group>
 
@@ -203,11 +298,20 @@ const ConteudoCursoFormador = () => {
                     <Form.Select
                       value={tipoFicheiro}
                       onChange={(e) => setTipoFicheiro(e.target.value)}
+                      className="form-select-custom"
                     >
-                      <option value="material">Material</option>
-                      <option value="video">Vídeo</option>
-                      <option value="imagem">Imagem</option>
-                      <option value="outro">Outro</option>
+                      <option value="material">
+                        <FiFile className="me-2" /> Material
+                      </option>
+                      <option value="video">
+                        <FiVideo className="me-2" /> Vídeo
+                      </option>
+                      <option value="imagem">
+                        <FiImage className="me-2" /> Imagem
+                      </option>
+                      <option value="outro">
+                        <FiFile className="me-2" /> Outro
+                      </option>
                     </Form.Select>
                   </Form.Group>
 
@@ -217,6 +321,7 @@ const ConteudoCursoFormador = () => {
                       type="file"
                       onChange={(e) => setNovoFicheiro(e.target.files[0])}
                       required={tipoUpload === 'arquivo'}
+                      className="form-control-file"
                     />
                   </Form.Group>
                 </>
@@ -229,103 +334,165 @@ const ConteudoCursoFormador = () => {
                     onChange={(e) => setUrlLink(e.target.value)}
                     placeholder="https://exemplo.com"
                     required={tipoUpload === 'link'}
+                    className="form-control-custom"
                   />
                 </Form.Group>
               )}
 
-              {uploadStatus && <p className="text-danger">{uploadStatus}</p>}
-
-              <Button variant="primary" type="submit">
-                Enviar
-              </Button>
+              <div className="modal-footer-buttons">
+                <Button variant="secondary" onClick={handleClose} className="me-2">
+                  Cancelar
+                </Button>
+                <Button variant="primary" type="submit">
+                  {tipoUpload === 'arquivo' ? 'Enviar Arquivo' : 'Adicionar Link'}
+                </Button>
+              </div>
             </Form>
           </Modal.Body>
         </Modal>
 
         {loading ? (
-          <p>Carregando conteúdos...</p>
+          <div className="loading-container">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Carregando...</span>
+            </div>
+            <p className="loading-text">Carregando conteúdos...</p>
+          </div>
         ) : conteudos.length === 0 ? (
-          <p>Nenhum conteúdo encontrado.</p>
+          <div className="empty-state">
+            <img 
+              src="/images/empty-folder.svg" 
+              alt="Pasta vazia" 
+              className="empty-image"
+            />
+            <h5>Nenhum conteúdo encontrado</h5>
+            <p>Adicione novos conteúdos usando o botão acima</p>
+          </div>
         ) : (
-          <>
-            <Section title="PDFs">
-              {conteudos.filter(c => isPDF(c.url)).map((c) => (
-                <CardWrapper key={c.id_conteudo}>
-                  <div className="card-body d-flex align-items-center justify-content-between">
-                    <span>{getFileNameFromUrl(c.url)}</span>
-                    <button className="btn btn-outline-primary btn-sm" onClick={() => abrirEmNovaAba(c.url)}>
-                      Abrir
-                    </button>
-                  </div>
-                </CardWrapper>
-              ))}
-            </Section>
+          <div className="content-sections">
+            {/* PDFs Section */}
+            {conteudos.filter(c => isPDF(c.url)).length > 0 && (
+              <div className="content-section">
+                <SectionHeader 
+                  title="Documentos PDF" 
+                  icon={FiFile} 
+                  count={conteudos.filter(c => isPDF(c.url)).length} 
+                />
+                <div className="row g-4">
+                  {conteudos.filter(c => isPDF(c.url)).map((c) => (
+                    <div className="col-md-4 col-lg-3" key={c.id_conteudo}>
+                      <ContentCard conteudo={c}>
+                        <div className="pdf-preview">
+                          <FiFile className="pdf-icon" />
+                          <span className="pdf-filename">{getFileNameFromUrl(c.url)}</span>
+                        </div>
+                      </ContentCard>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-            <Section title="Vídeos">
-              {conteudos.filter(c => isVideo(c.url)).map((c) => (
-                <CardWrapper key={c.id_conteudo}>
-                  <div className="card-body">
-                    <video controls src={c.url} style={{ width: '100%' }} />
-                  </div>
-                </CardWrapper>
-              ))}
-            </Section>
+            {/* Videos Section */}
+            {conteudos.filter(c => isVideo(c.url)).length > 0 && (
+              <div className="content-section">
+                <SectionHeader 
+                  title="Vídeos" 
+                  icon={FiVideo} 
+                  count={conteudos.filter(c => isVideo(c.url)).length} 
+                />
+                <div className="row g-4">
+                  {conteudos.filter(c => isVideo(c.url)).map((c) => (
+                    <div className="col-md-6 col-lg-4" key={c.id_conteudo}>
+                      <ContentCard conteudo={c}>
+                        <video controls className="video-preview">
+                          <source src={c.url} type={`video/${c.url.split('.').pop()}`} />
+                        </video>
+                      </ContentCard>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-            <Section title="Imagens">
-              {conteudos.filter(c => isImage(c.url)).map((c) => (
-                <CardWrapper key={c.id_conteudo}>
-                  <div className="card-body p-2">
-                    <img
-                      src={c.url}
-                      alt={c.descricao}
-                      style={{ width: '100%', cursor: 'pointer', borderRadius: '0.5rem' }}
-                      onClick={() => abrirEmNovaAba(c.url)}
-                    />
-                  </div>
-                </CardWrapper>
-              ))}
-            </Section>
+            {/* Images Section */}
+            {conteudos.filter(c => isImage(c.url)).length > 0 && (
+              <div className="content-section">
+                <SectionHeader 
+                  title="Imagens" 
+                  icon={FiImage} 
+                  count={conteudos.filter(c => isImage(c.url)).length} 
+                />
+                <div className="row g-4">
+                  {conteudos.filter(c => isImage(c.url)).map((c) => (
+                    <div className="col-md-4 col-lg-3" key={c.id_conteudo}>
+                      <ContentCard conteudo={c}>
+                        <img
+                          src={c.url}
+                          alt={c.descricao}
+                          className="img-preview"
+                        />
+                      </ContentCard>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-            <Section title="Links">
-              {conteudos.filter(c => c.tipo_conteudo === "link").map((c) => (
-                <CardWrapper key={c.id_conteudo}>
-                  <div className="card-body">
-                    <h6>{c.descricao}</h6>
-                    <a 
-                      href={c.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="btn btn-outline-primary btn-sm"
-                    >
-                      Acessar Link
-                    </a>
-                  </div>
-                </CardWrapper>
-              ))}
-            </Section>
+            {/* Links Section */}
+            {conteudos.filter(c => c.tipo_conteudo === "link").length > 0 && (
+              <div className="content-section">
+                <SectionHeader 
+                  title="Links Externos" 
+                  icon={FiLink} 
+                  count={conteudos.filter(c => c.tipo_conteudo === "link").length} 
+                />
+                <div className="row g-4">
+                  {conteudos.filter(c => c.tipo_conteudo === "link").map((c) => (
+                    <div className="col-md-6" key={c.id_conteudo}>
+                      <ContentCard conteudo={c}>
+                        <div className="link-preview">
+                          <FiLink className="link-icon" />
+                          <span className="link-url">{c.url}</span>
+                        </div>
+                      </ContentCard>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-            <Section title="Outros Ficheiros">
-              {conteudos.filter(c =>
-                !isPDF(c.url) && !isVideo(c.url) && !isImage(c.url) && c.tipo_conteudo !== "link"
-              ).map((c) => (
-                <CardWrapper key={c.id_conteudo}>
-                  <div className="card-body d-flex align-items-center justify-content-between">
-                    <span>{getFileNameFromUrl(c.url)}</span>
-                    <a
-                      href={c.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-outline-secondary btn-sm"
-                    >
-                      Aceder
-                    </a>
-                  </div>
-                </CardWrapper>
-              ))}
-            </Section>
-          </>
+            {/* Other Files Section */}
+            {conteudos.filter(c =>
+              !isPDF(c.url) && !isVideo(c.url) && !isImage(c.url) && c.tipo_conteudo !== "link"
+            ).length > 0 && (
+              <div className="content-section">
+                <SectionHeader 
+                  title="Outros Arquivos" 
+                  icon={FiFile} 
+                  count={conteudos.filter(c =>
+                    !isPDF(c.url) && !isVideo(c.url) && !isImage(c.url) && c.tipo_conteudo !== "link"
+                  ).length} 
+                />
+                <div className="row g-4">
+                  {conteudos.filter(c =>
+                    !isPDF(c.url) && !isVideo(c.url) && !isImage(c.url) && c.tipo_conteudo !== "link"
+                  ).map((c) => (
+                    <div className="col-md-4 col-lg-3" key={c.id_conteudo}>
+                      <ContentCard conteudo={c}>
+                        <div className="file-preview">
+                          <FiFile className="file-icon" />
+                          <span className="file-filename">{getFileNameFromUrl(c.url)}</span>
+                        </div>
+                      </ContentCard>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         )}
-      </div>
+      </main>
     </div>
   );
 };

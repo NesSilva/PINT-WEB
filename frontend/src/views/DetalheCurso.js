@@ -123,7 +123,7 @@ const DetalhesCurso = () => {
       const formData = new FormData();
       formData.append('file', uploadFile);
       formData.append('id_curso', id_curso);
-      formData.append('id_utilizador', user.id_utilizador);
+      formData.append('id_utilizador', user.id);
       formData.append('descricao', uploadDescription);
 
       const res = await axios.post(
@@ -359,12 +359,7 @@ const DetalhesCurso = () => {
                           <div className="d-flex justify-content-between align-items-center">
                             <div>
                               <Card.Title>{doc.descricao || 'Documento sem descrição'}</Card.Title>
-                              <Card.Subtitle className="mb-2 text-muted small">
-                                <i className="bi bi-person me-1"></i>
-                                {doc.nome_utilizador || 'Utilizador desconhecido'} | 
-                                <i className="bi bi-clock me-1 ms-2"></i>
-                                {new Date(doc.createdAt).toLocaleDateString('pt-PT')}
-                              </Card.Subtitle>
+                              
                             </div>
                             <div className="d-flex gap-2">
                               <Button 

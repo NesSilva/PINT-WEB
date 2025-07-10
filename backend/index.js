@@ -60,7 +60,7 @@ app.post('/api/utilizadores/admin/aceitar-pedido', (req, res) => {
 
 const perfisRoutes = require("./routes/perfisRoutes");
 app.use("/api/perfis", perfisRoutes);
-
+//
 const cursoRoutes = require("./routes/cursoRoutes");
 app.use("/api/cursos", cursoRoutes);
 

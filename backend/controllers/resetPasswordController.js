@@ -81,6 +81,7 @@ const resetPassword = async (req, res) => {
     }
 };
 
+
 const updateFirstLoginPassword = async (req, res) => {
     const { email, newPassword } = req.body;
 

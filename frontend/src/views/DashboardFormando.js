@@ -90,19 +90,15 @@ const CourseCard = ({ curso, areas, categorias }) => {
 };
 
 const DashboardFormando = () => {
-  // Estado para user e perfil
   const [user, setUser] = useState(null);
   const [perfil, setPerfil] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Buscar user e perfil do localStorage quando componente monta
   useEffect(() => {
     const loadUserData = () => {
       try {
-        // 1. Obter dados completos do usuário
         const usuarioData = JSON.parse(localStorage.getItem('usuarioData') || '{}');
         
-        // 2. Se não tiver dados completos, verifica os campos antigos
         if (!usuarioData.id && !usuarioData.id_utilizador) {
           const usuarioId = localStorage.getItem('usuarioId');
           const usuarioNome = localStorage.getItem('usuarioNome');
@@ -114,7 +110,6 @@ const DashboardFormando = () => {
           }
         }
 
-        // 3. Garantir que temos os campos mínimos necessários
         if (usuarioData.id || usuarioData.id_utilizador) {
           const userObj = {
             ...usuarioData,
@@ -127,7 +122,6 @@ const DashboardFormando = () => {
           setUser(userObj);
         }
 
-        // 4. Carregar perfil
         const usuarioPerfil = JSON.parse(localStorage.getItem('perfil') || null);
         if (usuarioPerfil) {
           console.log("Perfil carregado:", usuarioPerfil);

@@ -2,14 +2,18 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import SidebarFormador from "../components/SidebarFormador";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
-import { Modal, Button, Badge } from "react-bootstrap";
+import { Modal, Button, Badge, Alert, Spinner } from "react-bootstrap";
+import { FaArrowLeft, FaFileAlt, FaEye, FaDownload, FaPencilAlt, FaFolder, FaChalkboardTeacher } from "react-icons/fa";
+import "../css/AvaliarAlunos.css";
 
 const AvaliarAlunos = () => {
   const { id_curso } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, curso } = location.state || {};
-
+  
+  // Obter user do localStorage em vez de location.state
+  const [user, setUser] = useState(null);
+  const [curso, setCurso] = useState(null);
   const [inscritos, setInscritos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -22,28 +26,64 @@ const AvaliarAlunos = () => {
   const [documentosAluno, setDocumentosAluno] = useState([]);
 
   useEffect(() => {
-    const fetchInscritos = async () => {
+    // Carregar user do localStorage
+    const loadUser = () => {
       try {
-        const res = await axios.get(`http://localhost:3000/api/inscricoes/curso/${id_curso}`);
-        setInscritos(res.data);
-      } catch (err) {
-        console.error(err);
-        setError("Erro ao buscar alunos inscritos.");
-      } finally {
-        setLoading(false);
+        const storedUser = localStorage.getItem('usuarioId');
+        if (storedUser) {
+          // Tenta parsear como JSON (caso seja um objeto)
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+        }
+      } catch (e) {
+        console.error("Erro ao carregar usuário:", e);
       }
     };
 
+    loadUser();
+
+    // Se veio de location.state, usar esses dados também
+    if (location.state?.user) {
+      setUser(location.state.user);
+    }
+    if (location.state?.curso) {
+      setCurso(location.state.curso);
+    } else {
+      // Se não veio com state, buscar curso da API
+      fetchCurso();
+    }
+
     fetchInscritos();
-  }, [id_curso]);
+  }, [id_curso, location.state]);
+
+  const fetchCurso = async () => {
+    try {
+      const res = await axios.get(`http://localhost:3000/api/cursos/${id_curso}`);
+      setCurso(res.data);
+    } catch (err) {
+      console.error("Erro ao buscar curso:", err);
+      setError("Erro ao carregar informações do curso");
+    }
+  };
+
+  const fetchInscritos = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`http://localhost:3000/api/inscricoes/curso/${id_curso}`);
+      setInscritos(res.data);
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao buscar alunos inscritos.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const buscarDocumentosAluno = async (id_utilizador) => {
     try {
       const res = await axios.get(
         `http://localhost:3000/api/documentos-avaliacao/utilizador/${id_utilizador}/curso/${id_curso}`
       );
-
-      
       return res.data;
     } catch (err) {
       console.error("Erro ao buscar documentos:", err);
@@ -106,33 +146,58 @@ const AvaliarAlunos = () => {
   };
 
   if (!user) {
-    return <p>Erro: usuário não identificado.</p>;
+    return (
+      <div className="avaliar-alunos-container">
+        <SidebarFormador />
+        <main className="main-content">
+          <Alert variant="danger" className="status-message">
+            Erro: usuário não identificado. Por favor, faça login novamente.
+          </Alert>
+        </main>
+      </div>
+    );
   }
 
   return (
-    <div className="d-flex">
+    <div className="avaliar-alunos-container">
       <SidebarFormador user={user} />
-      <div className="container mt-4">
-        <button className="btn btn-secondary mb-3" onClick={() => navigate(-1)}>
-          Voltar
-        </button>
-        <h2>Alunos inscritos no curso: {curso?.titulo || id_curso}</h2>
+      
+      <main className="main-content">
+        <div className="page-header">
+          <Button 
+            variant="outline-secondary" 
+            onClick={() => navigate(-1)}
+            className="back-button"
+          >
+            <FaArrowLeft className="button-icon" /> Voltar
+          </Button>
+          
+          <div className="header-title">
+            <FaChalkboardTeacher className="header-icon" />
+            <h2>Alunos inscritos no curso: {curso?.titulo || id_curso}</h2>
+          </div>
+        </div>
+
+        {error && (
+          <Alert variant="danger" className="status-message">
+            {error}
+          </Alert>
+        )}
 
         {loading ? (
-          <div className="text-center">
-            <div className="spinner-border" role="status">
-              <span className="visually-hidden">Carregando...</span>
-            </div>
+          <div className="loading-container">
+            <Spinner animation="border" role="status" />
             <p>Carregando alunos...</p>
           </div>
-        ) : error ? (
-          <div className="alert alert-danger">{error}</div>
         ) : inscritos.length === 0 ? (
-          <div className="alert alert-info">Nenhum aluno inscrito neste curso.</div>
+          <div className="alert alert-info no-results-message">
+            <FaFolder className="no-results-icon" />
+            Nenhum aluno inscrito neste curso.
+          </div>
         ) : (
           <div className="table-responsive">
-            <table className="table table-striped table-hover">
-              <thead className="table-dark">
+            <table className="alunos-table">
+              <thead>
                 <tr>
                   <th>ID</th>
                   <th>Nome</th>
@@ -149,31 +214,42 @@ const AvaliarAlunos = () => {
                     <td>{utilizador?.nome}</td>
                     <td>{utilizador?.email}</td>
                     <td>
-                      <button
-                        className="btn btn-sm btn-outline-primary"
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
                         onClick={() => abrirModalDocumentos({ utilizador })}
+                        className="action-btn"
                       >
-                        <i className="bi bi-folder"></i> Ver Documentos
-                      </button>
+                        <FaFileAlt className="button-icon" /> Documentos
+                      </Button>
                     </td>
                     <td>
                       {progresso?.nota_curso != null ? (
-                        <Badge bg={progresso.nota_curso >= 50 ? "success" : "danger"}>
+                        <Badge 
+                          pill 
+                          bg={progresso.nota_curso >= 50 ? "success" : "danger"}
+                          className="nota-badge"
+                        >
                           {progresso.nota_curso}%
                         </Badge>
                       ) : (
-                        <Badge bg="secondary">Não avaliado</Badge>
+                        <Badge pill bg="secondary" className="nota-badge">
+                          Não avaliado
+                        </Badge>
                       )}
                     </td>
                     <td>
-                      <button
-                        className="btn btn-sm btn-primary me-2"
+                      <Button
+                        variant={progresso?.nota_curso != null ? "outline-success" : "primary"}
+                        size="sm"
                         onClick={() => abrirModalAvaliacao({ utilizador })}
-                        disabled={progresso?.nota_curso != null} 
+                        className="action-btn"
+                        disabled={progresso?.nota_curso != null}
                         title={progresso?.nota_curso != null ? "Aluno já avaliado" : "Avaliar aluno"}
-                        >
-                        <i className="bi bi-pencil"></i> Avaliar
-                        </button>
+                      >
+                        <FaPencilAlt className="button-icon" /> 
+                        {progresso?.nota_curso != null ? "Editar" : "Avaliar"}
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -185,7 +261,10 @@ const AvaliarAlunos = () => {
         {/* Modal de Avaliação */}
         <Modal show={modalAvaliacaoAberto} onHide={fecharModal}>
           <Modal.Header closeButton>
-            <Modal.Title>Avaliar Aluno</Modal.Title>
+            <Modal.Title>
+              <FaPencilAlt className="modal-icon" /> 
+              Avaliar Aluno
+            </Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <h5>Aluno: {alunoSelecionado?.utilizador.nome}</h5>
@@ -217,18 +296,19 @@ const AvaliarAlunos = () => {
         <Modal show={modalDocumentosAberto} onHide={fecharModal} size="lg">
           <Modal.Header closeButton>
             <Modal.Title>
+              <FaFolder className="modal-icon" /> 
               Documentos enviados por: {alunoSelecionado?.utilizador.nome}
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
             {loading ? (
-              <div className="text-center">
-                <div className="spinner-border" role="status">
-                  <span className="visually-hidden">Carregando...</span>
-                </div>
+              <div className="loading-container">
+                <Spinner animation="border" role="status" />
               </div>
             ) : documentosAluno.length === 0 ? (
-              <div className="alert alert-info">Nenhum documento enviado.</div>
+              <div className="alert alert-info">
+                Nenhum documento enviado.
+              </div>
             ) : (
               <div className="list-group">
                 {documentosAluno.map((doc) => (
@@ -241,21 +321,22 @@ const AvaliarAlunos = () => {
                         </small>
                       </div>
                       <div>
-                        <a
+                        <Button
+                          variant="outline-primary"
                           href={doc.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="btn btn-sm btn-outline-primary me-2"
+                          className="me-2"
                         >
-                          <i className="bi bi-eye"></i> Visualizar
-                        </a>
-                        <a
+                          <FaEye className="button-icon" /> Visualizar
+                        </Button>
+                        <Button
+                          variant="outline-secondary"
                           href={doc.url}
                           download
-                          className="btn btn-sm btn-outline-secondary"
                         >
-                          <i className="bi bi-download"></i> Baixar
-                        </a>
+                          <FaDownload className="button-icon" /> Baixar
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -269,7 +350,7 @@ const AvaliarAlunos = () => {
             </Button>
           </Modal.Footer>
         </Modal>
-      </div>
+      </main>
     </div>
   );
 };

@@ -1,0 +1,268 @@
+/* Container principal */
+.conteudo-curso-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.main-content {
+    flex: 1;
+    padding: 2rem;
+    margin-left: 220px;
+}
+
+/* Cabeçalho da página */
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.page-title {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+.course-title {
+    color: #3498db;
+    font-weight: 500;
+}
+
+/* Botões */
+.back-button {
+    color: #7f8c8d;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.back-button:hover {
+    color: #34495e;
+}
+
+.add-content-button, .upload-toggle {
+    display: flex;
+    align-items: center;
+}
+
+/* Alertas */
+.status-alert {
+    margin-bottom: 2rem;
+}
+
+/* Seções de conteúdo */
+.content-sections {
+    margin-top: 2rem;
+}
+
+.content-section {
+    margin-bottom: 3rem;
+}
+
+.section-header {
+    position: relative;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.section-icon {
+    margin-right: 0.75rem;
+    color: #3498db;
+}
+
+.section-divider {
+    height: 2px;
+    background: linear-gradient(90deg, #3498db, rgba(52, 152, 219, 0.1));
+    margin-top: 0.5rem;
+}
+
+/* Cards de conteúdo */
+.content-card {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.content-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.content-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.content-preview {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    min-height: 120px;
+}
+
+/* Previews específicos */
+.pdf-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #e74c3c;
+}
+
+.pdf-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.pdf-filename {
+    font-size: 0.8rem;
+    text-align: center;
+    word-break: break-all;
+}
+
+.video-preview {
+    width: 100%;
+    border-radius: 0.5rem;
+    background-color: #000;
+}
+
+.img-preview {
+    max-width: 100%;
+    max-height: 150px;
+    border-radius: 0.25rem;
+    object-fit: contain;
+}
+
+.link-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #3498db;
+}
+
+.link-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.link-url {
+    font-size: 0.8rem;
+    text-align: center;
+    word-break: break-all;
+    color: #7f8c8d;
+}
+
+.file-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #7f8c8d;
+}
+
+.file-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.file-filename {
+    font-size: 0.8rem;
+    text-align: center;
+    word-break: break-all;
+}
+
+/* Modal */
+.content-modal .modal-header {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.content-modal .modal-title {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+}
+
+.form-select-custom, .form-control-custom {
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #dfe6e9;
+}
+
+.form-select-custom:focus, .form-control-custom:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+.modal-footer-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+}
+
+/* Estado vazio */
+.empty-state {
+    text-align: center;
+    padding: 3rem 0;
+    color: #7f8c8d;
+}
+
+.empty-image {
+    width: 150px;
+    height: 150px;
+    margin-bottom: 1.5rem;
+    opacity: 0.6;
+}
+
+/* Loading */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 0;
+}
+
+.loading-text {
+    margin-top: 1rem;
+    color: #7f8c8d;
+}
+
+/* Responsividade */
+@media (max-width: 992px) {
+    .main-content {
+        margin-left: 0;
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .content-card {
+        margin-bottom: 1.5rem;
+    }
+}
