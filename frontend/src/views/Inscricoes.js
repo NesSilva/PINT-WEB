@@ -21,9 +21,9 @@ const Inscricoes = () => {
       try {
         setLoading(true);
         const [inscricoesRes, utilizadoresRes, cursosRes] = await Promise.all([
-          axios.get("https://frontend-z8p8.onrender.com/api/inscricoes"),
-          axios.get("https://frontend-z8p8.onrender.com/api/utilizadores/utilizadores"),
-          axios.get("https://frontend-z8p8.onrender.com/api/cursos/todos")
+          axios.get("https://backend-8pyn.onrender.com/api/inscricoes"),
+          axios.get("https://backend-8pyn.onrender.com/api/utilizadores/utilizadores"),
+          axios.get("https://backend-8pyn.onrender.com/api/cursos/todos")
         ]);
         
         setInscricoes(inscricoesRes.data);

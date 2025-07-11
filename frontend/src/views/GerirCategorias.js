@@ -24,7 +24,7 @@ const GerenciarCategorias = () => {
     const carregarCategorias = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('https://frontend-z8p8.onrender.com/api/categorias');
+            const response = await axios.get('https://backend-8pyn.onrender.com/api/categorias');
             setCategorias(response.data.categorias);
         } catch (error) {
             console.error("Erro ao carregar categorias:", error);
@@ -51,12 +51,12 @@ const GerenciarCategorias = () => {
         try {
             if (categoriaAtual) {
                 await axios.put(
-                    `https://frontend-z8p8.onrender.com/api/categorias/${categoriaAtual.id_categoria}`, 
+                    `https://backend-8pyn.onrender.com/api/categorias/${categoriaAtual.id_categoria}`, 
                     formData
                 );
                 mostrarMensagem("Categoria atualizada com sucesso!", "success");
             } else {
-                await axios.post('https://frontend-z8p8.onrender.com/api/categorias', formData);
+                await axios.post('https://backend-8pyn.onrender.com/api/categorias', formData);
                 mostrarMensagem("Categoria criada com sucesso!", "success");
             }
             setShowModal(false);
@@ -83,7 +83,7 @@ const GerenciarCategorias = () => {
     const handleDelete = async () => {
         try {
             await axios.delete(
-                `https://frontend-z8p8.onrender.com/api/categorias/${categoriaAtual.id_categoria}`
+                `https://backend-8pyn.onrender.com/api/categorias/${categoriaAtual.id_categoria}`
             );
             mostrarMensagem("Categoria deletada com sucesso!", "success");
             setShowDeleteModal(false);

@@ -33,7 +33,7 @@ const ConteudoCursoFormador = () => {
   const fetchConteudos = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`https://frontend-z8p8.onrender.com/api/conteudo/curso/${id_curso}`);
+      const res = await axios.get(`https://backend-8pyn.onrender.com/api/conteudo/curso/${id_curso}`);
       setConteudos(res.data);
     } catch (error) {
       console.error("Erro ao buscar conteúdos:", error);
@@ -54,7 +54,7 @@ const ConteudoCursoFormador = () => {
   const toggleUploadDocumentos = async () => {
     try {
       const res = await axios.put(
-        `https://frontend-z8p8.onrender.com/api/cursos/${id_curso}/toggle-upload-documentos`
+        `https://backend-8pyn.onrender.com/api/cursos/${id_curso}/toggle-upload-documentos`
       );
       setUploadPermitido(res.data.conteudo_upload);
       setUploadStatus({ 
@@ -102,7 +102,7 @@ const ConteudoCursoFormador = () => {
     formData.append("tipo_conteudo", tipoFicheiro);
 
     try {
-      await axios.post("https://frontend-z8p8.onrender.com/api/conteudo/adicionar", formData, {
+      await axios.post("https://backend-8pyn.onrender.com/api/conteudo/adicionar", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -137,7 +137,7 @@ const ConteudoCursoFormador = () => {
     }
 
     try {
-      await axios.post("https://frontend-z8p8.onrender.com/api/conteudo/adicionar-link", {
+      await axios.post("https://backend-8pyn.onrender.com/api/conteudo/adicionar-link", {
         id_curso,
         descricao: descricaoFicheiro,
         url: urlLink,

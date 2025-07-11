@@ -52,9 +52,9 @@ const ListarUtilizadores = () => {
     const fetchData = async () => {
       try {
         const [utilizadoresRes, cursosRes, perfisRes] = await Promise.all([
-          fetch("https://frontend-z8p8.onrender.com/api/utilizadores/utilizadores"),
-          axios.get("https://frontend-z8p8.onrender.com/api/cursos/todos"),
-          fetch("https://frontend-z8p8.onrender.com/api/perfis")
+          fetch("https://backend-8pyn.onrender.com/api/utilizadores/utilizadores"),
+          axios.get("https://backend-8pyn.onrender.com/api/cursos/todos"),
+          fetch("https://backend-8pyn.onrender.com/api/perfis")
         ]);
 
         const [utilizadoresData, perfisData] = await Promise.all([
@@ -106,7 +106,7 @@ const ListarUtilizadores = () => {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`https://frontend-z8p8.onrender.com/api/utilizadores/utilizadores/${id_utilizador}`, {
+      const response = await fetch(`https://backend-8pyn.onrender.com/api/utilizadores/utilizadores/${id_utilizador}`, {
         method: "DELETE",
       });
 
@@ -124,7 +124,7 @@ const ListarUtilizadores = () => {
 
   const buscarProgresso = async (id) => {
     try {
-      let url = `https://frontend-z8p8.onrender.com/api/progressos/utilizador/${id}`;
+      let url = `https://backend-8pyn.onrender.com/api/progressos/utilizador/${id}`;
       const query = [];
 
       if (dataInicio) query.push(`dataInicio=${dataInicio}`);
@@ -162,7 +162,7 @@ const ListarUtilizadores = () => {
         corpo.senha = senha.trim();
       }
 
-      const response = await fetch(`https://frontend-z8p8.onrender.com/api/utilizadores/utilizadores/${utilizadorAtual.id_utilizador}`, {
+      const response = await fetch(`https://backend-8pyn.onrender.com/api/utilizadores/utilizadores/${utilizadorAtual.id_utilizador}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(corpo),
@@ -189,7 +189,7 @@ const ListarUtilizadores = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("https://frontend-z8p8.onrender.com/api/utilizadores/utilizadores", {
+      const response = await fetch("https://backend-8pyn.onrender.com/api/utilizadores/utilizadores", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -207,7 +207,7 @@ const ListarUtilizadores = () => {
         setShowCreateModal(false);
         setNovoUtilizador({ nome: "", email: "", morada: "", senha: "", perfis: [] });
         
-        const refreshResponse = await fetch("https://frontend-z8p8.onrender.com/api/utilizadores/utilizadores");
+        const refreshResponse = await fetch("https://backend-8pyn.onrender.com/api/utilizadores/utilizadores");
         const refreshData = await refreshResponse.json();
         
         if (Array.isArray(refreshData)) {
@@ -225,7 +225,7 @@ const ListarUtilizadores = () => {
 
   const handlePedido = async (id, valor) => {
     try {
-      const response = await fetch(`https://frontend-z8p8.onrender.com/api/utilizadores/pedido/${id}`, {
+      const response = await fetch(`https://backend-8pyn.onrender.com/api/utilizadores/pedido/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pedidoAceitoSN: valor }),
@@ -246,7 +246,7 @@ const ListarUtilizadores = () => {
 
   const aceitarPedido = async (idUtilizador, senha) => {
     try {
-      const response = await fetch("https://frontend-z8p8.onrender.com/api/utilizadores/admin/aceitar-pedido", {
+      const response = await fetch("https://backend-8pyn.onrender.com/api/utilizadores/admin/aceitar-pedido", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id_utilizador: idUtilizador, senha })

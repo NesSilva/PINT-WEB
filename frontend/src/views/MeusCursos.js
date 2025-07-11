@@ -22,7 +22,7 @@ const MeusCursos = () => {
       return;
     }
 
-    axios.get(`https://frontend-z8p8.onrender.com/api/inscricoes/${userId}`)
+    axios.get(`https://backend-8pyn.onrender.com/api/inscricoes/${userId}`)
       .then(res => {
         if (res.data.success) {
           setInscricoes(res.data.inscricoes);
@@ -33,7 +33,7 @@ const MeusCursos = () => {
 
     fetchCursos();
 
-    axios.get(`https://frontend-z8p8.onrender.com/api/progressos/utilizador/${userId}`)
+    axios.get(`https://backend-8pyn.onrender.com/api/progressos/utilizador/${userId}`)
       .then(res => setProgressoCursos(res.data))
       .catch(console.error);
 
@@ -43,7 +43,7 @@ const MeusCursos = () => {
       const fetchData = async () => {
         try {
           const [cursosRes] = await Promise.all([
-            axios.get('https://frontend-z8p8.onrender.com/api/cursos'),
+            axios.get('https://backend-8pyn.onrender.com/api/cursos'),
           ]);
   
   
@@ -60,7 +60,7 @@ const MeusCursos = () => {
     }, []);
   const fetchCursos = async () => {
     try {
-      const res = await axios.get("https://frontend-z8p8.onrender.com/api/cursos/todos");
+      const res = await axios.get("https://backend-8pyn.onrender.com/api/cursos/todos");
       setCursos(res.data);
     } catch (err) {
       console.error("Erro ao buscar cursos:", err);
@@ -120,7 +120,7 @@ const MeusCursos = () => {
   const userId = user?.id_utilizador || localStorage.getItem("usuarioId");
 
   try {
-    const res = await axios.post("https://frontend-z8p8.onrender.com/api/certificados", {
+    const res = await axios.post("https://backend-8pyn.onrender.com/api/certificados", {
       id_utilizador: userId,
       id_curso,
     });
@@ -128,7 +128,7 @@ const MeusCursos = () => {
 
     // Independente de ser novo ou existente, abre o PDF
     if (res.data.success) {
-      const url = `https://frontend-z8p8.onrender.com/api/certificados/pdf?user=${userId}&curso=${id_curso}`;
+      const url = `https://backend-8pyn.onrender.com/api/certificados/pdf?user=${userId}&curso=${id_curso}`;
       window.open(url, "_blank");
       
       // Mostra mensagem apropriada

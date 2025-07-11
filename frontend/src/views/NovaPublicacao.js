@@ -38,7 +38,7 @@ const NovaPublicacao = () => {
     useEffect(() => {
         const carregarCategorias = async () => {
             try {
-                const response = await axios.get('https://frontend-z8p8.onrender.com/api/categorias');
+                const response = await axios.get('https://backend-8pyn.onrender.com/api/categorias');
                 setCategorias(response.data.categorias);
             } catch (error) {
                 console.error('Erro ao carregar categorias:', error);
@@ -60,7 +60,7 @@ const NovaPublicacao = () => {
             }
 
             // 1. Create the topic first (without file)
-            const response = await axios.post('https://frontend-z8p8.onrender.com/api/forum/topico/criar', {
+            const response = await axios.post('https://backend-8pyn.onrender.com/api/forum/topico/criar', {
                 id_autor: usuarioId,
                 id_categoria: values.categoria,
                 titulo: values.titulo,
@@ -82,7 +82,7 @@ const NovaPublicacao = () => {
                     };
                     
                     await axios.post(
-                        'https://frontend-z8p8.onrender.com/api/forum/anexo/topico/anexo', 
+                        'https://backend-8pyn.onrender.com/api/forum/anexo/topico/anexo', 
                         formData, 
                         config
                     );
