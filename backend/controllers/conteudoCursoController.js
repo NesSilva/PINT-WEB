@@ -112,4 +112,67 @@ const adicionarConteudosMultiplos = async (req, res) => {
   }
 };
 
-module.exports = { adicionarConteudo , adicionarConteudosMultiplos};
+const obterPrimeiraImagemCurso = async (req, res) => {
+  const { id_curso } = req.params;
+  try {
+    const primeiraImagem = await ConteudoCurso.findOne({
+      where: {
+        id_curso,
+        tipo_conteudo: 'imagem'
+      },
+      order: [['createdAt', 'ASC']]
+    });
+
+    if (!primeiraImagem) {
+      return res.status(404).json({ message: "Nenhuma imagem encontrada para este curso." });
+    }
+
+    res.json(primeiraImagem);
+  } catch (error) {
+    console.error("Erro ao buscar imagem:", error);
+    res.status(500).json({ message: "Erro ao buscar imagem." });
+  }
+};
+
+const listarConteudosPorCurso = async (req, res) => {
+  const { id_curso } = req.params;
+
+  try {
+    const conteudos = await ConteudoCurso.findAll({ where: { id_curso } });
+    res.status(200).json(conteudos);
+  } catch (error) {
+    console.error("Erro ao buscar conteúdos:", error);
+    res.status(500).json({ message: "Erro ao buscar conteúdos do curso." });
+  }
+};
+
+const adicionarLink = async (req, res) => {
+  try {
+    const { id_curso, descricao, url, tipo_conteudo } = req.body;
+
+    if (!url) {
+      return res.status(400).json({ success: false, message: "URL é obrigatória." });
+    }
+
+    const conteudo = await ConteudoCurso.create({
+      id_curso,
+      tipo_conteudo: tipo_conteudo || "link",
+      url,
+      descricao: descricao || "Link do curso",
+    });
+
+    res.status(201).json({ 
+      success: true, 
+      message: "Link adicionado com sucesso!", 
+      conteudo 
+    });
+  } catch (error) {
+    console.error("Erro ao adicionar link:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Erro no servidor.",
+      error: error.message 
+    });
+  }
+};
+module.exports = { adicionarConteudo , adicionarConteudosMultiplos , obterPrimeiraImagemCurso , listarConteudosPorCurso , adicionarLink};

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="imagens/logo.png" type="image/png">
+    <title>The SoftSkills</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3F76A6;
+            --primary-light: #A7BDD9;
+            --secondary: #04C4D9;
+            --secondary-light: #85E7F2;
+            --background: #F2F2F2;
+            --text: #333333;
+            --text-light: #666666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 60px 20px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(90deg, var(--secondary-light), var(--primary-light));
+        }
+        
+        header img {
+            max-width: 250px;
+            height: auto;
+            display: block;
+            margin: 0 auto 20px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+        }
+        
+        /* Sections */
+        .section {
+            padding: 60px 0;
+        }
+        
+        .section-content {
+            background: white;
+            border-radius: 16px;
+            padding: 50px;
+            margin: 0 auto;
+            width: 90%;
+            box-shadow: 0 8px 24px rgba(63, 118, 166, 0.1);
+            border: 1px solid var(--primary-light);
+        }
+        
+        .section h2 {
+            color: var(--primary);
+            font-size: 2.2rem;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            font-weight: 600;
+        }
+        
+        .section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary), var(--secondary-light));
+            border-radius: 2px;
+        }
+        
+        .section p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text);
+            margin-bottom: 25px;
+            text-align: justify;
+        }
+        
+        .highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        /* App Showcase */
+        .app-showcase {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 50px;
+            background: white;
+            border-radius: 16px;
+            margin: 40px auto;
+            width: 90%;
+            box-shadow: 0 8px 24px rgba(63, 118, 166, 0.1);
+            border: 1px solid var(--primary-light);
+            transition: transform 0.3s ease;
+        }
+        
+        .app-showcase:hover {
+            transform: translateY(-5px);
+        }
+        
+        .app-showcase.reverse {
+            flex-direction: row-reverse;
+        }
+        
+        .app-image {
+            flex: 1;
+            position: relative;
+        }
+        
+        .app-image img {
+            width: 100%;
+            border-radius: 12px;
+        }
+        
+        .app-content {
+            flex: 1;
+            padding: 0 40px;
+        }
+        
+        .app-content h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        /* Buttons */
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(63, 118, 166, 0.2);
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(63, 118, 166, 0.3);
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+        }
+        
+        /* Video */
+        .video-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 40px auto;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 12px 28px rgba(63, 118, 166, 0.15);
+            border: 1px solid var(--primary-light);
+        }
+        
+        .video-container iframe {
+            width: 100%;
+            height: 450px;
+            border: none;
+            display: block;
+        }
+        
+        /* Team */
+        .team-section {
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary-light));
+            padding: 80px 0;
+            margin-top: 60px;
+        }
+        
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+        
+        .team-card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(63, 118, 166, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid var(--primary-light);
+        }
+        
+        .team-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 32px rgba(63, 118, 166, 0.2);
+        }
+        
+        .team-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            color: white;
+            font-size: 2rem;
+            font-weight: 600;
+            box-shadow: 0 8px 16px rgba(63, 118, 166, 0.2);
+        }
+        
+        .team-card h3 {
+            color: var(--primary);
+            margin: 20px 0 10px;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .team-card p {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 40px 0 20px;
+        }
+        
+        .footer-content {
+            margin-bottom: 30px;
+        }
+        
+        .copyright {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .section-content, .app-showcase {
+                padding: 40px;
+                width: 95%;
+            }
+            
+            .app-showcase {
+                flex-direction: column;
+            }
+            
+            .app-content {
+                padding: 0;
+                margin-top: 40px;
+            }
+            
+            .app-content h2 {
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                padding: 50px 20px;
+            }
+            
+            header img {
+                max-width: 200px;
+            }
+            
+            .section h2 {
+                font-size: 1.8rem;
+            }
+            
+            .section-content, .app-showcase {
+                padding: 30px;
+            }
+            
+            .video-container iframe {
+                height: 350px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .section h2 {
+                font-size: 1.6rem;
+            }
+            
+            .section p {
+                font-size: 1rem;
+            }
+            
+            .button {
+                padding: 12px 24px;
+            }
+            
+            .video-container iframe {
+                height: 250px;
+            }
+            
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <img src="imagens/logo.png" alt="Logo SoftShare">
+        <h1 style="font-weight: 700; font-size: 2.5rem; margin-top: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">THE SOFTSKILLS</h1>
+    </div>
+</header>
+
+<section>
+    <div class="container">
+        <div class="section-content">
+            <h2>Bem-vindo ao The SoftSkills!</h2>
+            <p>O The SoftSkills é uma plataforma web e mobile criada para modernizar e facilitar o acesso à formação interna e à partilha de conhecimento dentro da Softinsa, especialmente num contexto em que o trabalho remoto se tornou predominante. Esta aplicação surge como resposta à necessidade de manter os colaboradores motivados, acompanhados e em constante aprendizagem, promovendo um ambiente colaborativo e formativo.</p>
+
+            <p>A plataforma centraliza todo o percurso formativo dos colaboradores – desde a inscrição num curso interno até à sua avaliação – e permite também a partilha de conteúdos diversos por categorias e áreas de conhecimento, em formato de vídeos, ficheiros, links e fóruns de discussão.</p>
+            
+            <p>Organizada em várias vertentes – como Saúde, Desporto, Formação, entre outras –, a aplicação disponibiliza funcionalidades como notificações personalizadas, fóruns por tópicos, quizzes, uploads de trabalhos e certificados automáticos. Conta ainda com um sistema de permissões por perfil (Administrador, Formador, Formando), tanto no FrontOffice como no BackOffice, permitindo uma gestão eficaz e segura dos conteúdos e das interações.</p>
+            
+            <p>Com o The SoftSkills, é possível acompanhar de forma clara o progresso individual de cada colaborador e incentivar uma cultura de aprendizagem contínua e partilha ativa.</p>
+            
+            <p style="text-align: center; margin-top: 40px;">
+                <span class="highlight" style="font-size: 1.2rem;">Explore, aprenda e cresça com o The SoftSkills – a sua nova plataforma de formação interna!</span>
+            </p>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <div class="app-showcase">
+        <div class="app-image">
+            <img src="" alt="App Mobile">
+        </div>
+        <div class="app-content">
+            <h2>Aplicação Mobile</h2>
+            <p>Na aplicação mobile do The SoftSkills, os colaboradores podem aceder facilmente aos cursos disponíveis, inscrever-se em formações, consultar conteúdos didáticos e acompanhar o seu percurso formativo. A app permite ainda participar em fóruns por categorias e tópicos, partilhar materiais, comentar publicações e realizar quizzes integrados. Além disso, o sistema de notificações push mantém os utilizadores atualizados sobre alterações em cursos, avaliações e novas oportunidades de aprendizagem.</p>
+            <div class="button-container">
+                <a href="" download="SoftShares.apk" class="button">Download da Aplicação</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="app-showcase reverse">
+        <div class="app-content">
+            <h2>Aplicação Web</h2>
+            <p>A versão web do The SoftSkills oferece todas as funcionalidades da aplicação mobile, com o benefício adicional de um ambiente mais completo para formadores e gestores. Através da plataforma web, é possível gerir utilizadores e permissões, criar cursos e definir conteúdos, acompanhar a evolução dos formandos e organizar fóruns de partilha de conhecimento. O backoffice disponibiliza ainda ferramentas para avaliar formandos, gerar certificados e visualizar o percurso formativo de cada colaborador, garantindo uma gestão eficaz e centralizada da formação interna.</p>
+            <div class="button-container">
+                <a href="https://frontend-z8p8.onrender.com/" class="button">Aceder ao Site Web</a>
+            </div>
+        </div>
+        <div class="app-image">
+            <img src="imagens\web.png"" alt="App Web">
+        </div>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="section-content">
+            <h2>Veja o vídeo para ver a aplicação:</h2>
+            <div class="video-container">
+                <iframe  
+                    title="YouTube video player" frameborder="0" 
+                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Seção dos criadores da aplicação -->
+<div class="team-section">
+    <div class="container">
+        <div class="section-content" style="background: transparent; border: none; box-shadow: none; padding: 0;">
+            <h2 style="color: var(--primary);">Criadores da Aplicação</h2>
+            <div class="team-grid">
+                <div class="team-card">
+                    <div class="team-icon">C</div>
+                    <h3>Claudio Filho Pv19866</h3>
+                    <p>Desenvolvedor mobile</p>
+                </div>
+                <div class="team-card">
+                    <div class="team-icon">I</div>
+                    <h3>Inês Silva pv25222</h3>
+                    <p>Desenvolvedor Web</p>
+                </div>
+                <div class="team-card">
+                    <div class="team-icon">P</div>
+                    <h3>Pedro Rodrigues pv24512</h3>
+                    <p>Desenvolvedor web</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <img src="imagens/logo.png" alt="The SoftSkills" style="width: 160px; margin-bottom: 20px; filter: brightness(0) invert(1);">
+        </div>
+        <div class="copyright">
+            &copy; 2025 SoftSkills - PINT
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

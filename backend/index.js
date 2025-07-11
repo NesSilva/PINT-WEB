@@ -3,6 +3,7 @@ const app = express();
 const sequelize = require("./models/basededados");
 const authRoutes = require("./routes/auth");
 const passwordRoutes = require("./routes/passwordRoutes");
+const cometario_anexo = require("./models/ForumComentarioAnexo");
 
 // Configurações básicas
 app.set("port", process.env.PORT || 3000);
@@ -59,7 +60,7 @@ app.post('/api/utilizadores/admin/aceitar-pedido', (req, res) => {
 
 const perfisRoutes = require("./routes/perfisRoutes");
 app.use("/api/perfis", perfisRoutes);
-
+//
 const cursoRoutes = require("./routes/cursoRoutes");
 app.use("/api/cursos", cursoRoutes);
 
@@ -69,8 +70,17 @@ app.use("/api/conteudo", conteudoRoutes);
 // --- NOVAS ROTAS DO FÓRUM ---
 const forumTopicoRoutes = require('./routes/forumTopico');
 const forumComentarioRoutes = require('./routes/forumComentario');
+const forumTopicoAnexo = require('./routes/forumTopicoRoutes');
+const forumComentarioAnexoRoutes = require('./routes/forumComentarioAnexoRoutes');
+
 app.use('/api/forum/topico', forumTopicoRoutes);
 app.use('/api/forum/comentario', forumComentarioRoutes);
+app.use('/api/forum/anexo', forumTopicoAnexo);
+app.use('/api/forum/anexo/comentario', forumComentarioAnexoRoutes);  // Nova rota
+
+
+
+
 
 // Servir imagens dos uploads (deixa isso depois de todas as rotas)
 app.use('/uploads/forum', express.static('uploads/forum'));
@@ -84,6 +94,8 @@ app.use("/api/notificacoes", notificacaoRoutes);
 const progressoRoutes = require("./routes/progressos");
 app.use("/api/progressos/", progressoRoutes);
 
+const documentosAvaliacaoRoutes = require("./routes/documentos_avaliação");
+app.use('/api/documentos-avaliacao', documentosAvaliacaoRoutes);
 
 
 app.get("/", (req, res) => {

@@ -7,16 +7,18 @@ const SelecionarPerfil = () => {
   const location = useLocation();
   const { user } = location.state || {};
 
-  const handleSelecionar = (perfil) => {
+    const handleSelecionar = (perfil) => {
     console.log("Perfil selecionado:", perfil);
+    // Atualize para usar os paths definidos nas rotas
     if (perfil.nome.toLowerCase() === 'formando') {
-      navigate('/dashboard/formando', { state: { user, perfil } });
+        navigate('/dashboard/formando', { state: { user, perfil } });
     } else if (perfil.nome.toLowerCase() === 'administrador') {
-      navigate('/dashboard/administrador', { state: { user, perfil } });
-    } else if (perfil.nome.toLowerCase() === 'formador') {
+        navigate('/dashboard/administrador', { state: { user, perfil } });
+    }else if (perfil.nome.toLowerCase() === 'formador') {
       navigate('/dashboard/formador', { state: { user, perfil } });
     }
-  };
+    // Adicione outros perfis conforme necessário
+};
 
   if (!user || !user.perfis) {
     return <p className="text-center mt-5 text-danger">Erro: informação do utilizador em falta.</p>;
@@ -36,7 +38,7 @@ const SelecionarPerfil = () => {
 
         <div className="d-flex flex-wrap justify-content-center gap-3">
           {user.perfis.map((perfil) => (
-            <button
+            <button   
               key={perfil.id}
               className="btn btn-outline-light"
               onClick={() => handleSelecionar(perfil)}

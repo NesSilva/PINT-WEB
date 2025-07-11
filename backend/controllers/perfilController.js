@@ -1,6 +1,5 @@
 const Perfil = require("../models/Perfil");
 
-// Função para listar todos os perfis
 const listarPerfis = async (req, res) => {
   try {
     const perfis = await Perfil.findAll({ attributes: ["id_perfil", "nome"], raw: true });

@@ -16,7 +16,7 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post("https://backend-8pyn.onrender.com/", {
+            const response = await axios.post("https://frontend-z8p8.onrender.com/", {
                 email: email,
                 senha: senha
             });
@@ -29,7 +29,7 @@ const Login = () => {
                 const primeiroLogin = response.data.user?.primeiroLogin;
                 
                 if (primeiroLogin === 0) {
-
+                  
                     navigate("/primeiro-login", { state: { email: email } });
                 } else {
                     console.log("primeiroLogin:", response.data.user?.primeiroLogin);

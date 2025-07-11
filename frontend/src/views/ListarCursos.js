@@ -1,17 +1,29 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
-import { Modal, Button, Form } from "react-bootstrap";
+import { Modal, Button, Form, Alert } from "react-bootstrap";
+import { FaTrash, FaEdit, FaSync, FaPlus } from "react-icons/fa";
+import "../css/ListarCursos.css";
 
 const ListarCursos = () => {
+  // Estados para dados
   const [cursos, setCursos] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [cursoParaEditar, setCursoParaEditar] = useState(null);
   const [categorias, setCategorias] = useState([]);
   const [areas, setAreas] = useState([]);
   const [formadores, setFormadores] = useState([]);
 
+  // Estados para modais
+  const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [cursoParaEditar, setCursoParaEditar] = useState(null);
+  const [showReativarModal, setShowReativarModal] = useState(false); 
+  const [cursoParaReativar, setCursoParaReativar] = useState(null); 
+
+  // Estados para reativação
+  const [novaDataInicio, setNovaDataInicio] = useState("");
+  const [novaDataFim, setNovaDataFim] = useState("")
+
+  // Estados para formulários
   const [formData, setFormData] = useState({
     titulo: "",
     descricao: "",
@@ -21,63 +33,46 @@ const ListarCursos = () => {
     data_inicio: "",
     data_fim: "",
     vagas: null,
-    ficheiro: null, 
+    ficheiro: null,
     descricao_formador: "",
   });
 
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState("");
+  // Estados para feedback e filtros
+  const [message, setMessage] = useState({ text: "", type: "" });
+  const [filtros, setFiltros] = useState({
+    nomeFormador: "",
+    dataInicio: "",
+    dataFim: ""
+  });
 
-  const [filtroNomeFormador, setFiltroNomeFormador] = useState("");
-  const [filtroDataInicio, setFiltroDataInicio] = useState("");
-  const [filtroDataFim, setFiltroDataFim] = useState("");
-
- useEffect(() => {
-  fetchCursos();
-}, []);
-
-useEffect(() => {
-  const fetchDados = async () => {
-    try {
-      const cursosRes = await axios.get("http://localhost:3000/api/cursos/todos");
-
-      setCursos(cursosRes.data);
-      
-      const categoriasRes = await axios.get('https://backend-8pyn.onrender.com/api/categorias');
-      setCategorias(categoriasRes.data.categorias || []);
-      
-      const areasRes = await axios.get('https://backend-8pyn.onrender.com/api/areas-formacao');
-      setAreas(areasRes.data.areas || []);
-      
+  // Carregar dados iniciais
+  useEffect(() => {
+    const carregarDados = async () => {
       try {
-        const formadoresRes = await axios.get('https://backend-8pyn.onrender.com/api/utilizadores/formadores');
+        const [cursosRes, categoriasRes, areasRes, formadoresRes] = await Promise.all([
+          axios.get("https://frontend-z8p8.onrender.com/api/cursos/todos"),
+          axios.get('https://frontend-z8p8.onrender.com/api/categorias'),
+          axios.get('https://frontend-z8p8.onrender.com/api/areas-formacao'),
+          axios.get('https://frontend-z8p8.onrender.com/api/utilizadores/formadores').catch(() => ({ data: { formadores: [] } }))
+        ]);
+
+        setCursos(cursosRes.data);
+        setCategorias(categoriasRes.data.categorias || []);
+        setAreas(areasRes.data.areas || []);
         setFormadores(formadoresRes.data.formadores || []);
       } catch (error) {
-        console.error("Erro ao buscar formadores:", error);
-        setFormadores([]); 
+        console.error("Erro ao carregar dados:", error);
+        mostrarMensagem("Erro ao carregar dados", "error");
       }
-    } catch (error) {
-      console.error("Erro ao buscar dados:", error);
-    }
-  };
-  
-  fetchDados();
-}, []);
+    };
 
-  const fetchCursos = async () => {
-    try {
-      const response = await axios.get("http://localhost:3000/api/cursos/todos");
+    carregarDados();
+  }, []);
 
-      setCursos(response.data);
-    } catch (error) {
-      console.error("Erro ao buscar cursos:", error);
-    }
-  };
-
-  const handleShowModal = () => setShowModal(true);
-  const handleCloseModal = () => {
-    setShowModal(false);
-    resetFormData();
+  // Funções auxiliares
+  const mostrarMensagem = (text, type) => {
+    setMessage({ text, type });
+    setTimeout(() => setMessage({ text: "", type: "" }), 5000);
   };
 
   const resetFormData = () => {
@@ -90,12 +85,9 @@ useEffect(() => {
       data_inicio: "",
       data_fim: "",
       vagas: null,
-      ficheiro: null,  
-      descricao_formador: "", // Novo campo
-
+      ficheiro: null,
+      descricao_formador: "",
     });
-    setMessage("");
-    setMessageType("");
   };
 
   const handleChange = (e) => {
@@ -103,551 +95,749 @@ useEffect(() => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    setFormData(prev => ({ ...prev, ficheiro: e.target.files[0] }));
-  };
-
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setCursoParaEditar(prev => ({ ...prev, [name]: value }));
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  try {
-    // 1. Preparar os dados do curso
-    const dadosCurso = {
-      titulo: formData.titulo,
-      descricao: formData.descricao,
-      id_categoria: formData.id_categoria,
-      id_area: formData.id_area,
-      id_formador: formData.id_formador || null, // Pode ser null
-      data_inicio: formData.data_inicio,
-      data_fim: formData.data_fim,
-      vagas: formData.vagas,
-      descricao_formador: formData.id_formador ? formData.descricao_formador : null
-    };
-
-    // 2. Enviar dados do curso
-    const response = await axios.post("https://backend-8pyn.onrender.com/api/cursos/criar", dadosCurso);
-    const idCursoCriado = response.data.curso.id_curso;
-
-    // 3. Se houver arquivo, enviar separadamente
-    if (formData.ficheiro) {
-      const formDataArquivo = new FormData();
-      formDataArquivo.append("file", formData.ficheiro);
-      formDataArquivo.append("id_curso", idCursoCriado);
-      formDataArquivo.append("tipo_conteudo", "material");
-      formDataArquivo.append("descricao", "Material do curso");
-
-      await axios.post("https://backend-8pyn.onrender.com/api/conteudo/adicionar", formDataArquivo, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
-    }
-
-    // 4. Feedback e limpeza
-    setMessage("Curso criado com sucesso!");
-    setMessageType("success");
-    fetchCursos(); // Atualiza a lista de cursos
-    handleCloseModal(); // Fecha o modal
-    
-  } catch (error) {
-    console.error("Erro ao criar curso:", error);
-    
-    // Tratamento de erros mais detalhado
-    const errorMessage = error.response?.data?.message || 
-                        error.response?.data?.error || 
-                        "Erro ao criar curso. Por favor, tente novamente.";
-    
-    setMessage(errorMessage);
-    setMessageType("error");
-  }
-};
-  
-  const handleEditClick = (curso) => {
-    setCursoParaEditar(curso);
-    setShowEditModal(true);
+  const handleFileChange = (e) => {
+    setFormData(prev => ({ ...prev, ficheiro: e.target.files[0] }));
   };
 
-  const handleUpdateCurso = async () => {
-  try {
-    // Verifica se o curso já começou
-    const hoje = new Date();
-    const dataInicio = new Date(cursoParaEditar.data_inicio);
-    
-    if (hoje > dataInicio) {
-      setMessage("Não é possível editar as vagas após a data de início do curso");
-      setMessageType("error");
-      return;
+  const handleFiltroChange = (e) => {
+    const { name, value } = e.target;
+    setFiltros(prev => ({ ...prev, [name]: value }));
+  };
+
+  const limparFiltros = () => {
+    setFiltros({
+      nomeFormador: "",
+      dataInicio: "",
+      dataFim: ""
+    });
+  };
+
+  const handleReativarCurso = async () => {
+    try {
+        const response = await axios.put(
+            `https://frontend-z8p8.onrender.com/api/cursos/reativar/${cursoParaReativar.id_curso}`,
+            {
+                nova_data_inicio: novaDataInicio,
+                nova_data_fim: novaDataFim
+            }
+        );
+
+        mostrarMensagem("Curso reativado com sucesso!", "success");
+        setCursos(prev => prev.map(c => 
+            c.id_curso === cursoParaReativar.id_curso ? response.data.curso : c
+        ));
+        setShowReativarModal(false);
+        setNovaDataInicio("");
+        setNovaDataFim("");
+    } catch (error) {
+        console.error("Erro ao reativar curso:", error);
+        mostrarMensagem(error.response?.data?.message || "Erro ao reativar curso", "error");
     }
+  };
 
-    // Prepara os dados para envio
-    const dadosAtualizados = {
-      titulo: cursoParaEditar.titulo,
-      descricao: cursoParaEditar.descricao,
-      id_categoria: cursoParaEditar.id_categoria,
-      id_area: cursoParaEditar.id_area,
-      id_formador: cursoParaEditar.id_formador || null,
-      descricao_formador: cursoParaEditar.id_formador ? cursoParaEditar.descricao_formador : null,
-      data_inicio: cursoParaEditar.data_inicio,
-      data_fim: cursoParaEditar.data_fim,
-      vagas: cursoParaEditar.id_formador ? Number(cursoParaEditar.vagas) : null
-    };
 
-    const response = await axios.put(
-      `http://localhost:3000/api/cursos/editar/${cursoParaEditar.id_curso}`,
-      dadosAtualizados
-      formDataToSend,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+  const criarCurso = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const dadosCurso = {
+        titulo: formData.titulo,
+        descricao: formData.descricao,
+        id_categoria: formData.id_categoria,
+        id_area: formData.id_area,
+        id_formador: formData.id_formador || null,
+        data_inicio: formData.data_inicio,
+        data_fim: formData.data_fim,
+        vagas: formData.vagas,
+        descricao_formador: formData.id_formador ? formData.descricao_formador : null
+      };
+
+      const response = await axios.post("https://frontend-z8p8.onrender.com/api/cursos/criar", dadosCurso);
+      
+      if (formData.ficheiro) {
+        await enviarArquivo(response.data.curso.id_curso, formData.ficheiro);
       }
 
-    );
-
-    // Se houver arquivo para enviar, faz separadamente
-    if (cursoParaEditar.ficheiro) {
-      const formDataArquivo = new FormData();
-      formDataArquivo.append("file", cursoParaEditar.ficheiro);
-      formDataArquivo.append("id_curso", cursoParaEditar.id_curso);
-      formDataArquivo.append("tipo_conteudo", "material");
-      formDataArquivo.append("descricao", "Material do curso");
-
-      await axios.post("http://localhost:3000/api/conteudo/adicionar", formDataArquivo, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
-    }
-
-    setMessage("Curso atualizado com sucesso!");
-    setMessageType("success");
-    fetchCursos();
-    setShowEditModal(false);
-  } catch (error) {
-    console.error("Erro ao atualizar curso:", error);
-    setMessage(error.response?.data?.message || "Erro ao atualizar curso.");
-    setMessageType("error");
-  }
-};
-
-  const handleDeleteCurso = async (id) => {
-    if (!id) {
-      console.error("ID inválido.");
-      return;
-    }
-    try {
-      await axios.delete(`https://backend-8pyn.onrender.com/api/cursos/eliminar/${id}`);
-      setMessage("Curso eliminado com sucesso!");
-      setMessageType("success");
-      fetchCursos();
+      mostrarMensagem("Curso criado com sucesso!", "success");
+      setCursos(prev => [...prev, response.data.curso]);
+      setShowModal(false);
+      resetFormData();
     } catch (error) {
-      console.error("Erro ao eliminar curso:", error);
-      setMessage("Erro ao eliminar curso.");
-      setMessageType("error");
+      console.error("Erro ao criar curso:", error);
+      const errorMsg = error.response?.data?.message || "Erro ao criar curso";
+      mostrarMensagem(errorMsg, "error");
     }
   };
 
+  const atualizarCurso = async () => {
+    try {
+      const hoje = new Date();
+      const dataInicio = new Date(cursoParaEditar.data_inicio);
+      
+      if (hoje > dataInicio) {
+        mostrarMensagem("Não é possível editar após o início do curso", "error");
+        return;
+      }
+
+      const dadosAtualizados = {
+        titulo: cursoParaEditar.titulo,
+        descricao: cursoParaEditar.descricao,
+        id_categoria: cursoParaEditar.id_categoria,
+        id_area: cursoParaEditar.id_area,
+        id_formador: cursoParaEditar.id_formador || null,
+        descricao_formador: cursoParaEditar.id_formador ? cursoParaEditar.descricao_formador : null,
+        data_inicio: cursoParaEditar.data_inicio,
+        data_fim: cursoParaEditar.data_fim,
+        vagas: cursoParaEditar.id_formador ? Number(cursoParaEditar.vagas) : null
+      };
+
+      await axios.put(
+        `https://frontend-z8p8.onrender.com/api/cursos/editar/${cursoParaEditar.id_curso}`,
+        dadosAtualizados
+      );
+
+      if (cursoParaEditar.ficheiro) {
+        await enviarArquivo(cursoParaEditar.id_curso, cursoParaEditar.ficheiro);
+      }
+
+      mostrarMensagem("Curso atualizado com sucesso!", "success");
+      setCursos(prev => prev.map(c => 
+        c.id_curso === cursoParaEditar.id_curso ? { ...c, ...dadosAtualizados } : c
+      ));
+      setShowEditModal(false);
+    } catch (error) {
+      console.error("Erro ao atualizar curso:", error);
+      mostrarMensagem(error.response?.data?.message || "Erro ao atualizar curso", "error");
+    }
+  };
+
+  const deletarCurso = async (id) => {
+    try {
+      // Verificar o estado do curso antes de deletar
+      const curso = cursos.find(c => c.id_curso === id);
+      
+      if (!curso) {
+        mostrarMensagem("Curso não encontrado", "error");
+        return;
+      }
+
+      if (curso.estado === 'em_curso' || curso.estado === 'terminado') {
+        mostrarMensagem("Não é possível eliminar cursos em andamento ou terminados", "error");
+        return;
+      }
+
+      await axios.delete(`https://frontend-z8p8.onrender.com/api/cursos/eliminar/${id}`);
+      mostrarMensagem("Curso eliminado com sucesso!", "success");
+      setCursos(prev => prev.filter(c => c.id_curso !== id));
+    } catch (error) {
+      console.error("Erro ao eliminar curso:", error);
+      mostrarMensagem("Erro ao eliminar curso", "error");
+    }
+  };
+
+  const enviarArquivo = async (idCurso, arquivo) => {
+    const formDataArquivo = new FormData();
+    formDataArquivo.append("file", arquivo);
+    formDataArquivo.append("id_curso", idCurso);
+    formDataArquivo.append("tipo_conteudo", "material");
+    formDataArquivo.append("descricao", "Material do curso");
+
+    await axios.post("https://frontend-z8p8.onrender.com/api/conteudo/adicionar", formDataArquivo, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+  };
+
+  // Filtragem de cursos
   const cursosFiltrados = cursos.filter(curso => {
-    const nomeMatch = curso.nome_formador?.toLowerCase().includes(filtroNomeFormador.toLowerCase());
-    const dataInicioMatch = filtroDataInicio ? curso.data_inicio?.startsWith(filtroDataInicio) : true;
-    const dataFimMatch = filtroDataFim ? curso.data_fim?.startsWith(filtroDataFim) : true;
+    const nomeMatch = curso.nome_formador?.toLowerCase().includes(filtros.nomeFormador.toLowerCase());
+    const dataInicioMatch = filtros.dataInicio ? curso.data_inicio?.startsWith(filtros.dataInicio) : true;
+    const dataFimMatch = filtros.dataFim ? curso.data_fim?.startsWith(filtros.dataFim) : true;
     return nomeMatch && dataInicioMatch && dataFimMatch;
   });
 
-  const limparFiltros = () => {
-    setFiltroNomeFormador("");
-    setFiltroDataInicio("");
-    setFiltroDataFim("");
+  // Função para renderizar as ações da tabela
+  const renderAcoesCell = (curso) => {
+    const podeEditar = curso.estado === 'agendado';
+    const podeExcluir = curso.estado === 'agendado';
+    const podeReativar = curso.estado === 'terminado';
+
+    return (
+      <>
+        {/* Botão Excluir - só aparece se podeExcluir */}
+        {podeExcluir && (
+          <Button 
+            variant="outline-danger" 
+            size="sm" 
+            onClick={() => deletarCurso(curso.id_curso)}
+            className="acao-btn"
+            title="Excluir"
+          >
+            <FaTrash />
+          </Button>
+        )}
+        
+        {/* Botão Editar */}
+        <Button 
+          variant="outline-warning" 
+          size="sm" 
+          onClick={() => {
+            setCursoParaEditar({
+              ...curso,
+              data_inicio: formatarDataParaInput(curso.data_inicio),
+              data_fim: formatarDataParaInput(curso.data_fim)
+            });
+            setShowEditModal(true);
+          }}
+          disabled={!podeEditar}
+          className="acao-btn"
+          title={!podeEditar ? "Edição bloqueada após início" : "Editar"}
+        >
+          <FaEdit />
+        </Button>
+        
+        {/* Botão Reativar - só aparece se podeReativar */}
+        {podeReativar && (
+          <Button 
+            variant="outline-success" 
+            size="sm"
+            onClick={() => {
+              setCursoParaReativar(curso);
+              setNovaDataInicio("");
+              setNovaDataFim("");
+              setShowReativarModal(true);
+            }}
+            className="acao-btn"
+            title="Reativar"
+          >
+            <FaSync />
+          </Button>
+        )}
+      </>
+    );
   };
 
+  // Renderização
   return (
-    <div className="d-flex">
+    <div className="listar-cursos-container">
       <Sidebar />
 
-      <div className="container mt-5">
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2>Lista de Cursos</h2>
-          <Button variant="primary" onClick={handleShowModal}>Criar Curso</Button>
-        </div>
+      <main className="main-content">
+        <header className="page-header">
+          <h1>Lista de Cursos</h1>
+          <Button variant="primary" onClick={() => setShowModal(true)}>
+            Criar Curso
+          </Button>
+        </header>
 
         {/* Filtros */}
-        <div className="mb-4">
-          <div className="d-flex gap-3">
-            <div style={{ width: "250px" }}>
-              <Form.Label>Filtrar por Nome do Formador:</Form.Label>
+        <section className="filtros-section">
+          <div className="filtros-grid">
+            <Form.Group>
+              <Form.Label>Filtrar por Formador:</Form.Label>
               <Form.Control
                 type="text"
-                value={filtroNomeFormador}
-                onChange={(e) => setFiltroNomeFormador(e.target.value)}
+                name="nomeFormador"
+                value={filtros.nomeFormador}
+                onChange={handleFiltroChange}
+                placeholder="Nome do formador"
               />
-            </div>
-            <div style={{ width: "200px" }}>
+            </Form.Group>
+
+            <Form.Group>
               <Form.Label>Data de Início:</Form.Label>
               <Form.Control
                 type="date"
-                value={filtroDataInicio}
-                onChange={(e) => setFiltroDataInicio(e.target.value)}
+                name="dataInicio"
+                value={filtros.dataInicio}
+                onChange={handleFiltroChange}
               />
-            </div>
-            <div style={{ width: "200px" }}>
+            </Form.Group>
+
+            <Form.Group>
               <Form.Label>Data de Fim:</Form.Label>
               <Form.Control
                 type="date"
-                value={filtroDataFim}
-                onChange={(e) => setFiltroDataFim(e.target.value)}
+                name="dataFim"
+                value={filtros.dataFim}
+                onChange={handleFiltroChange}
               />
-            </div>
+            </Form.Group>
+
+            <Button variant="outline-secondary" onClick={limparFiltros}>
+              Limpar Filtros
+            </Button>
           </div>
-          <Button variant="secondary" className="mt-2" onClick={limparFiltros}>Limpar Filtros</Button>
-        </div>
+        </section>
 
         {/* Tabela de Cursos */}
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>Título</th>
-              <th>Descrição</th>
-              <th>Formador</th>
-              <th>Data Início</th>
-              <th>Data Fim</th>
-              <th>Estado</th> {/* Nova coluna */}
-              <th>Vagas</th>
-              <th>Tipo</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cursosFiltrados.map(curso => (
-              <tr key={curso.id_curso}>
-                <td>{curso.titulo}</td>
-                <td>{curso.descricao}</td>
-                <td>{curso.nome_formador}</td>
-
-                <td>{curso.data_inicio?.split("T")[0]}</td>
-                <td>{curso.data_fim?.split("T")[0]}</td>
-                <td>
-        {curso.estado === 'agendado' && 'Agendado'}
-        {curso.estado === 'em_curso' && 'Em curso'}
-        {curso.estado === 'terminado' && 'Terminado'}
-      </td>
-                <td>{curso.vagas ?? "Ilimitado"}</td> {/* Alterado aqui */}
-                <td>{curso.tipo}</td>
-                <td>
-                  <Button variant="danger" size="sm" onClick={() => handleDeleteCurso(curso.id_curso)}>Excluir</Button>{" "}
-<Button 
-  variant="warning" 
-  size="sm" 
-  onClick={() => handleEditClick(curso)}
-  disabled={new Date() > new Date(curso.data_inicio)}
-  title={new Date() > new Date(curso.data_inicio) ? "O curso já começou e não pode ser editado" : ""}
->
-  Editar
-</Button>              </td>
+        <div className="table-responsive">
+          <table className="cursos-table">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Formador</th>
+                <th>Data Início</th>
+                <th>Data Fim</th>
+                <th>Estado</th>
+                <th>Vagas</th>
+                <th>Tipo</th>
+                <th>Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {cursosFiltrados.length > 0 ? (
+                cursosFiltrados.map(curso => (
+                  <tr key={curso.id_curso}>
+                    <td>{curso.titulo}</td>
+                    <td>{curso.nome_formador || "-"}</td>
+                    <td>{formatarData(curso.data_inicio)}</td>
+                    <td>{formatarData(curso.data_fim)}</td>
+                    <td>
+                      <span className={`badge estado-${curso.estado}`}>
+                        {formatarEstado(curso.estado)}
+                      </span>
+                    </td>
+                    <td>{curso.vagas ?? "Ilimitado"}</td>
+                    <td>{curso.tipo === 'sincrono' ? 'Síncrono' : 'Assíncrono'}</td>
+                    <td className="acoes-cell">
+                      {renderAcoesCell(curso)}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="9" className="text-center py-4">
+                    Nenhum curso encontrado
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-        {/* Modal para Criar Curso */}
-        <Modal show={showModal} onHide={handleCloseModal}>
+        {/* Modal de Criação */}
+        <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
           <Modal.Header closeButton>
             <Modal.Title>Criar Novo Curso</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Form onSubmit={handleSubmit}>
-              <Form.Group className="mb-2">
-                <Form.Label>Título:</Form.Label>
-                <Form.Control type="text" name="titulo" value={formData.titulo} onChange={handleChange} required />
-              </Form.Group>
-              <Form.Group className="mb-2">
-                <Form.Label>Descrição:</Form.Label>
-                <Form.Control as="textarea" name="descricao" value={formData.descricao} onChange={handleChange} />
-              </Form.Group>
-             <Form.Group className="mb-2">
-  <Form.Label>Categoria:</Form.Label>
-  <Form.Select 
-    name="id_categoria" 
-    value={formData.id_categoria} 
-    onChange={handleChange} 
-    required
-  >
-    <option value="">Selecione uma categoria</option>
-    {categorias.map((categoria) => (
-      <option key={categoria.id_categoria} value={categoria.id_categoria}>
-        {categoria.nome}
-      </option>
-    ))}
-  </Form.Select>
-</Form.Group>
-              <Form.Group className="mb-2">
-  <Form.Label>Área:</Form.Label>
-  <Form.Select 
-    name="id_area" 
-    value={formData.id_area} 
-    onChange={handleChange} 
-    required
-  >
-    <option value="">Selecione uma área</option>
-    {areas.map((area) => (
-      <option key={area.id_area} value={area.id_area}>
-        {area.nome}
-      </option>
-    ))}
-  </Form.Select>
-</Form.Group>
-<Form.Group className="mb-2">
-  <Form.Label>Formador (opcional):</Form.Label>
-  <Form.Select 
-    name="id_formador" 
-    value={formData.id_formador || ""} 
-    onChange={(e) => {
-      handleChange(e);
-      // Mostra/oculta o campo de descrição do formador baseado na seleção
-      setFormData(prev => ({
-        ...prev,
-        descricao_formador: e.target.value ? prev.descricao_formador : ""
-      }));
-    }}
-  >
-    <option value="">Nenhum formador (curso assíncrono)</option>
-    {formadores.map((formador) => (
-      <option key={formador.id_utilizador} value={formador.id_utilizador}>
-        {formador.nome}
-      </option>
-    ))}
-  </Form.Select>
-</Form.Group>
-
-{formData.id_formador && (
-  <Form.Group className="mb-2">
-    <Form.Label>Descrição do Formador:</Form.Label>
-    <Form.Control 
-      as="textarea" 
-      name="descricao_formador" 
-      value={formData.descricao_formador} 
-      onChange={handleChange} 
-      placeholder="Informações sobre o formador para os alunos"
-    />
-  </Form.Group>
-)}
-              <Form.Group className="mb-2">
-                <Form.Label>Data Início:</Form.Label>
-                <Form.Control type="date" name="data_inicio" value={formData.data_inicio} onChange={handleChange} required />
-              </Form.Group>
-              <Form.Group className="mb-2">
-                <Form.Label>Data Fim:</Form.Label>
-                <Form.Control type="date" name="data_fim" value={formData.data_fim} onChange={handleChange} required />
-              </Form.Group>
-             <Form.Group className="mb-2">
-  <Form.Label>Vagas {formData.id_formador && "(obrigatório)"}:</Form.Label>
-  <Form.Control 
-    type="number" 
-    name="vagas" 
-    value={formData.vagas || ""} 
-    onChange={handleChange} 
-    min="1"
-    required={!!formData.id_formador} // Obrigatório apenas para síncrono
-    disabled={!formData.id_formador} // Desabilitado para assíncrono
-    placeholder={formData.id_formador ? "" : "Ilimitadas (curso assíncrono)"}
-  />
-</Form.Group>
-              
-              <Form.Group className="mb-2">
-                <Form.Label>Ficheiro (opcional):</Form.Label>
-                <Form.Control type="file" name="ficheiro" onChange={handleFileChange} />
-              </Form.Group>
-
-              <Button variant="primary" type="submit" className="mt-3">Criar</Button>
-            </Form>
-
-            {message && (
-              <div className={`alert mt-3 ${messageType === "success" ? "alert-success" : "alert-danger"}`} role="alert">
-                {message}
-              </div>
+            {message.text && (
+              <Alert variant={message.type} dismissible onClose={() => setMessage({ text: "", type: "" })}>
+                {message.text}
+              </Alert>
             )}
+            <Form onSubmit={criarCurso}>
+              <div className="form-row">
+                <Form.Group className="col-md-6">
+                  <Form.Label>Título *</Form.Label>
+                  <Form.Control 
+                    type="text" 
+                    name="titulo" 
+                    value={formData.titulo} 
+                    onChange={handleChange} 
+                    required 
+                  />
+                </Form.Group>
+
+                <Form.Group className="col-md-6">
+                  <Form.Label>Categoria *</Form.Label>
+                  <Form.Select
+                    name="id_categoria"
+                    value={formData.id_categoria}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Selecione...</option>
+                    {categorias.map(categoria => (
+                      <option key={categoria.id_categoria} value={categoria.id_categoria}>
+                        {categoria.nome}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </div>
+
+              <Form.Group>
+                <Form.Label>Descrição</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  name="descricao"
+                  value={formData.descricao}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+
+              <div className="form-row">
+                <Form.Group className="col-md-6">
+                  <Form.Label>Área *</Form.Label>
+                  <Form.Select
+                    name="id_area"
+                    value={formData.id_area}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Selecione...</option>
+                    {areas.map(area => (
+                      <option key={area.id_area} value={area.id_area}>
+                        {area.nome}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+
+                <Form.Group className="col-md-6">
+                  <Form.Label>Formador</Form.Label>
+                  <Form.Select
+                    name="id_formador"
+                    value={formData.id_formador}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setFormData(prev => ({
+                        ...prev,
+                        vagas: e.target.value ? prev.vagas || 1 : null
+                      }));
+                    }}
+                  >
+                    <option value="">Nenhum (curso assíncrono)</option>
+                    {formadores.map(formador => (
+                      <option key={formador.id_utilizador} value={formador.id_utilizador}>
+                        {formador.nome}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </div>
+
+              {formData.id_formador && (
+                <>
+                  <Form.Group>
+                    <Form.Label>Descrição do Formador</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={2}
+                      name="descricao_formador"
+                      value={formData.descricao_formador}
+                      onChange={handleChange}
+                      placeholder="Informações sobre o formador"
+                    />
+                  </Form.Group>
+
+                  <Form.Group>
+                    <Form.Label>Vagas *</Form.Label>
+                    <Form.Control
+                      type="number"
+                      min="1"
+                      name="vagas"
+                      value={formData.vagas || ""}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </>
+              )}
+
+              <div className="form-row">
+                <Form.Group className="col-md-6">
+                  <Form.Label>Data de Início *</Form.Label>
+                  <Form.Control
+                    type="date"
+                    name="data_inicio"
+                    value={formData.data_inicio}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+
+                <Form.Group className="col-md-6">
+                  <Form.Label>Data de Fim *</Form.Label>
+                  <Form.Control
+                    type="date"
+                    name="data_fim"
+                    value={formData.data_fim}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+              </div>
+
+              <Form.Group>
+                <Form.Label>Material do Curso (opcional)</Form.Label>
+                <Form.Control
+                  type="file"
+                  name="ficheiro"
+                  onChange={handleFileChange}
+                />
+              </Form.Group>
+
+              <div className="modal-footer-buttons">
+                <Button variant="secondary" onClick={() => setShowModal(false)}>
+                  Cancelar
+                </Button>
+                <Button variant="primary" type="submit">
+                  Salvar Curso
+                </Button>
+              </div>
+            </Form>
           </Modal.Body>
         </Modal>
 
-       {/* Modal para Editar Curso */}
-{cursoParaEditar && (
-  <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
-    <Modal.Header closeButton>
-      <Modal.Title>Editar Curso</Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
-      {cursoParaEditar && (
-        <Form>
-          <Form.Group className="mb-2">
-            <Form.Label>Título:</Form.Label>
-            <Form.Control
-              type="text"
-              name="titulo"
-              value={cursoParaEditar.titulo}
-              onChange={handleEditChange}
-            />
-          </Form.Group>
-          <Form.Group className="mb-2">
-            <Form.Label>Descrição:</Form.Label>
-            <Form.Control
-              as="textarea"
-              name="descricao"
-              value={cursoParaEditar.descricao}
-              onChange={handleEditChange}
-            />
-          </Form.Group>
-          <Form.Group className="mb-2">
-            <Form.Label>Categoria:</Form.Label>
-            <Form.Select
-              name="id_categoria"
-              value={cursoParaEditar.id_categoria}
-              onChange={handleEditChange}
-            >
-              <option value="">Selecione uma categoria</option>
-              {categorias.map((categoria) => (
-                <option key={categoria.id_categoria} value={categoria.id_categoria}>
-                  {categoria.nome}
-                </option>
-              ))}
-            </Form.Select>
-          </Form.Group>
-          
-          <Form.Group className="mb-2">
-            <Form.Label>Área:</Form.Label>
-            <Form.Select
-              name="id_area"
-              value={cursoParaEditar.id_area}
-              onChange={handleEditChange}
-            >
-              <option value="">Selecione uma área</option>
-              {areas.map((area) => (
-                <option key={area.id_area} value={area.id_area}>
-                  {area.nome}
-                </option>
-              ))}
-            </Form.Select>
-          </Form.Group>
+        {/* Modal de Reativação */}
+        <Modal show={showReativarModal} onHide={() => setShowReativarModal(false)}>
+          <Modal.Header closeButton>
+              <Modal.Title>Reativar Curso</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+              <Form>
+                  <Form.Group>
+                      <Form.Label>Nova Data de Início *</Form.Label>
+                      <Form.Control
+                          type="date"
+                          name="nova_data_inicio"
+                          value={novaDataInicio}
+                          onChange={(e) => setNovaDataInicio(e.target.value)}
+                          min={new Date().toISOString().split('T')[0]}
+                          required
+                      />
+                  </Form.Group>
+                  <Form.Group>
+                      <Form.Label>Nova Data de Fim *</Form.Label>
+                      <Form.Control
+                          type="date"
+                          name="nova_data_fim"
+                          value={novaDataFim}
+                          onChange={(e) => setNovaDataFim(e.target.value)}
+                          min={novaDataInicio || new Date().toISOString().split('T')[0]}
+                          required
+                      />
+                  </Form.Group>
+              </Form>
+          </Modal.Body>
+          <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowReativarModal(false)}>
+                  Cancelar
+              </Button>
+              <Button 
+                  variant="primary" 
+                  onClick={handleReativarCurso}
+                  disabled={!novaDataInicio || !novaDataFim}
+              >
+                  Reativar Curso
+              </Button>
+          </Modal.Footer>
+        </Modal>
 
-          <Form.Group className="mb-2">
-            <Form.Label>Formador (opcional):</Form.Label>
-            <Form.Select
-              name="id_formador"
-              value={cursoParaEditar.id_formador || ""}
-              onChange={(e) => {
-                handleEditChange(e);
-                setCursoParaEditar(prev => ({
-                  ...prev,
-                  descricao_formador: e.target.value ? prev.descricao_formador : "",
-                  // Atualiza automaticamente o tipo e vagas quando muda o formador
-                  tipo: e.target.value ? "sincrono" : "assincrono",
-                  vagas: e.target.value ? (prev.vagas || 1) : null
-                }));
-              }}
-            >
-              <option value="">Nenhum formador (curso assíncrono)</option>
-              {formadores.map((formador) => (
-                <option key={formador.id_utilizador} value={formador.id_utilizador}>
-                  {formador.nome}
-                </option>
-              ))}
-            </Form.Select>
-          </Form.Group>
+        {/* Modal de Edição */}
+        {cursoParaEditar && (
+          <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="lg">
+            <Modal.Header closeButton>
+              <Modal.Title>Editar Curso</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              {message.text && (
+                <Alert variant={message.type} dismissible onClose={() => setMessage({ text: "", type: "" })}>
+                  {message.text}
+                </Alert>
+              )}
+              <Form>
+                <div className="form-row">
+                  <Form.Group className="col-md-6">
+                    <Form.Label>Título *</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="titulo"
+                      value={cursoParaEditar.titulo}
+                      onChange={handleEditChange}
+                      required
+                    />
+                  </Form.Group>
 
-          {cursoParaEditar.id_formador && (
-            <Form.Group className="mb-2">
-              <Form.Label>Descrição do Formador:</Form.Label>
-              <Form.Control
-                as="textarea"
-                name="descricao_formador"
-                value={cursoParaEditar.descricao_formador || ""}
-                onChange={handleEditChange}
-                placeholder="Informações sobre o formador para os alunos"
-              />
-            </Form.Group>
-          )}
+                  <Form.Group className="col-md-6">
+                    <Form.Label>Categoria *</Form.Label>
+                    <Form.Select
+                      name="id_categoria"
+                      value={cursoParaEditar.id_categoria}
+                      onChange={handleEditChange}
+                      required
+                    >
+                      <option value="">Selecione...</option>
+                      {categorias.map(categoria => (
+                        <option key={categoria.id_categoria} value={categoria.id_categoria}>
+                          {categoria.nome}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                </div>
 
-          <Form.Group className="mb-2">
-            <Form.Label>Data Início:</Form.Label>
-            <Form.Control
-  type="date"
-  name="data_inicio"
-  value={cursoParaEditar.data_inicio?.split("T")[0] || ""}
-  onChange={handleEditChange}
-/>
-          </Form.Group>
-          <Form.Group className="mb-2">
-            <Form.Label>Data Fim:</Form.Label>
-            <Form.Control
-              type="date"
-              name="data_fim"
-              value={cursoParaEditar.data_fim?.split("T")[0] || ""}
-              onChange={handleEditChange}
-            />
-          </Form.Group>
+                <Form.Group>
+                  <Form.Label>Descrição</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    name="descricao"
+                    value={cursoParaEditar.descricao}
+                    onChange={handleEditChange}
+                  />
+                </Form.Group>
 
-          <Form.Group className="mb-2">
-            <Form.Label>Vagas {cursoParaEditar.id_formador && "(obrigatório)"}:</Form.Label>
-            <Form.Control
-              type="number"
-              name="vagas"
-              value={cursoParaEditar.vagas || ""}
-              onChange={handleEditChange}
-              min="1"
-              required={!!cursoParaEditar.id_formador}
-              disabled={
-                !cursoParaEditar.id_formador || 
-                new Date() > new Date(cursoParaEditar.data_inicio)
-              }
-              placeholder={
-                cursoParaEditar.id_formador 
-                  ? new Date() > new Date(cursoParaEditar.data_inicio)
-                    ? "Edição bloqueada (curso iniciado)"
-                    : ""
-                  : "Ilimitado (curso assíncrono)"
-              }
-            />
-            {new Date() > new Date(cursoParaEditar.data_inicio) && (
-              <Form.Text className="text-danger">
-                As vagas não podem ser alteradas após a data de início do curso
-              </Form.Text>
-            )}
-          </Form.Group>
+                <div className="form-row">
+                  <Form.Group className="col-md-6">
+                    <Form.Label>Área *</Form.Label>
+                    <Form.Select
+                      name="id_area"
+                      value={cursoParaEditar.id_area}
+                      onChange={handleEditChange}
+                      required
+                    >
+                      <option value="">Selecione...</option>
+                      {areas.map(area => (
+                        <option key={area.id_area} value={area.id_area}>
+                          {area.nome}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
 
-          <Form.Group className="mb-2">
-            <Form.Label>Ficheiro (opcional):</Form.Label>
-            <Form.Control 
-              type="file" 
-              name="ficheiro" 
-              onChange={(e) => {
-                setCursoParaEditar(prev => ({
-                  ...prev,
-                  ficheiro: e.target.files[0]
-                }));
-              }} 
-            />
-          </Form.Group>
-        </Form>
-      )}
-    </Modal.Body>
-    <Modal.Footer>
-      <Button variant="secondary" onClick={() => setShowEditModal(false)}>
-        Cancelar
-      </Button>
-      <Button 
-        variant="primary" 
-        onClick={handleUpdateCurso}
-        disabled={new Date() > new Date(cursoParaEditar.data_inicio)}
-        title={new Date() > new Date(cursoParaEditar.data_inicio) ? "O curso já começou e não pode ser editado" : ""}
-      >
-        Guardar Alterações
-      </Button>
-    </Modal.Footer>
-  </Modal>
-)}
-         
-      </div>
+                  <Form.Group className="col-md-6">
+                    <Form.Label>Formador</Form.Label>
+                    <Form.Select
+                      name="id_formador"
+                      value={cursoParaEditar.id_formador || ""}
+                      onChange={(e) => {
+                        handleEditChange(e);
+                        setCursoParaEditar(prev => ({
+                          ...prev,
+                          vagas: e.target.value ? (prev.vagas || 1) : null,
+                          tipo: e.target.value ? "sincrono" : "assincrono"
+                        }));
+                      }}
+                    >
+                      <option value="">Nenhum (curso assíncrono)</option>
+                      {formadores.map(formador => (
+                        <option key={formador.id_utilizador} value={formador.id_utilizador}>
+                          {formador.nome}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                </div>
+
+                {cursoParaEditar.id_formador && (
+                  <>
+                    <Form.Group>
+                      <Form.Label>Descrição do Formador</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        name="descricao_formador"
+                        value={cursoParaEditar.descricao_formador || ""}
+                        onChange={handleEditChange}
+                      />
+                    </Form.Group>
+
+                    <Form.Group>
+                      <Form.Label>Vagas *</Form.Label>
+                      <Form.Control
+                        type="number"
+                        min="1"
+                        name="vagas"
+                        value={cursoParaEditar.vagas || ""}
+                        onChange={handleEditChange}
+                        required
+                        disabled={new Date() > new Date(cursoParaEditar.data_inicio)}
+                      />
+                      {new Date() > new Date(cursoParaEditar.data_inicio) && (
+                        <Form.Text className="text-warning">
+                          Vagas não podem ser alteradas após o início do curso
+                        </Form.Text>
+                      )}
+                    </Form.Group>
+                  </>
+                )}
+
+                <div className="form-row">
+                  <Form.Group className="col-md-6">
+                    <Form.Label>Data de Início *</Form.Label>
+                    <Form.Control
+                      type="date"
+                      name="data_inicio"
+                      value={cursoParaEditar.data_inicio || ""}
+                      onChange={handleEditChange}
+                      required
+                    />
+                  </Form.Group>
+
+                  <Form.Group className="col-md-6">
+                    <Form.Label>Data de Fim *</Form.Label>
+                    <Form.Control
+                      type="date"
+                      name="data_fim"
+                      value={cursoParaEditar.data_fim || ""}
+                      onChange={handleEditChange}
+                      required
+                    />
+                  </Form.Group>
+                </div>
+
+                <Form.Group>
+                  <Form.Label>Material do Curso (opcional)</Form.Label>
+                  <Form.Control
+                    type="file"
+                    name="ficheiro"
+                    onChange={(e) => {
+                      setCursoParaEditar(prev => ({
+                        ...prev,
+                        ficheiro: e.target.files[0]
+                      }));
+                    }}
+                  />
+                </Form.Group>
+
+                <div className="modal-footer-buttons">
+                  <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+                    Cancelar
+                  </Button>
+                  <Button 
+                    variant="primary" 
+                    onClick={atualizarCurso}
+                    disabled={new Date() > new Date(cursoParaEditar.data_inicio)}
+                  >
+                    Salvar Alterações
+                  </Button>
+                </div>
+              </Form>
+            </Modal.Body>
+          </Modal>
+        )}
+      </main>
     </div>
   );
+};
+
+// Funções auxiliares de formatação
+const formatarData = (data) => {
+  if (!data) return "-";
+  return new Date(data).toLocaleDateString('pt-PT');
+};
+
+const formatarDataParaInput = (data) => {
+  if (!data) return "";
+  return data.split('T')[0];
+};
+
+const formatarEstado = (estado) => {
+  const estados = {
+    'agendado': 'Agendado',
+    'em_curso': 'Em Curso',
+    'terminado': 'Terminado'
+  };
+  return estados[estado] || estado;
 };
 
 export default ListarCursos;

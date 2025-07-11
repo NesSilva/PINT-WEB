@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("./basededados");
-const ForumPublicacao = require("./forumPublicação");
+const ForumTopico = require("./ForumTopico");
 
 const ForumAnexo = sequelize.define("ForumAnexo", {
     id_anexo: {
@@ -8,13 +8,14 @@ const ForumAnexo = sequelize.define("ForumAnexo", {
         primaryKey: true,
         autoIncrement: true
     },
-    id_publicacao: {
+    id_topico: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: ForumPublicacao,
-            key: "id_publicacao"
-        }
+            model: ForumTopico,
+            key: "id_topico"
+        },
+         onDelete: 'CASCADE'
     },
     nome_arquivo: {
         type: DataTypes.STRING(255),
@@ -24,7 +25,7 @@ const ForumAnexo = sequelize.define("ForumAnexo", {
         type: DataTypes.STRING(512),
         allowNull: false
     },
-    url: {  // <-- Adicione este campo
+    url: {
         type: DataTypes.STRING(512),
         allowNull: false
     },
@@ -36,10 +37,18 @@ const ForumAnexo = sequelize.define("ForumAnexo", {
         type: DataTypes.INTEGER,
         allowNull: false
     },
+    is_imagem_principal: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
     data_upload: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
-    }
+    },
+    is_imagem_principal: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        }
 }, {
     tableName: "forum_anexos",
     timestamps: false

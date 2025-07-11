@@ -1,102 +1,177 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, Link } from "react-router-dom";
-import SidebarFormando from "../components/SidebarFormando";
-import axios from "axios";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faImage } from "@fortawesome/free-solid-svg-icons";
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import SidebarFormando from '../components/SidebarFormando';
+import { Card, Row, Col, Badge } from 'react-bootstrap';
+import { FaBookOpen, FaClock, FaSearch } from 'react-icons/fa';
+import axios from 'axios';
 
-// Componente para descrição expandível
-const DescricaoExpandivel = ({ texto, limite = 100 }) => {
-  const [expandido, setExpandido] = useState(false);
-  if (!texto) return null;
-  const mostrarTexto = expandido ? texto : texto.slice(0, limite);
+const transformFirebaseUrl = (url) => {
+  if (!url) return null;
+  if (url.includes('firebasestorage.googleapis.com/v0/b/') || !url.includes('storage.googleapis.com')) {
+    return url;
+  }
+
+  const matches = url.match(/https:\/\/storage\.googleapis\.com\/([^\/]+)\/(.+)/);
+  if (matches) {
+    const bucketName = matches[1];
+    const filePath = matches[2];
+    return `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodeURIComponent(filePath)}?alt=media`;
+  }
+
+  return url;
+};
+
+const CourseCard = ({ curso, areas, categorias }) => {
+  const imagemCurso = transformFirebaseUrl(curso.imagem_capa);
+  const areaCurso = areas.find(a => a.id_area === curso.id_area)?.nome || 'N/A';
+  const categoriaCurso = categorias.find(c => c.id_categoria === curso.id_categoria)?.nome || 'N/A';
+  const dataInicio = new Date(curso.data_inicio).toLocaleDateString('pt-PT');
+  const isSincrono = curso.tipo === 'sincrono';
+
   return (
-    <div style={{ maxWidth: "300px" }}>
-      <p style={{ marginBottom: 0, whiteSpace: "pre-wrap" }}>
-        {mostrarTexto}
-        {!expandido && texto.length > limite ? "..." : ""}
-      </p>
-      {texto.length > limite && (
-        <button
-          onClick={() => setExpandido(!expandido)}
-          style={{
-            background: "none",
-            border: "none",
-            color: "#0d6efd",
-            cursor: "pointer",
-            padding: 0,
-            fontSize: "0.875rem",
-            fontWeight: "600",
-          }}
-          aria-expanded={expandido}
-        >
-          {expandido ? "Mostrar menos" : "Mostrar mais"}
-        </button>
-      )}
-    </div>
+    <Card className="h-100 shadow-sm">
+      <div className="position-relative">
+        {imagemCurso ? (
+          <img
+            src={imagemCurso}
+            alt={`Capa do curso ${curso.titulo}`}
+            style={{ height: '150px', width: '100%', objectFit: 'cover' }}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.style.display = 'none'; 
+            }}
+          />
+        ) : (
+          <div style={{ height: '150px', backgroundColor: '#f0f0f0' }}></div>
+        )}
+
+
+        <div className="position-absolute top-0 end-0 m-2">
+          <span className={`badge ${isSincrono ? 'bg-primary' : 'bg-success'}`}>
+            {isSincrono ? 'Síncrono' : 'Assíncrono'}
+          </span>
+        </div>
+      </div>
+      <Card.Body className="d-flex flex-column">
+        <div className="mb-2">
+          <span className="badge bg-light text-dark me-2">{areaCurso}</span>
+          <span className="badge bg-light text-dark">{categoriaCurso}</span>
+        </div>
+        <Card.Title className="h5 mb-3">
+          <Link to={`/curso/${curso.id_curso}`} className="text-decoration-none text-dark">
+            {curso.titulo}
+          </Link>
+        </Card.Title>
+        <Card.Text className="text-muted small mb-3 flex-grow-1">
+          {curso.descricao?.substring(0, 100)}{curso.descricao?.length > 100 ? '...' : ''}
+        </Card.Text>
+        <div className="d-flex justify-content-between align-items-center mt-auto">
+          <div className="d-flex align-items-center text-muted small">
+            <FaClock className="me-1" />
+            <span>{curso.duracao || 'N/A'}</span>
+          </div>
+          <Badge bg="light" text="dark" className="border">
+            {curso.nivel || 'Todos os níveis'}
+          </Badge>
+        </div>
+      </Card.Body>
+      <Card.Footer className="bg-white border-top-0">
+        <div className="d-flex justify-content-between align-items-center">
+          <div>
+            <small className="text-muted">Início: {dataInicio}</small>
+          </div>
+          <Link to={`/cursod/${curso.id_curso}`} className="btn btn-sm btn-primary">
+            Ver detalhes
+          </Link>
+        </div>
+      </Card.Footer>
+    </Card>
   );
 };
 
 const DashboardFormando = () => {
-  const location = useLocation();
-  const { user } = location.state || {};
+  const [user, setUser] = useState(null);
+  const [perfil, setPerfil] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    const loadUserData = () => {
+      try {
+        const usuarioData = JSON.parse(localStorage.getItem('usuarioData') || '{}');
+        
+        if (!usuarioData.id && !usuarioData.id_utilizador) {
+          const usuarioId = localStorage.getItem('usuarioId');
+          const usuarioNome = localStorage.getItem('usuarioNome');
+          
+          if (usuarioId) {
+            usuarioData.id = usuarioId;
+            usuarioData.id_utilizador = usuarioId;
+            usuarioData.nome = usuarioNome || 'Usuário';
+          }
+        }
+
+        if (usuarioData.id || usuarioData.id_utilizador) {
+          const userObj = {
+            ...usuarioData,
+            id: usuarioData.id || usuarioData.id_utilizador,
+            id_utilizador: usuarioData.id_utilizador || usuarioData.id,
+            nome: usuarioData.nome || 'Usuário'
+          };
+
+          console.log("User object:", userObj);
+          setUser(userObj);
+        }
+
+        const usuarioPerfil = JSON.parse(localStorage.getItem('perfil') || null);
+        if (usuarioPerfil) {
+          console.log("Perfil carregado:", usuarioPerfil);
+          setPerfil(usuarioPerfil);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar dados do usuário:", error);
+      }
+    };
+
+    loadUserData();
+  }, []);
+
   const [cursosAgendados, setCursosAgendados] = useState([]);
-  const [conteudosPorCurso, setConteudosPorCurso] = useState({});
+  const [loading, setLoading] = useState(true);
   const [categorias, setCategorias] = useState([]);
   const [areas, setAreas] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [areaFiltro, setAreaFiltro] = useState("");
-  const [categoriaFiltro, setCategoriaFiltro] = useState("");
+  const [areaFiltro, setAreaFiltro] = useState('');
+  const [categoriaFiltro, setCategoriaFiltro] = useState('');
+  const [cursosFiltrados, setCursosFiltrados] = useState([]);
+
+  useEffect(() => {
+  if (user?.id_utilizador) {
+    axios.get(`https://frontend-z8p8.onrender.com/api/notificacoes/${user.id_utilizador}`)
+      .then(response => {
+        console.log("Notificações:", response.data);
+      })
+      .catch(error => {
+        console.error("Erro ao buscar notificações:", error);
+      });
+  }
+}, [user]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [catRes, areaRes, cursosRes] = await Promise.all([
-          axios.get("http://localhost:3000/api/categorias"),
-          axios.get("http://localhost:3000/api/areas-formacao"),
-          fetch("http://localhost:3000/api/cursos"),
+        const [categoriasRes, areasRes, cursosRes] = await Promise.all([
+          axios.get('https://frontend-z8p8.onrender.com/api/categorias'),
+          axios.get('https://frontend-z8p8.onrender.com/api/areas-formacao'),
+          axios.get('https://frontend-z8p8.onrender.com/api/cursos'),
         ]);
 
-        setCategorias(catRes.data.categorias || []);
-        setAreas(areaRes.data.areas || []);
+        setCategorias(categoriasRes.data?.categorias || []);
+        setAreas(areasRes.data?.areas || []);
 
-        const result = await cursosRes.json();
-        const cursos = result.data;
-
-        const hoje = new Date();
-        const cursosAtualizados = cursos.map((curso) => {
-          const inicio = new Date(curso.data_inicio);
-          const fim = new Date(curso.data_fim);
-          let estado = curso.estado;
-          if (hoje > fim) estado = "terminado";
-          else if (hoje >= inicio && hoje <= fim) estado = "em-curso";
-          return { ...curso, estado };
-        });
-
-        const agendados = cursosAtualizados.filter(c => c.estado === "agendado");
-
-        // Buscar conteúdos por curso
-        const conteudosPromises = agendados.map(async (curso) => {
-          try {
-            const res = await fetch(`http://localhost:3000/api/cursos/${curso.id_curso}/conteudos`);
-            const conteudos = await res.json();
-            return { cursoId: curso.id_curso, conteudos };
-          } catch {
-            return { cursoId: curso.id_curso, conteudos: [] };
-          }
-        });
-
-        const conteudosResults = await Promise.all(conteudosPromises);
-        const conteudosMap = conteudosResults.reduce((acc, { cursoId, conteudos }) => {
-          acc[cursoId] = conteudos;
-          return acc;
-        }, {});
-
-        setCursosAgendados(cursosAtualizados);
-        setConteudosPorCurso(conteudosMap);
-        setLoading(false);
-      } catch (err) {
-        console.error("Erro ao buscar dados:", err);
+        const agendados = (cursosRes.data?.data || []).filter(curso => curso.estado === 'agendado');
+        setCursosAgendados(agendados);
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+      } finally {
         setLoading(false);
       }
     };
@@ -104,111 +179,133 @@ const DashboardFormando = () => {
     fetchData();
   }, []);
 
-  const transformFirebaseUrl = (url) => {
-    if (!url) return null;
-    if (url.includes("firebasestorage.googleapis.com/v0/b/") || !url.includes("storage.googleapis.com")) return url;
-    const matches = url.match(/https:\/\/storage\.googleapis\.com\/([^\/]+)\/(.+)/);
-    if (matches) {
-      const [_, bucket, path] = matches;
-      return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(path)}?alt=media`;
+  useEffect(() => {
+  let filtrados = [...cursosAgendados];
+
+  if (areaFiltro) {
+    filtrados = filtrados.filter(curso => curso.id_area.toString() === areaFiltro);
+  }
+
+  if (categoriaFiltro) {
+    filtrados = filtrados.filter(curso => curso.id_categoria.toString() === categoriaFiltro);
+  }
+
+  if (searchTerm.trim() !== '') {
+      const termoLower = searchTerm.toLowerCase();
+      filtrados = filtrados.filter(curso =>
+        curso.titulo.toLowerCase().includes(termoLower)
+      );
     }
-    return url;
-  };
+  setCursosFiltrados(filtrados);
+}, [cursosAgendados, areaFiltro, categoriaFiltro , searchTerm]);
 
-  if (!user) return <div className="alert alert-danger">Utilizador não autenticado.</div>;
-
-  const cursosFiltrados = cursosAgendados.filter((curso) => {
-    const areaMatch = areaFiltro ? curso.id_area === parseInt(areaFiltro) : true;
-    const categoriaMatch = categoriaFiltro ? curso.id_categoria === parseInt(categoriaFiltro) : true;
-    return areaMatch && categoriaMatch;
-  });
+  if (!user) {
+    return (
+      <div className="container mt-4">
+        <div className="alert alert-danger">Utilizador não autenticado.</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="d-flex" style={{ minHeight: "100vh" }}>
-      <SidebarFormando />
-      <div className="container-fluid mt-4" style={{ marginLeft: "200px" }}>
-        <h2>Olá {user.nome} 👋</h2>
-        <p className="text-muted">Bem-vindo ao seu painel de formando</p>
-        <hr />
-
-        {/* Filtros */}
-        <div className="row mb-3">
-          <div className="col-md-3">
-            <label htmlFor="areaFiltro" className="form-label">Filtrar por Área</label>
-            <select className="form-select" value={areaFiltro} onChange={e => setAreaFiltro(e.target.value)}>
-              <option value="">Todas as áreas</option>
-              {areas.map(area => (
-                <option key={area.id_area} value={area.id_area}>{area.nome}</option>
-              ))}
-            </select>
+    <div className="container-fluid">
+      <div className="row">
+        <SidebarFormando user={user} perfil={perfil} />
+        <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4 " style={{ backgroundColor: '#f8f9fa' }}>
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h1 className="h3 mb-0">Bem-vindo de volta, {user.nome}</h1>
+            <div className="d-flex">
+              <div className="input-group" style={{ width: '300px' }}>
+                 <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Pesquisar cursos..."
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                />
+                 <button className="btn btn-primary" type="button">
+                  <FaSearch />
+                </button>
+              </div>
+            </div>
           </div>
-          <div className="col-md-3">
-            <label htmlFor="categoriaFiltro" className="form-label">Filtrar por Categoria</label>
-            <select className="form-select" value={categoriaFiltro} onChange={e => setCategoriaFiltro(e.target.value)}>
-              <option value="">Todas as categorias</option>
-              {categorias.map(cat => (
-                <option key={cat.id_categoria} value={cat.id_categoria}>{cat.nome}</option>
-              ))}
-            </select>
-          </div>
-        </div>
 
-        {/* Cursos */}
-        <div className="card">
-          <div className="card-body">
-            <h5 className="card-title">Cursos Agendados</h5>
+          <div className="row mb-4">
+            <div className="col-md-4">
+              <select
+                className="form-select"
+                value={areaFiltro}
+                onChange={e => setAreaFiltro(e.target.value)}
+              >
+                <option value="">Todas as áreas</option>
+                {areas.map(area => (
+                  <option key={area.id_area} value={area.id_area}>
+                    {area.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-4">
+              <select
+                className="form-select"
+                value={categoriaFiltro}
+                onChange={e => setCategoriaFiltro(e.target.value)}
+              >
+                <option value="">Todas as categorias</option>
+                {categorias.map(cat => (
+                  <option key={cat.id_categoria} value={cat.id_categoria}>
+                    {cat.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="mb-5">
+            <h2 className="h4 mb-4">Cursos em Destaque</h2>
+            <Row xs={1} md={2} lg={3} className="g-4">
+              {cursosFiltrados.slice(0, 3).map(curso => (
+                <Col key={curso.id_curso}>
+                  <CourseCard curso={curso} areas={areas} categorias={categorias} />
+                </Col>
+              ))}
+            </Row>
+          </div>
+
+          <div>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="h4 mb-0">Todos os Cursos</h2>
+              <div className="text-muted">
+                {cursosFiltrados.length} cursos encontrados
+              </div>
+            </div>
+
             {loading ? (
-              <div className="text-center py-4">
-                <div className="spinner-border text-primary" role="status" />
-                <p className="mt-2">Carregando cursos...</p>
+              <div className="text-center py-5">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Carregando...</span>
+                </div>
+                <p className="mt-2">A carregar cursos...</p>
               </div>
-            ) : cursosFiltrados.length ? (
-              <div className="table-responsive">
-                <table className="table table-hover align-middle">
-                  <thead>
-                    <tr>
-                      <th>Imagem</th>
-                      <th>Título</th>
-                      <th>Descrição</th>
-                      <th>Categoria</th>
-                      <th>Área</th>
-                      <th>Data Início</th>
-                      <th>Data Fim</th>
-                      <th>Tipo</th>
-                      <th>Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {cursosFiltrados.map(curso => {
-                      const img = transformFirebaseUrl(curso.imagem_capa);
-                      return (
-                        <tr key={curso.id_curso}>
-                          <td>
-                            {img ? (
-                              <img src={img} alt="Capa" className="img-thumbnail" style={{ width: 60, height: 60, objectFit: "cover" }} />
-                            ) : (
-                              <FontAwesomeIcon icon={faImage} className="text-muted" />
-                            )}
-                          </td>
-                          <td><Link to={`/curso/${curso.id_curso}`}>{curso.titulo}</Link></td>
-                          <td><DescricaoExpandivel texto={curso.descricao} /></td>
-                          <td>{categorias.find(c => c.id_categoria === curso.id_categoria)?.nome || 'Desconhecida'}</td>
-                          <td>{areas.find(a => a.id_area === curso.id_area)?.nome || 'Desconhecida'}</td>
-                          <td>{new Date(curso.data_inicio).toLocaleDateString('pt-PT')}</td>
-                          <td>{new Date(curso.data_fim).toLocaleDateString('pt-PT')}</td>
-                          <td><span className={`badge ${curso.tipo === 'sincrono' ? 'bg-primary' : 'bg-success'}`}>{curso.tipo}</span></td>
-                          <td>{curso.estado}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+            ) : cursosFiltrados.length > 0 ? (
+              <Row xs={1} md={2} lg={3} className="g-4">
+                {cursosFiltrados.map(curso => (
+                  <Col key={curso.id_curso}>
+                    <CourseCard curso={curso} areas={areas} categorias={categorias} />
+                  </Col>
+                ))}
+              </Row>
             ) : (
-              <p className="text-muted">Nenhum curso encontrado com os filtros selecionados.</p>
+              <div className="text-center py-5">
+                <div className="mb-3">
+                  <FaBookOpen size={48} className="text-muted" />
+                </div>
+                <h3 className="h5">Nenhum curso encontrado</h3>
+                <p className="text-muted">Tente ajustar os filtros de pesquisa</p>
+              </div>
             )}
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

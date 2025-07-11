@@ -8,7 +8,9 @@ const ForumDenuncia = sequelize.define('ForumDenuncia', {
   id_topico: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: { model: ForumTopico, key: 'id_topico' }
+    references: { model: ForumTopico, key: 'id_topico' },
+    onDelete: 'CASCADE' 
+
   },
   id_utilizador: {
     type: DataTypes.INTEGER,

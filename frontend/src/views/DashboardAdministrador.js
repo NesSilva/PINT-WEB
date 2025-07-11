@@ -1,8 +1,9 @@
-// src/pages/DashboardAdministrador.js
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import { Bar } from "react-chartjs-2";
-import Sidebar from "../components/Sidebar";  // Importando o Sidebar
+import Sidebar from "../components/Sidebar";
+import '../css/DashboardAdministrador.css';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -17,39 +18,67 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const DashboardAdministrador = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+
   const { user } = location.state || {};
 
   const [numCursos, setNumCursos] = useState(null);
   const [numFormandos, setNumFormandos] = useState(null);
   const [cursosPorMes, setCursosPorMes] = useState([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [responseCursos, responseFormandos, responseGrafico] = await Promise.all([
-          fetch("https://backend-8pyn.onrender.com/api/dashboard/admin"),
-          fetch("https://backend-8pyn.onrender.com/api/dashboard/formandos"),
-          fetch("https://backend-8pyn.onrender.com/api/dashboard/cursos/por-mes")
-        ]);
+  const userId = localStorage.getItem('usuarioId');
 
-        const [dataCursos, dataFormandos, dataGrafico] = await Promise.all([
-          responseCursos.json(),
-          responseFormandos.json(),
-          responseGrafico.json()
-        ]);
+  if (!userId) {
+    setIsAuthenticated(false); // mostra mensagem
+    setTimeout(() => {
+      navigate('/', { replace: true });
+    }, 2000); // redireciona após 2 segundos
+    return;
+  }
 
-        setNumCursos(dataCursos.totalCursos);
-        setNumFormandos(dataFormandos.totalFormandos);
+  const fetchData = async () => {
+    try {
+      const [responseCursos, responseFormandos, responseGrafico] = await Promise.all([
+        fetch("https://frontend-z8p8.onrender.com//dashboard/admin"),
+        fetch("https://frontend-z8p8.onrender.com//dashboard/formandos"),
+        fetch("https://frontend-z8p8.onrender.com//dashboard/cursos/por-mes")
+      ]);
 
-        const processedData = processChartData(dataGrafico.data);
-        setCursosPorMes(processedData);
-      } catch (error) {
-        console.error("Erro ao buscar dados:", error);
-      }
-    };
+      const [dataCursos, dataFormandos, dataGrafico] = await Promise.all([
+        responseCursos.json(),
+        responseFormandos.json(),
+        responseGrafico.json()
+      ]);
 
-    fetchData();
-  }, []);
+      setNumCursos(dataCursos.totalCursos);
+      setNumFormandos(dataFormandos.totalFormandos);
+
+      const processedData = processChartData(dataGrafico.data);
+      setCursosPorMes(processedData);
+    } catch (error) {
+      console.error("Erro ao buscar dados:", error);
+    }
+  };
+
+  fetchData();
+}, [navigate]);
+
+
+if (!isAuthenticated) {
+  return (
+    <div className="dashboard-container">
+      <Sidebar />
+      <div className="unauthenticated-message">
+        <p>Utilizador não autenticado. A redirecionar para o login...</p>
+      </div>
+    </div>
+  );
+}
+
+
 
   const processChartData = (apiData) => {
     return apiData.map(item => {
@@ -84,9 +113,10 @@ const DashboardAdministrador = () => {
       {
         label: "Cursos criados",
         data: cursosPorMes.map(item => item.numero_cursos),
-        backgroundColor: "rgba(46, 112, 236, 0.6)",
-        borderColor: "rgba(46, 112, 236, 1)",
-        borderWidth: 1
+        backgroundColor: "#05C7F2",
+        borderColor: "rgba(54, 162, 235, 1)",
+        borderWidth: 1,
+        borderRadius: 5
       }
     ]
   };
@@ -98,18 +128,31 @@ const DashboardAdministrador = () => {
         position: "top",
         labels: {
           font: {
-            size: 14
-          }
+            size: 14,
+            weight: '600',
+            family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+          },
+          color: "#333"
         }
       },
       title: {
         display: true,
         text: "Cursos por mês",
         font: {
-          size: 16
+          size: 18,
+          weight: '700',
+          family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+        },
+        color: "#222",
+        padding: {
+          top: 10,
+          bottom: 20
         }
       },
       tooltip: {
+        backgroundColor: "rgba(0,0,0,0.75)",
+        titleFont: { size: 14, weight: 'bold' },
+        bodyFont: { size: 13 },
         callbacks: {
           label: function(context) {
             return `${context.dataset.label}: ${context.raw}`;
@@ -126,67 +169,80 @@ const DashboardAdministrador = () => {
         suggestedMax: 50,
         ticks: {
           stepSize: 5,
-          precision: 0
+          precision: 0,
+          color: "#444",
+          font: { size: 12, family: "'Segoe UI', sans-serif" }
         },
         title: {
           display: true,
-          text: 'Número de Cursos'
+          text: 'Número de Cursos',
+          color: "#555",
+          font: { size: 14, weight: '600' }
+        },
+        grid: {
+          color: "#eee"
         }
       },
       x: {
         ticks: {
           autoSkip: false,
+          color: "#444",
+          font: { size: 12, family: "'Segoe UI', sans-serif" }
         },
         title: {
           display: true,
-          text: 'Mês'
+          text: 'Mês',
+          color: "#555",
+          font: { size: 14, weight: '600' }
+        },
+        grid: {
+          display: false
         }
       }
     },
     maintainAspectRatio: false
   };
 
-  if (!user) return <p>Utilizador não autenticado.</p>;
+  if (!user) return <div className="unauthenticated-message">Utilizador não autenticado.</div>;
 
   return (
-    <div className="d-flex" style={{ minHeight: '100vh' }}>
+    <div className="dashboard-container">
       <Sidebar />
+      
+      <main className="main-content">
+        <h2 className="greeting-title">Olá, {user.nome} <span role="img" aria-label="wave"></span></h2>
+        <hr className="divider" />
+        
+        <section className="stats-container">
+          <div className="stat-card" 
+               onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-5px)'}
+               onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+            <h5>Total de Cursos</h5>
+            <p className="stat-value">
+              {numCursos !== null ? numCursos : "..."}
+            </p>
+          </div>
+          <div className="stat-card" 
+               onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-5px)'}
+               onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+            <h5>Total de Formandos</h5>
+            <p className="stat-value">
+              {numFormandos !== null ? numFormandos : "..."}
+            </p>
+          </div>
+        </section>
 
-      <div className="container-fluid mt-4" style={{ marginLeft: '200px' }}>
-        <h2>Olá {user.nome} 👋</h2>
-        <hr />
-        <div className="row mb-4">
-          <div className="col-md-6">
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">Total de Cursos</h5>
-                <p className="display-4">{numCursos !== null ? numCursos : "..."}</p>
-              </div>
-            </div>
+        <section className="chart-container">
+          <h5>Cursos criados por mês</h5>
+          <div className="chart-wrapper">
+            {cursosPorMes.length > 0 ? (
+              <Bar data={chartData} options={chartOptions} />
+            ) : (
+              <p className="loading-message">A carregar gráfico...</p>
+            )}
           </div>
-          <div className="col-md-6">
-            <div className="card">
-              <div className="card-body">
-                <h5 className="card-title">Total de Formandos</h5>
-                <p className="display-4">{numFormandos !== null ? numFormandos : "..."}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="card mt-4">
-          <div className="card-body">
-            <h5 className="card-title">Cursos criados por mês</h5>
-            <div style={{ height: '400px' }}>
-              {cursosPorMes.length > 0 ? (
-                <Bar data={chartData} options={chartOptions} />
-              ) : (
-                <p className="text-center py-5">A carregar gráfico...</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 };

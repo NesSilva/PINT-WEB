@@ -4,6 +4,7 @@ const cursoController = require('../controllers/cursoController');
 const upload = require('../firebase/upload'); // Adicione esta linha
 const Curso = require('../models/Curso');  // certifique-se que está importado
 
+const cursoControllerFormador = require('../controllers/cursoControllerFormador');
 
 
 // Criar curso
@@ -36,5 +37,12 @@ router.get('/:id_curso', async (req, res) => {
   }
 });
 
+router.get('/formador/:id', cursoControllerFormador.listarCursosPorFormador);
+
+router.put('/:id_curso/toggle-upload', cursoController.toggleUploadPermissao);
+
+router.put('/:id_curso/toggle-upload-documentos', cursoController.toggleUploadDocumentos);
+
+router.put('/reativar/:id_curso', cursoController.reativarCurso);
 
 module.exports = router;

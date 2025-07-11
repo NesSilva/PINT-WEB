@@ -12,7 +12,7 @@ const SolicitarConta = () => {
     e.preventDefault();
 
     try {
-      const resposta = await fetch("https://backend-8pyn.onrender.com/api/utilizadores/solicitar", {
+      const resposta = await fetch("https://frontend-z8p8.onrender.com/api/utilizadores/solicitar", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

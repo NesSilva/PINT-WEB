@@ -1,6 +1,6 @@
 const Inscricao = require("../models/Inscricoes");
 const Utilizador = require("../models/Utilizador");
-const Curso = require("../models/Curso"); // Ajuste conforme o nome correto do seu modelo de cursos
+const Curso = require("../models/Curso");
 const nodemailer = require("nodemailer");
 
 const enviarEmailConfirmacaoInscricao = async (email, nomeCurso, dataInicio) => {
@@ -39,6 +39,17 @@ const criarInscricao = async (req, res) => {
       return res.status(400).json({ mensagem: "Dados incompletos." });
     }
 
+    // Verifica se o curso existe
+    const curso = await Curso.findOne({ where: { id_curso } });
+    if (!curso) {
+      return res.status(404).json({ mensagem: "Curso não encontrado." });
+    }
+
+    // Verifica se o curso está ativo e não terminou
+    if (!curso.ativo || curso.estado === 'terminado') {
+      return res.status(400).json({ mensagem: "Este curso não está disponível para inscrição." });
+    }
+
     // Verifica se já existe inscrição para o usuário e curso
     const inscricaoExistente = await Inscricao.findOne({
       where: { id_utilizador, id_curso }
@@ -46,6 +57,17 @@ const criarInscricao = async (req, res) => {
 
     if (inscricaoExistente) {
       return res.status(409).json({ mensagem: "Usuário já está inscrito neste curso." });
+    }
+
+    // Verifica vagas disponíveis para cursos síncronos
+    if (curso.tipo === 'sincrono') {
+      const totalInscritos = await Inscricao.count({
+        where: { id_curso, status: ['pendente', 'confirmada'] }
+      });
+
+      if (totalInscritos >= curso.vagas) {
+        return res.status(400).json({ mensagem: "Não há vagas disponíveis para este curso." });
+      }
     }
 
     // Cria nova inscrição
@@ -56,9 +78,8 @@ const criarInscricao = async (req, res) => {
       status: "pendente"
     });
 
-    // Buscar utilizador e curso para enviar email
+    // Buscar utilizador para enviar email
     const utilizador = await Utilizador.findOne({ where: { id_utilizador } });
-    const curso = await Curso.findOne({ where: { id_curso } });
 
     if (utilizador && curso) {
       try {
@@ -69,10 +90,18 @@ const criarInscricao = async (req, res) => {
       }
     }
 
-    return res.status(201).json(novaInscricao);
+    return res.status(201).json({
+      success: true,
+      message: "Inscrição realizada com sucesso!",
+      inscricao: novaInscricao
+    });
   } catch (error) {
     console.error("Erro ao criar inscrição:", error);
-    return res.status(500).json({ mensagem: "Erro interno." });
+    return res.status(500).json({ 
+      success: false,
+      message: "Erro interno ao processar inscrição.",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 

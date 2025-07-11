@@ -2,44 +2,78 @@ const ForumComentario = require('../models/ForumComentario');
 const Utilizador = require('../models/Utilizador');
 const ForumDenuncia = require('../models/ForumDenuncia');
 const ForumComentarioLike = require('../models/ForumComentarioLike');
+const ForumComentarioAnexo = require('../models/ForumComentarioAnexo'); // Importe o modelo
 
 // Criar comentário (com imagem)
+// controllers/forumComentarioController.js
+// controllers/forumComentarioController.js
 const criarComentario = async (req, res) => {
   try {
-    const { id_topico, conteudo } = req.body;
-    const id_utilizador = req.user?.id_utilizador || req.body.id_utilizador;
-    const imagem_url = req.file ? '/uploads/forum/' + req.file.filename : null;
+    const { id_topico, conteudo, id_utilizador } = req.body;
 
+    // Cria apenas o comentário (sem processar anexos aqui)
     const comentario = await ForumComentario.create({
       id_topico,
       conteudo,
-      imagem_url,
       id_utilizador
     });
-    res.status(201).json({ success: true, comentario });
+
+    res.status(201).json({ 
+      success: true, 
+      comentario,
+      message: "Comentário criado com sucesso" 
+    });
   } catch (error) {
     console.error("ERRO AO CRIAR COMENTÁRIO:", error);
-    res.status(500).json({ success: false, message: "Erro ao criar comentário", error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: "Erro ao criar comentário", 
+      error: error.message 
+    });
   }
 };
 
-// Listar comentários de um tópico
 const listarComentariosPorTopico = async (req, res) => {
   try {
     const { id_topico } = req.params;
+    
+    // Primeiro busca os comentários sem os anexos
     const comentarios = await ForumComentario.findAll({
       where: { id_topico },
-      include: [{ model: Utilizador, as: 'autor', attributes: ['nome'] }],
+      include: [
+        { 
+          model: Utilizador, 
+          as: 'autor', 
+          attributes: ['id_utilizador', 'nome'] 
+        }
+      ],
       order: [['data_criacao', 'ASC']]
     });
-    // Adiciona contagem de likes para cada comentário
-    for (let comentario of comentarios) {
-      const count = await ForumComentarioLike.count({ where: { id_comentario: comentario.id_comentario } });
-      comentario.dataValues.likes = count;
-    }
-    res.json({ success: true, comentarios });
+
+    // Para cada comentário, busca os anexos separadamente
+    const comentariosComAnexos = await Promise.all(comentarios.map(async comentario => {
+      const anexos = await ForumComentarioAnexo.findAll({
+        where: { id_comentario: comentario.id_comentario },
+        order: [['data_upload', 'ASC']]
+      });
+      
+      return {
+        ...comentario.get({ plain: true }),
+        anexos
+      };
+    }));
+
+    res.json({ 
+      success: true, 
+      comentarios: comentariosComAnexos 
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Erro ao listar comentários" });
+    console.error('Erro ao listar comentários:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Erro ao buscar comentários",
+      error: error.message
+    });
   }
 };
 
@@ -128,6 +162,29 @@ const getLikesCount = async (req, res) => {
   }
 };
 
+const contarComentariosPorTopico = async (req, res) => {
+  try {
+    const { id_topico } = req.params;
+    
+    const totalComentarios = await ForumComentario.count({
+      where: { id_topico }
+    });
+
+    res.json({ 
+      success: true,
+      total_respostas: totalComentarios
+    });
+  } catch (error) {
+    console.error('Erro ao contar comentários:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Erro ao contar comentários",
+      error: error.message 
+    });
+  }
+};
+
+
 
 
 module.exports = {
@@ -137,5 +194,6 @@ module.exports = {
   editarComentario,
   removerComentario,
   toggleLikeComentario,
-  getLikesCount
+  getLikesCount,
+  contarComentariosPorTopico
 };
