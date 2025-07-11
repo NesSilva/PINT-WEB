@@ -13,7 +13,8 @@ import {
   Divider,
   Tag,
   Alert,
-  Space,
+    Space,
+  
 } from 'antd';
 import { 
   CheckOutlined, 
@@ -33,12 +34,6 @@ const { Title } = Typography;
 const { Search } = Input;
 const { TextArea } = Input;
 const { Option } = Select;
-
-// Configuração do axios com URL base
-const API_BASE_URL = 'https://backend-8pyn.onrender.com/';
-const api = axios.create({
-  baseURL: API_BASE_URL
-});
 
 const AdminForum = () => {
     const [topicos, setTopicos] = useState([]);
@@ -60,8 +55,8 @@ const AdminForum = () => {
         try {
             setLoading(true);
             const [responseTopicos, responseCategorias] = await Promise.all([
-                api.get('/api/forum/topico/todos'),
-                api.get('/api/categorias')
+                axios.get('/api/forum/topico/todos'),
+                axios.get('/api/categorias')
             ]);
             setTopicos(responseTopicos.data.topicos);
             setCategorias(responseCategorias.data.categorias);
@@ -79,7 +74,7 @@ const AdminForum = () => {
 
     const validarTopico = async (id_topico, validar) => {
         try {
-            await api.patch(`/api/forum/topico/${id_topico}/validar`, { valido: validar });
+            await axios.patch(`/api/forum/topico/${id_topico}/validar`, { valido: validar });
             mostrarMensagem(`Tópico ${validar ? 'validado' : 'invalidado'} com sucesso!`, 'success');
             carregarDados();
         } catch (error) {
@@ -90,7 +85,7 @@ const AdminForum = () => {
     const criarTopico = async (values) => {
         try {
             const usuarioId = localStorage.getItem('usuarioId');
-            const response = await api.post('/api/forum/topico/criar', {
+            const response = await axios.post('/api/forum/topico/criar', {
                 ...values,
                 id_autor: usuarioId,
                 valido: true
@@ -102,7 +97,7 @@ const AdminForum = () => {
                 formData.append('id_topico', response.data.topico.id_topico);
                 formData.append('isImage', isImage.toString());
                 
-                await api.post('/api/forum/anexo/topico/anexo', formData, {
+                await axios.post('/api/forum/anexo/topico/anexo', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -125,7 +120,7 @@ const AdminForum = () => {
 
     const removerTopico = async (id_topico) => {
         try {
-            await api.delete(`/api/forum/topico/remover/${id_topico}`);
+            await axios.delete(`/api/forum/topico/remover/${id_topico}`);
             mostrarMensagem('Tópico removido com sucesso!', 'success');
             carregarDados();
         } catch (error) {
