@@ -21,7 +21,7 @@ const ResetPasswordForm = () => {
     setMessage("");
 
     try {
-      const response = await axios.post("https://frontend-z8p8.onrender.com/api/password/reset-password", {
+      const response = await axios.post("https://backend-8pyn.onrender.com/api/password/reset-password", {
         email,
         resetCode,
         newPassword,

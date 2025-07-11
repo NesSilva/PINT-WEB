@@ -42,9 +42,9 @@ const DashboardAdministrador = () => {
   const fetchData = async () => {
     try {
       const [responseCursos, responseFormandos, responseGrafico] = await Promise.all([
-        fetch("https://frontend-z8p8.onrender.com//dashboard/admin"),
-        fetch("https://frontend-z8p8.onrender.com//dashboard/formandos"),
-        fetch("https://frontend-z8p8.onrender.com//dashboard/cursos/por-mes")
+        fetch("https://backend-8pyn.onrender.com/api/dashboard/admin"),
+        fetch("https://backend-8pyn.onrender.com/api/dashboard/formandos"),
+        fetch("https://backend-8pyn.onrender.com/api/dashboard/cursos/por-mes")
       ]);
 
       const [dataCursos, dataFormandos, dataGrafico] = await Promise.all([
