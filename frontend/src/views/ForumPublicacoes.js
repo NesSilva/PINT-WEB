@@ -32,6 +32,12 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/pt';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
+// Configuração do axios com URL base
+const API_BASE_URL = 'https://backend-8pyn.onrender.com/';
+const api = axios.create({
+  baseURL: API_BASE_URL
+});
+
 dayjs.extend(relativeTime);
 dayjs.locale('pt');
 
@@ -67,14 +73,14 @@ const ForumPublicacoes = () => {
             };
 
             const [responsePublicacoes, responseCategorias] = await Promise.all([
-                axios.get('/api/forum/topico/todos/validos', { params }),
-                axios.get('/api/categorias')
+                api.get('/api/forum/topico/todos/validos', { params }),
+                api.get('/api/categorias')
             ]);
             
             const publicacoesComContagem = await Promise.all(
                 responsePublicacoes.data.topicos.map(async (topico) => {
                     try {
-                        const response = await axios.get(`/api/forum/comentario/contar/${topico.id_topico}`);
+                        const response = await api.get(`/api/forum/comentario/contar/${topico.id_topico}`);
                         return {
                             ...topico,
                             total_respostas: response.data.total_respostas || 0

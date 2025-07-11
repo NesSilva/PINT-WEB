@@ -31,6 +31,12 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/pt';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
+// Configuração do axios com URL base
+const API_BASE_URL = 'https://frontend-z8p8.onrender.com';
+const api = axios.create({
+  baseURL: API_BASE_URL
+});
+
 dayjs.extend(relativeTime);
 dayjs.locale('pt');
 
@@ -58,8 +64,8 @@ const PublicacaoDetalhes = () => {
             try {
                 setLoading(true);
                 const [responseTopico, responseComentarios] = await Promise.all([
-                    axios.get(`/api/forum/topico/${id_topico}`),
-                    axios.get(`/api/forum/comentario/${id_topico}`)
+                    api.get(`/api/forum/topico/${id_topico}`),
+                    api.get(`/api/forum/comentario/${id_topico}`)
                 ]);
 
                 setTopico(responseTopico.data.topico);
@@ -78,7 +84,7 @@ const PublicacaoDetalhes = () => {
     useEffect(() => {
         const carregarAnexosTopico = async () => {
             try {
-                const response = await axios.get(`/api/forum/anexo/${id_topico}/anexos`);
+                const response = await api.get(`/api/forum/anexo/${id_topico}/anexos`);
                 setAnexosTopico(response.data.anexos);
             } catch (error) {
                 console.error('Erro ao carregar anexos:', error);
@@ -95,7 +101,7 @@ const PublicacaoDetalhes = () => {
         }
         
         try {
-            const responseComentario = await axios.post('/api/forum/comentario/criar', {
+            const responseComentario = await api.post('/api/forum/comentario/criar', {
                 id_topico,
                 conteudo: comentario,
                 id_utilizador: usuarioId
@@ -112,7 +118,7 @@ const PublicacaoDetalhes = () => {
                 formData.append('file', fileList[0].originFileObj);
                 formData.append('id_comentario', id_comentario);
                 
-                await axios.post('/api/forum/anexo/comentario/anexo', formData, {
+                await api.post('/api/forum/anexo/comentario/anexo', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -124,7 +130,7 @@ const PublicacaoDetalhes = () => {
             setComentario('');
             setFileList([]);
             
-            const response = await axios.get(`/api/forum/comentario/${id_topico}`);
+            const response = await api.get(`/api/forum/comentario/${id_topico}`);
             setComentarios(response.data.comentarios);
         } catch (error) {
             console.error('Erro ao adicionar comentário:', error);
@@ -135,7 +141,7 @@ const PublicacaoDetalhes = () => {
     const handleAvaliacao = async (value) => {
         try {
             setAvaliacao(value);
-            await axios.post('/api/forum/topico/avaliar', {
+            await api.post('/api/forum/topico/avaliar', {
                 id_topico,
                 id_utilizador: usuarioId,
                 nota: value
@@ -153,7 +159,7 @@ const PublicacaoDetalhes = () => {
             return;
         }
         try {
-            await axios.post('/api/forum/topico/denunciar', {
+            await api.post('/api/forum/topico/denunciar', {
                 id_topico,
                 id_utilizador: usuarioId,
                 motivo: motivoDenuncia
@@ -168,7 +174,7 @@ const PublicacaoDetalhes = () => {
 
     const removerComentario = async (id_comentario) => {
         try {
-            await axios.delete(`/api/forum/comentario/remover/${id_comentario}`);
+            await api.delete(`/api/forum/comentario/remover/${id_comentario}`);
             message.success("Comentário removido!");
             setComentarios(c => c.filter(cm => cm.id_comentario !== id_comentario));
         } catch {
@@ -189,7 +195,7 @@ const PublicacaoDetalhes = () => {
             ),
             onOk: async () => {
                 try {
-                    await axios.post('/api/forum/comentario/denunciar', {
+                    await api.post('/api/forum/comentario/denunciar', {
                         id_comentario,
                         id_utilizador: usuarioId,
                         motivo: motivoDenuncia

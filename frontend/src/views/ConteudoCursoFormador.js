@@ -6,6 +6,15 @@ import { Modal, Button, Form, Alert, Badge, Card } from 'react-bootstrap';
 import { FiUpload, FiLink, FiFile, FiVideo, FiImage, FiExternalLink, FiArrowLeft } from 'react-icons/fi';
 import '../css/ConteudoCursoFormador.css';
 
+const API_BASE_URL = 'https://backend-8pyn.onrender.com';
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+  }
+});
+
 const ConteudoCursoFormador = () => {
   const { id_curso } = useParams();
   const location = useLocation();
@@ -33,11 +42,17 @@ const ConteudoCursoFormador = () => {
   const fetchConteudos = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`https://backend-8pyn.onrender.com/api/conteudo/curso/${id_curso}`);
+      const res = await api.get(`/api/conteudo/curso/${id_curso}`);
       setConteudos(res.data);
     } catch (error) {
-      console.error("Erro ao buscar conteúdos:", error);
-      setUploadStatus({ text: "Erro ao carregar conteúdos", variant: "danger" });
+      console.error("Erro ao buscar conteúdos:", {
+        message: error.message,
+        response: error.response?.data
+      });
+      setUploadStatus({ 
+        text: error.response?.data?.message || "Erro ao carregar conteúdos", 
+        variant: "danger" 
+      });
     } finally {
       setLoading(false);
     }
@@ -53,9 +68,7 @@ const ConteudoCursoFormador = () => {
 
   const toggleUploadDocumentos = async () => {
     try {
-      const res = await axios.put(
-        `https://backend-8pyn.onrender.com/api/cursos/${id_curso}/toggle-upload-documentos`
-      );
+      const res = await api.put(`/api/cursos/${id_curso}/toggle-upload-documentos`);
       setUploadPermitido(res.data.conteudo_upload);
       setUploadStatus({ 
         text: res.data.message, 
@@ -102,9 +115,10 @@ const ConteudoCursoFormador = () => {
     formData.append("tipo_conteudo", tipoFicheiro);
 
     try {
-      await axios.post("https://backend-8pyn.onrender.com/api/conteudo/adicionar", formData, {
+      await api.post("/api/conteudo/adicionar", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+          "Authorization": `Bearer ${localStorage.getItem('token')}`
         },
       });
       setUploadStatus({ 
@@ -117,9 +131,12 @@ const ConteudoCursoFormador = () => {
       await fetchConteudos();
       setTimeout(handleClose, 1500);
     } catch (error) {
-      console.error("Erro ao enviar ficheiro:", error);
+      console.error("Erro detalhado ao enviar ficheiro:", {
+        message: error.message,
+        response: error.response?.data
+      });
       setUploadStatus({ 
-        text: "Erro ao enviar ficheiro.", 
+        text: error.response?.data?.message || "Erro ao enviar ficheiro.", 
         variant: "danger" 
       });
     }
@@ -137,7 +154,7 @@ const ConteudoCursoFormador = () => {
     }
 
     try {
-      await axios.post("https://backend-8pyn.onrender.com/api/conteudo/adicionar-link", {
+      await api.post("/api/conteudo/adicionar-link", {
         id_curso,
         descricao: descricaoFicheiro,
         url: urlLink,
@@ -155,7 +172,7 @@ const ConteudoCursoFormador = () => {
     } catch (error) {
       console.error("Erro ao adicionar link:", error);
       setUploadStatus({ 
-        text: "Erro ao adicionar link.", 
+        text: error.response?.data?.message || "Erro ao adicionar link.", 
         variant: "danger" 
       });
     }
@@ -210,40 +227,40 @@ const ConteudoCursoFormador = () => {
       <SidebarFormador user={user} />
       
       <main className="main-content">
-       <div className="page-header">
-  <div className="header-top-row">
-    <Button 
-      variant="link" 
-      onClick={() => navigate(-1)}
-      className="back-button"
-    >
-      <FiArrowLeft className="me-1" /> Voltar
-    </Button>
-    
-    <h2 className="page-title">
-      Conteúdos do Curso: <span className="course-title">{curso?.titulo}</span>
-    </h2>
-  </div>
-  
-  <div className="header-actions">
-    <Button 
-      variant={uploadPermitido ? "success" : "secondary"} 
-      onClick={toggleUploadDocumentos}
-      className="upload-toggle"
-    >
-      <FiUpload className="me-1" />
-      {uploadPermitido ? 'Upload Ativo' : 'Upload Inativo'}
-    </Button>
-    
-    <Button 
-      variant="primary" 
-      onClick={handleShow}
-      className="add-content-button"
-    >
-      <FiUpload className="me-1" /> Adicionar Conteúdo
-    </Button>
-  </div>
-</div>
+        <div className="page-header">
+          <div className="header-top-row">
+            <Button 
+              variant="link" 
+              onClick={() => navigate(-1)}
+              className="back-button"
+            >
+              <FiArrowLeft className="me-1" /> Voltar
+            </Button>
+            
+            <h2 className="page-title">
+              Conteúdos do Curso: <span className="course-title">{curso?.titulo}</span>
+            </h2>
+          </div>
+          
+          <div className="header-actions">
+            <Button 
+              variant={uploadPermitido ? "success" : "secondary"} 
+              onClick={toggleUploadDocumentos}
+              className="upload-toggle"
+            >
+              <FiUpload className="me-1" />
+              {uploadPermitido ? 'Upload Ativo' : 'Upload Inativo'}
+            </Button>
+            
+            <Button 
+              variant="primary" 
+              onClick={handleShow}
+              className="add-content-button"
+            >
+              <FiUpload className="me-1" /> Adicionar Conteúdo
+            </Button>
+          </div>
+        </div>
 
         {uploadStatus.text && (
           <Alert variant={uploadStatus.variant} className="status-alert">
