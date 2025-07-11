@@ -102,11 +102,11 @@ const CursosPorArea = () => {
         setLoading(true);
         
         // Buscar dados da área
-        const areaRes = await axios.get(`http://localhost:3000/api/areas-formacao/${id_area}`);
+        const areaRes = await axios.get(`https://frontend-z8p8.onrender.com/api/areas-formacao/${id_area}`);
         setArea(areaRes.data?.area || null);
 
         // Buscar cursos da área
-        const cursosRes = await axios.get('http://localhost:3000/api/cursos');
+        const cursosRes = await axios.get('https://frontend-z8p8.onrender.com/api/cursos');
         const cursosDaArea = (cursosRes.data?.data || []).filter(
           curso => curso.id_area.toString() === id_area && curso.estado === 'agendado'
         );

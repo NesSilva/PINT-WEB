@@ -28,7 +28,7 @@ const SidebarFormador = ({ children }) => {
       if (!usuarioId) return;
 
       const response = await axios.get(
-        `http://localhost:3000/api/utilizadores/utilizador/nome/${usuarioId}`
+        `https://frontend-z8p8.onrender.com/api/utilizadores/utilizador/nome/${usuarioId}`
       );
 
       if (response.data.success) {

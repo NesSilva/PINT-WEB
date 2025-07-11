@@ -67,8 +67,8 @@ const DetalhesCurso = () => {
     const fetchData = async () => {
       try {
         const [cursoRes, conteudosRes] = await Promise.all([
-          axios.get(`http://localhost:3000/api/cursos/${id_curso}`),
-          axios.get(`http://localhost:3000/api/conteudo/curso/${id_curso}`)
+          axios.get(`https://frontend-z8p8.onrender.com/api/cursos/${id_curso}`),
+          axios.get(`https://frontend-z8p8.onrender.com/api/conteudo/curso/${id_curso}`)
         ]);
 
         setCurso(cursoRes.data);
@@ -77,12 +77,12 @@ const DetalhesCurso = () => {
         if (cursoRes.data.conteudo_upload) {
           try {
             const docsRes = await axios.get(
-              `http://localhost:3000/api/documentos-avaliacao/curso/${id_curso}`
+              `https://frontend-z8p8.onrender.com/api/documentos-avaliacao/curso/${id_curso}`
             );
             
             const userId = localStorage.getItem('usuarioId');
             const userDocsRes = await axios.get(
-              `http://localhost:3000/api/documentos-avaliacao/utilizador/${userId}`
+              `https://frontend-z8p8.onrender.com/api/documentos-avaliacao/utilizador/${userId}`
             );
             
             setDocumentosAvaliacao(docsRes.data);
@@ -127,7 +127,7 @@ const DetalhesCurso = () => {
       formData.append('descricao', uploadDescription);
 
       const res = await axios.post(
-        'http://localhost:3000/api/documentos-avaliacao/upload',
+        'https://frontend-z8p8.onrender.com/api/documentos-avaliacao/upload',
         formData,
         {
           headers: {
@@ -153,7 +153,7 @@ const DetalhesCurso = () => {
   const handleDeleteDocument = async (id) => {
     if (window.confirm('Tem certeza que deseja excluir este documento?')) {
       try {
-        await axios.delete(`http://localhost:3000/api/documentos-avaliacao/${id}`);
+        await axios.delete(`https://frontend-z8p8.onrender.com/api/documentos-avaliacao/${id}`);
         setDocumentosAvaliacao(documentosAvaliacao.filter(doc => doc.id_Doc_Avaliacao !== id));
       } catch (error) {
         console.error('Erro ao excluir documento:', error);
@@ -171,7 +171,7 @@ const DetalhesCurso = () => {
   const toggleUploadPermissao = async () => {
     try {
       const novoEstado = !curso.conteudo_upload;
-      await axios.put(`http://localhost:3000/api/cursos/${id_curso}/toggle-upload`, {
+      await axios.put(`https://frontend-z8p8.onrender.com/api/cursos/${id_curso}/toggle-upload`, {
         conteudo_upload: novoEstado
       });
       setCurso({...curso, conteudo_upload: novoEstado});

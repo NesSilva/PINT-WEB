@@ -58,7 +58,7 @@ const AvaliarAlunos = () => {
 
   const fetchCurso = async () => {
     try {
-      const res = await axios.get(`http://localhost:3000/api/cursos/${id_curso}`);
+      const res = await axios.get(`https://frontend-z8p8.onrender.com/api/cursos/${id_curso}`);
       setCurso(res.data);
     } catch (err) {
       console.error("Erro ao buscar curso:", err);
@@ -69,7 +69,7 @@ const AvaliarAlunos = () => {
   const fetchInscritos = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`http://localhost:3000/api/inscricoes/curso/${id_curso}`);
+      const res = await axios.get(`https://frontend-z8p8.onrender.com/api/inscricoes/curso/${id_curso}`);
       setInscritos(res.data);
     } catch (err) {
       console.error(err);
@@ -82,7 +82,7 @@ const AvaliarAlunos = () => {
   const buscarDocumentosAluno = async (id_utilizador) => {
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/documentos-avaliacao/utilizador/${id_utilizador}/curso/${id_curso}`
+        `https://frontend-z8p8.onrender.com/api/documentos-avaliacao/utilizador/${id_utilizador}/curso/${id_curso}`
       );
       return res.data;
     } catch (err) {
@@ -125,7 +125,7 @@ const AvaliarAlunos = () => {
     }
 
     try {
-      await axios.post("http://localhost:3000/api/progressos", {
+      await axios.post("https://frontend-z8p8.onrender.com/api/progressos", {
         id_utilizador: alunoSelecionado.utilizador.id_utilizador,
         id_curso,
         nota_curso: parseFloat(avaliacao),
@@ -136,7 +136,7 @@ const AvaliarAlunos = () => {
 
       // Atualizar lista de inscritos
       setLoading(true);
-      const res = await axios.get(`http://localhost:3000/api/inscricoes/curso/${id_curso}`);
+      const res = await axios.get(`https://frontend-z8p8.onrender.com/api/inscricoes/curso/${id_curso}`);
       setInscritos(res.data);
       setLoading(false);
     } catch (err) {

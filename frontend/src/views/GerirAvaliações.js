@@ -39,7 +39,7 @@ const FormadorCursos = () => {
     console.log("Fetching cursos for formador ID:", idFormador);
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3000/api/cursos/formador/${idFormador}`);
+      const response = await axios.get(`https://frontend-z8p8.onrender.com/api/cursos/formador/${idFormador}`);
       setCursos(response.data || []);
     } catch (error) {
       console.error("Error fetching cursos:", error);

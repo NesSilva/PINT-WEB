@@ -16,7 +16,7 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:3000/", {
+            const response = await axios.post("https://frontend-z8p8.onrender.com/", {
                 email: email,
                 senha: senha
             });

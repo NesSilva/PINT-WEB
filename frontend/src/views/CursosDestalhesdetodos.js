@@ -30,7 +30,7 @@ const DetalhesCurso = () => {
     const fetchData = async () => {
       try {
         // Busca os detalhes do curso incluindo o total de inscritos
-        const cursoRes = await axios.get(`http://localhost:3000/api/cursos/${id_curso}`);
+        const cursoRes = await axios.get(`https://frontend-z8p8.onrender.com/api/cursos/${id_curso}`);
         const cursoData = cursoRes.data;
         
         // Calcula vagas disponíveis para cursos síncronos
@@ -45,7 +45,7 @@ const DetalhesCurso = () => {
         const userLocal = localStorage.getItem('usuarioId');
         if (userLocal) {
           try {
-            const inscricaoRes = await axios.get(`http://localhost:3000/api/inscricoes/usuario/${userLocal}/curso/${id_curso}`);
+            const inscricaoRes = await axios.get(`https://frontend-z8p8.onrender.com/api/inscricoes/usuario/${userLocal}/curso/${id_curso}`);
             if (inscricaoRes.data && inscricaoRes.data.id_utilizador) {
               setInscricaoStatus("Já inscrito neste curso.");
             }
@@ -70,8 +70,8 @@ const DetalhesCurso = () => {
     const fetchData = async () => {
       try {
         const [categoriasRes, areasRes] = await Promise.all([
-          axios.get('http://localhost:3000/api/categorias'),
-          axios.get('http://localhost:3000/api/areas-formacao'),
+          axios.get('https://frontend-z8p8.onrender.com/api/categorias'),
+          axios.get('https://frontend-z8p8.onrender.com/api/areas-formacao'),
         ]);
 
         setCategorias(categoriasRes.data?.categorias || []);
@@ -105,7 +105,7 @@ const DetalhesCurso = () => {
         return;
       }
 
-      const response = await axios.post("http://localhost:3000/api/inscricoes", {
+      const response = await axios.post("https://frontend-z8p8.onrender.com/api/inscricoes", {
         id_utilizador: userLocal,
         id_curso: curso.id_curso
       });

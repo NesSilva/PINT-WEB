@@ -50,10 +50,10 @@ const ListarCursos = () => {
     const carregarDados = async () => {
       try {
         const [cursosRes, categoriasRes, areasRes, formadoresRes] = await Promise.all([
-          axios.get("http://localhost:3000/api/cursos/todos"),
-          axios.get('http://localhost:3000/api/categorias'),
-          axios.get('http://localhost:3000/api/areas-formacao'),
-          axios.get('http://localhost:3000/api/utilizadores/formadores').catch(() => ({ data: { formadores: [] } }))
+          axios.get("https://frontend-z8p8.onrender.com/api/cursos/todos"),
+          axios.get('https://frontend-z8p8.onrender.com/api/categorias'),
+          axios.get('https://frontend-z8p8.onrender.com/api/areas-formacao'),
+          axios.get('https://frontend-z8p8.onrender.com/api/utilizadores/formadores').catch(() => ({ data: { formadores: [] } }))
         ]);
 
         setCursos(cursosRes.data);
@@ -120,7 +120,7 @@ const ListarCursos = () => {
   const handleReativarCurso = async () => {
     try {
         const response = await axios.put(
-            `http://localhost:3000/api/cursos/reativar/${cursoParaReativar.id_curso}`,
+            `https://frontend-z8p8.onrender.com/api/cursos/reativar/${cursoParaReativar.id_curso}`,
             {
                 nova_data_inicio: novaDataInicio,
                 nova_data_fim: novaDataFim
@@ -140,7 +140,7 @@ const ListarCursos = () => {
     }
   };
 
-  // Operações CRUD
+
   const criarCurso = async (e) => {
     e.preventDefault();
     
@@ -157,7 +157,7 @@ const ListarCursos = () => {
         descricao_formador: formData.id_formador ? formData.descricao_formador : null
       };
 
-      const response = await axios.post("http://localhost:3000/api/cursos/criar", dadosCurso);
+      const response = await axios.post("https://frontend-z8p8.onrender.com/api/cursos/criar", dadosCurso);
       
       if (formData.ficheiro) {
         await enviarArquivo(response.data.curso.id_curso, formData.ficheiro);
@@ -197,7 +197,7 @@ const ListarCursos = () => {
       };
 
       await axios.put(
-        `http://localhost:3000/api/cursos/editar/${cursoParaEditar.id_curso}`,
+        `https://frontend-z8p8.onrender.com/api/cursos/editar/${cursoParaEditar.id_curso}`,
         dadosAtualizados
       );
 
@@ -231,7 +231,7 @@ const ListarCursos = () => {
         return;
       }
 
-      await axios.delete(`http://localhost:3000/api/cursos/eliminar/${id}`);
+      await axios.delete(`https://frontend-z8p8.onrender.com/api/cursos/eliminar/${id}`);
       mostrarMensagem("Curso eliminado com sucesso!", "success");
       setCursos(prev => prev.filter(c => c.id_curso !== id));
     } catch (error) {
@@ -247,7 +247,7 @@ const ListarCursos = () => {
     formDataArquivo.append("tipo_conteudo", "material");
     formDataArquivo.append("descricao", "Material do curso");
 
-    await axios.post("http://localhost:3000/api/conteudo/adicionar", formDataArquivo, {
+    await axios.post("https://frontend-z8p8.onrender.com/api/conteudo/adicionar", formDataArquivo, {
       headers: { "Content-Type": "multipart/form-data" }
     });
   };

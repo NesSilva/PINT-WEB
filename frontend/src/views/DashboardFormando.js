@@ -145,7 +145,7 @@ const DashboardFormando = () => {
 
   useEffect(() => {
   if (user?.id_utilizador) {
-    axios.get(`http://localhost:3000/api/notificacoes/${user.id_utilizador}`)
+    axios.get(`https://frontend-z8p8.onrender.com/api/notificacoes/${user.id_utilizador}`)
       .then(response => {
         console.log("Notificações:", response.data);
       })
@@ -159,9 +159,9 @@ const DashboardFormando = () => {
     const fetchData = async () => {
       try {
         const [categoriasRes, areasRes, cursosRes] = await Promise.all([
-          axios.get('http://localhost:3000/api/categorias'),
-          axios.get('http://localhost:3000/api/areas-formacao'),
-          axios.get('http://localhost:3000/api/cursos'),
+          axios.get('https://frontend-z8p8.onrender.com/api/categorias'),
+          axios.get('https://frontend-z8p8.onrender.com/api/areas-formacao'),
+          axios.get('https://frontend-z8p8.onrender.com/api/cursos'),
         ]);
 
         setCategorias(categoriasRes.data?.categorias || []);

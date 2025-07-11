@@ -30,8 +30,8 @@ const GerirAreasFormacao = () => {
         try {
             setLoading(true);
             const [areasRes, categoriasRes] = await Promise.all([
-                axios.get('http://localhost:3000/api/areas-formacao'),
-                axios.get('http://localhost:3000/api/categorias')
+                axios.get('https://frontend-z8p8.onrender.com/api/areas-formacao'),
+                axios.get('https://frontend-z8p8.onrender.com/api/categorias')
             ]);
             
             setAreas(areasRes.data.areas);
@@ -61,13 +61,13 @@ const GerirAreasFormacao = () => {
         try {
             if (areaAtual) {
                 await axios.put(
-                    `http://localhost:3000/api/areas-formacao/${areaAtual.id_area}`, 
+                    `https://frontend-z8p8.onrender.com/api/areas-formacao/${areaAtual.id_area}`, 
                     formData
                 );
                 mostrarMensagem("Área atualizada com sucesso!", "success");
             } else {
                 await axios.post(
-                    'http://localhost:3000/api/areas-formacao', 
+                    'https://frontend-z8p8.onrender.com/api/areas-formacao', 
                     formData
                 );
                 mostrarMensagem("Área criada com sucesso!", "success");
@@ -97,7 +97,7 @@ const GerirAreasFormacao = () => {
     const handleDelete = async () => {
         try {
             await axios.delete(
-                `http://localhost:3000/api/areas-formacao/${areaAtual.id_area}`
+                `https://frontend-z8p8.onrender.com/api/areas-formacao/${areaAtual.id_area}`
             );
             mostrarMensagem("Área deletada com sucesso!", "success");
             setShowDeleteModal(false);

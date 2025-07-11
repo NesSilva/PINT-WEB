@@ -65,7 +65,7 @@ const DashboardFormador = () => {
   const fetchUserData = async (userId) => {
 
   try {
-    const response = await axios.get(`http://localhost:3000/api/utilizadores/utilizador/nome/${userId}`, {
+    const response = await axios.get(`https://frontend-z8p8.onrender.com/api/utilizadores/utilizador/nome/${userId}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
@@ -88,7 +88,7 @@ const DashboardFormador = () => {
 //console.log("User ID:-------------************************", userId);
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3000/api/cursos/formador/${userId}`, {
+      const response = await axios.get(`https://frontend-z8p8.onrender.com/api/cursos/formador/${userId}`, {
        
       });
       const cursosData = response.data;

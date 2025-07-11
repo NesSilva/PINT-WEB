@@ -40,7 +40,7 @@ const SidebarFormando = ({ children }) => {
       if (!usuarioId) return;
 
       const response = await axios.get(
-        `http://localhost:3000/api/utilizadores/utilizador/nome/${usuarioId}`
+        `https://frontend-z8p8.onrender.com/api/utilizadores/utilizador/nome/${usuarioId}`
       );
       console.log('Nome do utilizador:', response);
 
@@ -57,8 +57,8 @@ const SidebarFormando = ({ children }) => {
     const fetchCategoriesAndAreas = async () => {
       try {
         const [categoriesRes, areasRes] = await Promise.all([
-          axios.get('http://localhost:3000/api/categorias'),
-          axios.get('http://localhost:3000/api/areas-formacao')
+          axios.get('https://frontend-z8p8.onrender.com/api/categorias'),
+          axios.get('https://frontend-z8p8.onrender.com/api/areas-formacao')
         ]);
 
         const categories = categoriesRes.data?.categorias || [];
@@ -109,7 +109,7 @@ const SidebarFormando = ({ children }) => {
         }
         
         const response = await axios.get(
-          `http://localhost:3000/api/notificacoes/${userId}`,
+          `https://frontend-z8p8.onrender.com/api/notificacoes/${userId}`,
           { timeout: 5000 }
         );
         
@@ -170,7 +170,7 @@ const SidebarFormando = ({ children }) => {
   const marcarComoLida = async (id_notificacao) => {
     try {
       await axios.patch(
-        `http://localhost:3000/api/notificacoes/${id_notificacao}/lida`,
+        `https://frontend-z8p8.onrender.com/api/notificacoes/${id_notificacao}/lida`,
         null,
         { timeout: 3000 }
       );
