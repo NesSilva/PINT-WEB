@@ -1,3 +1,4 @@
+
 const { Op } = require("sequelize");
 const Curso = require("../models/Curso");
 const ProgressoCurso = require("../models/ProcessoCurso");
