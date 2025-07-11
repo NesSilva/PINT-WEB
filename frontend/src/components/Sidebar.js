@@ -44,7 +44,7 @@ const Sidebar = ({ children }) => {
     { path: "/cursos", icon: <FiBookOpen size={20} />, label: "Cursos" },
     { path: "/gerenciar-categorias", icon: <FiGrid size={20} />, label: "Categorias" },
     { path: "/gerir-areas-formacao", icon: <FiLayers size={20} />, label: "Áreas de Formação" },
-    { path: "/admin/forum", icon: <FiMessageSquare size={20} />, label: "Moderar Fórum" }
+    { path: "/admin/forum", icon: <FiMessageSquare size={20} />, label: "Gerir Fórum" }
   ];
 
   return (

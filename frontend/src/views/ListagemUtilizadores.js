@@ -48,7 +48,6 @@ const ListarUtilizadores = () => {
   const [dataFim, setDataFim] = useState("");
   const [filtroCursoNome, setFiltroCursoNome] = useState("");
 
-  // Efeitos para carregar dados iniciais
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -102,7 +101,6 @@ const ListarUtilizadores = () => {
     return curso ? curso.data_fim : "Dia não definido";
   };
 
-  // Handlers para ações
   const handleDeleteClick = async (id_utilizador) => {
     const confirmDelete = window.confirm("Tem certeza que deseja eliminar este utilizador?");
     if (!confirmDelete) return;

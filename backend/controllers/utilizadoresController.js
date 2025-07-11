@@ -158,7 +158,6 @@ const solicitarConta = async (req, res) => {
                     "Este email já possui uma conta ativa"
             });
         }
-
         await Utilizador.create({
             email,
             numeroColaborador,
@@ -233,7 +232,6 @@ Equipe de suporte`
 };
 
 const aceitarPedidoConta = async (req, res) => {
-    console.log("entreiiiiiiiiiiiiiiiii-----------------------------------------");
     const { id_utilizador } = req.body;
     console.log("Chamada para aceitarPedidoConta com ID:", id_utilizador);
 
