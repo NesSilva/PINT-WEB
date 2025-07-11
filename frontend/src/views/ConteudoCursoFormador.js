@@ -6,7 +6,6 @@ import { Modal, Button, Form, Alert, Badge, Card } from 'react-bootstrap';
 import { FiUpload, FiLink, FiFile, FiVideo, FiImage, FiExternalLink, FiArrowLeft } from 'react-icons/fi';
 import '../css/ConteudoCursoFormador.css';
 
-// Configuração do axios com URL base
 const API_BASE_URL = 'https://backend-8pyn.onrender.com';
 const api = axios.create({
   baseURL: API_BASE_URL,
