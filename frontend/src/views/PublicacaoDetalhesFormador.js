@@ -32,7 +32,7 @@ import 'dayjs/locale/pt';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
 // Configuração do axios com URL base
-const API_BASE_URL = 'https://frontend-z8p8.onrender.com';
+const API_BASE_URL = 'https://backend-8pyn.onrender.com/';
 const api = axios.create({
   baseURL: API_BASE_URL
 });
